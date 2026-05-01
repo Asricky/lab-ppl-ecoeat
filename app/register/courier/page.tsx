@@ -3,8 +3,14 @@
 import Link from "next/link";
 import { Upload, Info, User, Truck, MapPin, FileCheck } from "lucide-react";
 import { FormEvent, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
+import { authHandler } from "@/lib/auth-handler";
 
 export default function RegisterCourierPage() {
+  const router = useRouter();
+  const { setUser } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -57,7 +63,7 @@ export default function RegisterCourierPage() {
     }
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
 
@@ -72,7 +78,16 @@ export default function RegisterCourierPage() {
       return;
     }
 
-    console.log("Submit Courier:", { ...formData, simFile, stnkFile });
+    setIsLoading(true);
+    try {
+      const { user, token } = await authHandler.register(formData, "courier");
+      setUser(user, token);
+      router.push(`/dashboard/${user.role}`);
+    } catch (error) {
+      console.error("Registration failed", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -282,9 +297,10 @@ export default function RegisterCourierPage() {
           <div className="pt-2">
             <button
               type="submit"
-              className="w-full bg-[#388e3c] hover:bg-[#2e7d32] text-white font-bold py-4 rounded-xl transition-colors shadow-md hover:shadow-lg text-lg flex justify-center items-center"
+              disabled={isLoading}
+              className="w-full bg-[#388e3c] hover:bg-[#2e7d32] text-white font-bold py-4 rounded-xl transition-colors shadow-md hover:shadow-lg text-lg flex justify-center items-center disabled:opacity-70"
             >
-              Submit Registration <span className="ml-2">→</span>
+              {isLoading ? "Submitting..." : <>Submit Registration <span className="ml-2">→</span></>}
             </button>
           </div>
         </form>

@@ -1,11 +1,12 @@
 "use client";
 
-import { useEcoPayStore } from '../store/ecoPayStore';
+import { useAuthStore } from '../store/authStore';
 import { Wallet, Bell, User } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Navbar() {
-  const balance = useEcoPayStore((state) => state.balance);
+  const { user } = useAuthStore();
+  const balance = user?.ecoPayBalance || 0;
 
   return (
     <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
@@ -32,8 +33,9 @@ export default function Navbar() {
             <button className="text-gray-500 hover:text-green-600 transition-colors">
               <Bell className="h-6 w-6" />
             </button>
-            <button className="text-gray-500 hover:text-green-600 transition-colors">
+            <button className="flex items-center text-gray-500 hover:text-green-600 transition-colors">
               <User className="h-6 w-6" />
+              {user && <span className="ml-2 font-medium text-sm">{user.name}</span>}
             </button>
           </div>
         </div>

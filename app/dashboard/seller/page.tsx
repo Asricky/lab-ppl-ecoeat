@@ -1,18 +1,17 @@
-import DocumentUpload from '@/components/DocumentUpload';
+"use client";
 
-export default function SellerDashboard() {
+import { useAuthStore } from "@/store/authStore";
+
+export default function SellerDashboardPage() {
+  const { user } = useAuthStore();
+  
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Seller Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <DocumentUpload 
-          title="NIB Seller" 
-          description="Unggah Nomor Induk Berusaha (NIB) untuk verifikasi toko Anda." 
-        />
-        <DocumentUpload 
-          title="Surat Legalitas LKS (F2 & F3)" 
-          description="Unggah dokumen F2 & F3 jika Anda merupakan Lembaga Kesejahteraan Sosial." 
-        />
+    <div className="p-8 max-w-7xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">Seller Dashboard</h1>
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <p className="text-lg">Welcome, <strong>{user?.name}</strong>!</p>
+        <p className="text-gray-600">Role: {user?.role}</p>
+        <p className="text-gray-600 mt-4">EcoPay Balance: Rp {(user?.ecoPayBalance || 0).toLocaleString()}</p>
       </div>
     </div>
   );

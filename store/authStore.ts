@@ -1,13 +1,37 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-type Role = 'buyer' | 'seller' | 'courier' | null;
+export type Role = 'admin' | 'seller' | 'buyer' | 'kurir' | null;
 
-interface AuthState {
-  selectedRole: Role;
-  setSelectedRole: (role: Role) => void;
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  ecoPayBalance: number;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  selectedRole: null,
-  setSelectedRole: (role) => set({ selectedRole: role }),
-}));
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  selectedRole: Role;
+  setUser: (user: User | null, token: string | null) => void;
+  setSelectedRole: (role: Role) => void;
+  logout: () => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      selectedRole: null,
+      setUser: (user, token) => set({ user, token }),
+      setSelectedRole: (role) => set({ selectedRole: role }),
+      logout: () => set({ user: null, token: null }),
+    }),
+    {
+      name: 'auth-storage',
+    }
+  )
+);

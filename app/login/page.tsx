@@ -1,8 +1,33 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { TrendingUp, ShieldCheck } from "lucide-react";
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
+import { authHandler } from "@/lib/auth-handler";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { setUser } = useAuthStore();
+
+  const handleLogin = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const { user, token } = await authHandler.login(email, password);
+      setUser(user, token);
+      router.push(`/dashboard/${user.role}`);
+    } catch (error) {
+      console.error("Login failed", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-[#f5f7f4]">
       {/* Left side: Image and Impact Statement */}
@@ -43,7 +68,7 @@ export default function LoginPage() {
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
           <p className="text-gray-600 mb-10">Login to continue your sustainable journey</p>
 
-          <form className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2" htmlFor="email">
                 Email Address
@@ -53,6 +78,9 @@ export default function LoginPage() {
                 type="email"
                 placeholder="hello@ecoeat.com"
                 className="w-full bg-[#e8ede7] border-transparent rounded-lg px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
 
@@ -70,6 +98,9 @@ export default function LoginPage() {
                 type="password"
                 placeholder="••••••••"
                 className="w-full bg-[#e8ede7] border-transparent rounded-lg px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
 
@@ -86,10 +117,11 @@ export default function LoginPage() {
 
             <div className="pt-2 flex flex-col space-y-4">
               <button
-                type="button"
-                className="w-full bg-[#388e3c] hover:bg-[#2e7d32] text-white font-semibold py-3.5 rounded-lg transition-colors shadow-md hover:shadow-lg flex justify-center items-center"
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-[#388e3c] hover:bg-[#2e7d32] text-white font-semibold py-3.5 rounded-lg transition-colors shadow-md hover:shadow-lg flex justify-center items-center disabled:opacity-70"
               >
-                Login
+                {isLoading ? "Logging in..." : "Login"}
               </button>
               
               <Link

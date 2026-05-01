@@ -3,8 +3,14 @@
 import Link from "next/link";
 import { Leaf } from "lucide-react";
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
+import { authHandler } from "@/lib/auth-handler";
 
 export default function RegisterBuyerPage() {
+  const router = useRouter();
+  const { setUser } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -15,7 +21,7 @@ export default function RegisterBuyerPage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
 
@@ -29,8 +35,16 @@ export default function RegisterBuyerPage() {
       return;
     }
 
-    // Submit logic here
-    console.log("Submit Buyer:", formData);
+    setIsLoading(true);
+    try {
+      const { user, token } = await authHandler.register(formData, "buyer");
+      setUser(user, token);
+      router.push(`/dashboard/${user.role}`);
+    } catch (error) {
+      console.error("Registration failed", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -124,9 +138,10 @@ export default function RegisterBuyerPage() {
           <div className="pt-4">
             <button
               type="submit"
-              className="w-full bg-[#388e3c] hover:bg-[#2e7d32] text-white font-bold py-4 rounded-xl transition-colors shadow-md hover:shadow-lg text-lg"
+              disabled={isLoading}
+              className="w-full bg-[#388e3c] hover:bg-[#2e7d32] text-white font-bold py-4 rounded-xl transition-colors shadow-md hover:shadow-lg text-lg disabled:opacity-70"
             >
-              Create Account
+              {isLoading ? "Creating Account..." : "Create Account"}
             </button>
           </div>
         </form>
