@@ -26,6 +26,7 @@ Route::get('/map/sellers', [MapController::class, 'sellers']);
 Route::get('/products', [ProductController::class, 'index']);
 
 Route::middleware(['auth:sanctum'])->group(function (): void {
+    Route::get('/wallet', [WalletController::class, 'show']);
     Route::post('/wallet/topup', [WalletController::class, 'topup']);
     Route::post('/orders/{order}/assign', [DeliveryController::class, 'assignCourier']);
     Route::post('/orders/{order}/start', [DeliveryController::class, 'startDelivery']);

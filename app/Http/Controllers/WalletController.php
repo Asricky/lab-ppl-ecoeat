@@ -38,4 +38,17 @@ class WalletController extends Controller
             ],
         ]);
     }
+
+    public function show(Request $request): JsonResponse
+    {
+        $wallet = Wallet::firstOrCreate(
+            ['user_id' => $request->user()->id],
+            ['balance' => 0]
+        );
+
+        return response()->json([
+            'balance' => (float) $wallet->balance,
+            'currency' => 'IDR',
+        ]);
+    }
 }
