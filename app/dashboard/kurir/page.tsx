@@ -1,74 +1,87 @@
 "use client";
 
-import { useState } from 'react';
-import CourierModal from '@/components/CourierModal';
-import { MapPin, Package, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import CourierLayout from '@/components/CourierLayout';
+import ActiveTaskCard from '@/components/ActiveTaskCard';
+import AssignedDeliveryList from '@/components/AssignedDeliveryList';
+import ImpactWidget from '@/components/ImpactWidget';
 
-export default function KurirDashboard() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export default function TasksView() {
+  const [isOnline, setIsOnline] = useState(true);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Kurir Dashboard</h1>
-      
-      <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm mb-6 max-w-2xl">
-        <div className="flex items-center justify-between mb-4 border-b border-gray-50 pb-4">
-          <h2 className="text-lg font-bold text-gray-800 flex items-center">
-            <Package className="w-5 h-5 mr-2 text-blue-600" />
-            Tugas Pengiriman Aktif
-          </h2>
-          <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold flex items-center">
-            <Clock className="w-3.5 h-3.5 mr-1" />
-            Sedang Jalan
-          </span>
-        </div>
-        
-        <div className="space-y-4 mb-6 relative">
-          <div className="flex">
-            <div className="mt-1 flex-shrink-0">
-              <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center border-2 border-white shadow-sm relative z-10">
-                <MapPin className="w-4 h-4 text-amber-600" />
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Pickup Point</p>
-              <p className="text-sm font-bold text-gray-800">Warung Bu Ani</p>
-              <p className="text-xs text-gray-500">Jl. Margonda Raya No. 100</p>
-            </div>
+    <CourierLayout>
+      <div className="max-w-6xl mx-auto py-2">
+        {/* Page Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+          <div>
+            <p className="text-xs font-bold text-ecoeat-muted uppercase tracking-widest mb-1">CURRENT STATUS</p>
+            <h1 className="text-4xl font-extrabold text-ecoeat-text mb-1">Hello, Alex</h1>
+            <p className="text-ecoeat-muted font-medium">Ready to save 42kg of CO2 today?</p>
           </div>
           
-          <div className="absolute top-8 left-4 bottom-8 w-0.5 bg-gray-200 z-0"></div>
-          
-          <div className="flex">
-            <div className="mt-1 flex-shrink-0">
-              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center border-2 border-white shadow-sm relative z-10">
-                <MapPin className="w-4 h-4 text-green-600" />
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Dropoff Point</p>
-              <p className="text-sm font-bold text-gray-800">Panti Asuhan Berkah</p>
-              <p className="text-xs text-gray-500">Jl. Nusantara No. 45</p>
-            </div>
+          <div className="flex items-center bg-white rounded-full p-1 shadow-sm border border-black/5">
+            <button 
+              onClick={() => setIsOnline(true)}
+              className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                isOnline ? 'bg-[#006824] text-white shadow-md' : 'text-ecoeat-muted hover:text-ecoeat-text'
+              }`}
+            >
+              Online
+            </button>
+            <button 
+              onClick={() => setIsOnline(false)}
+              className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                !isOnline ? 'bg-gray-200 text-ecoeat-text shadow-md' : 'text-ecoeat-muted hover:text-ecoeat-text'
+              }`}
+            >
+              Offline
+            </button>
           </div>
         </div>
 
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-5 rounded-xl shadow-md shadow-blue-200 transition-all active:scale-[0.98]"
-        >
-          Proses Handover
-        </button>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* Left Column: Active Task & Assigned List */}
+          <div className="lg:col-span-7 flex flex-col gap-8">
+            <div>
+              <ActiveTaskCard />
+            </div>
+            <AssignedDeliveryList />
+          </div>
+
+          {/* Right Column: Map & Impact Widget */}
+          <div className="lg:col-span-5 flex flex-col gap-8">
+            {/* Map Placeholder */}
+            <div className="bg-[#bce6ef] h-[320px] rounded-[24px] relative overflow-hidden shadow-sm border border-black/5 flex items-center justify-center">
+              {/* Fake Map Image (using a solid color or gradient for now, can be replaced with real Leaflet map later) */}
+              <div className="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
+              
+              {/* Traffic Overlay */}
+              <div className="absolute top-4 left-4 right-4 bg-white/90 backdrop-blur-sm rounded-xl p-3 flex items-center gap-3 shadow-md z-10">
+                <div className="w-10 h-10 bg-[#1e8932] rounded-full flex items-center justify-center text-white shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <div>
+                  <p className="font-bold text-ecoeat-text text-sm">Traffic: Light</p>
+                  <p className="text-[10px] font-semibold text-ecoeat-muted">Optimized via Eco-Path</p>
+                </div>
+                <div className="ml-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ecoeat-primary"><circle cx="12" cy="12" r="10"/><path d="m12 16 4-4-4-4"/><path d="M8 12h8"/></svg>
+                </div>
+              </div>
+
+              <div className="text-[#1e8932] font-bold opacity-70 z-0">
+                [ Map Area ]
+              </div>
+            </div>
+
+            <ImpactWidget />
+          </div>
+
+        </div>
       </div>
-
-      <CourierModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onConfirm={(data) => {
-          console.log('Handover confirmed:', data);
-          alert('Handover Berhasil diverifikasi!');
-        }}
-      />
-    </div>
+    </CourierLayout>
   );
 }
