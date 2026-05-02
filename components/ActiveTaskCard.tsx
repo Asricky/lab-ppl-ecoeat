@@ -40,7 +40,7 @@ export default function ActiveTaskCard() {
       </div>
 
       <div className="flex gap-3 mt-auto relative z-10">
-        <Link href="/dashboard/kurir/ORD-1" className="flex-1 bg-[#388e3c] text-white font-bold py-3.5 rounded-xl hover:bg-[#2e7d32] transition-colors shadow-md shadow-green-900/10 text-lg text-center">
+        <Link href="/kurir/ORD-1" className="flex-1 bg-[#388e3c] text-white font-bold py-3.5 rounded-xl hover:bg-[#2e7d32] transition-colors shadow-md shadow-green-900/10 text-lg text-center">
           View Route
         </Link>
         <button className="w-14 bg-[#eaf4eb] text-[#388e3c] flex items-center justify-center rounded-xl hover:bg-[#d4ecd7] transition-colors shadow-sm">

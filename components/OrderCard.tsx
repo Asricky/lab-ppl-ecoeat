@@ -99,21 +99,21 @@ export default function OrderCard({ order, onViewDetails, onAction }: OrderCardP
         ) : (
           <>
             <Link 
-              href={`/dashboard/kurir/${order.id}`}
+              href={`/kurir/${order.id}`}
               className="flex-1 bg-[#eaf4eb] text-[#1e8932] font-bold py-3.5 rounded-xl hover:bg-[#d4ecd7] transition-colors text-center"
             >
               View Details
             </Link>
             {order.status === 'in_progress' ? (
               <Link
-                href={`/dashboard/kurir/${order.id}`}
+                href={`/kurir/${order.id}`}
                 className="flex-1 bg-ecoeat-primary text-white font-bold py-3.5 rounded-xl hover:bg-[#025020] transition-colors shadow-sm text-center"
               >
                 Start Delivery
               </Link>
             ) : (
               <Link 
-                href={`/dashboard/kurir/${order.id}`}
+                href={`/kurir/${order.id}`}
                 className="flex-1 bg-ecoeat-primary text-white font-bold py-3.5 rounded-xl hover:bg-[#025020] transition-colors shadow-sm text-center"
               >
                 Finish Delivery

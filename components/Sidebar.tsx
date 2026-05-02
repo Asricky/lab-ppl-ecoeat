@@ -16,8 +16,8 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
-    { icon: CheckSquare, label: 'Tasks', href: '/dashboard/kurir' },
-    { icon: Clock, label: 'History', href: '/dashboard/kurir/history' },
+    { icon: CheckSquare, label: 'Tasks', href: '/kurir' },
+    { icon: Clock, label: 'History', href: '/kurir/history' },
     { icon: Map, label: 'Routes', href: '#' },
     { icon: DollarSign, label: 'Earnings', href: '#' },
     { icon: Settings, label: 'Settings', href: '#' },
