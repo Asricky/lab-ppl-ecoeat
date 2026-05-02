@@ -1,13 +1,19 @@
 "use client";
 
-import React from 'react';
-import { Menu, Bell, MessageSquare, Search } from 'lucide-react';
+import React, { useState } from 'react';
+import { Menu, Bell, Search } from 'lucide-react';
+import NotificationDropdown from './NotificationDropdown';
+import { dummyOrders, dummyNotifications } from '@/lib/data';
 
 interface NavbarProps {
   onMenuClick: () => void;
 }
 
 export default function Navbar({ onMenuClick }: NavbarProps) {
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  
+  const hasUnreadNotif = dummyNotifications.some(n => !n.isRead);
+
   return (
     <nav className="bg-ecoeat-bg px-6 py-4 flex items-center justify-between sticky top-0 z-20">
       <div className="flex items-center gap-4 flex-1">
@@ -32,13 +38,19 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 
       <div className="flex items-center gap-6 ml-4">
         {/* Notifications & Messages */}
-        <div className="flex items-center gap-4 text-ecoeat-text">
-          <button className="hover:text-ecoeat-primary transition-colors">
-            <Bell size={20} />
-          </button>
-          <button className="hover:text-ecoeat-primary transition-colors">
-            <MessageSquare size={20} />
-          </button>
+        <div className="flex items-center gap-4 text-ecoeat-text relative">
+          <div className="relative">
+            <button 
+              onClick={() => setIsNotifOpen(!isNotifOpen)}
+              className="relative hover:text-ecoeat-primary transition-colors"
+            >
+              <Bell size={20} />
+              {hasUnreadNotif && (
+                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+              )}
+            </button>
+            <NotificationDropdown isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
+          </div>
         </div>
 
         {/* User Profile */}

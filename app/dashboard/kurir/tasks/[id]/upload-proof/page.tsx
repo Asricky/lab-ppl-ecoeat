@@ -4,8 +4,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Camera, CheckCircle2, ShieldAlert } from 'lucide-react';
-import CourierLayout from '@/components/CourierLayout';
-import { getOrderById, updateOrderStatus, OrderData } from '@/lib/data';
+import CourierLayout from '@/app/components/CourierLayout';
+import { getOrderById, updateOrderStatus, updateOrderPhoto, OrderData } from '@/lib/data';
 
 export default function UploadProofView({ params }: { params: any }) {
   const router = useRouter();
@@ -39,15 +39,13 @@ export default function UploadProofView({ params }: { params: any }) {
   };
 
   const handleSubmit = () => {
-    if (resolvedId) {
-      // Update global state
+    if (resolvedId && image) {
       updateOrderStatus(resolvedId, 'completed');
+      updateOrderPhoto(resolvedId, image);
       
-      // Native browser alert for notification as requested
-      alert('Proof uploaded successfully! Order has been marked as delivered.');
+      alert('Proof uploaded successfully! Order has been marked as delivered and reward credited.');
       
-      // Redirect to dashboard
-      router.push('/');
+      router.push('/dashboard/kurir/home');
     }
   };
 
@@ -64,7 +62,7 @@ export default function UploadProofView({ params }: { params: any }) {
   return (
     <CourierLayout>
       <div className="max-w-2xl mx-auto py-8">
-        <Link href={`/dashboard/kurir/${resolvedId}`} className="inline-flex items-center gap-2 text-ecoeat-text font-bold hover:text-ecoeat-primary mb-8">
+        <Link href={`/dashboard/kurir/tasks/${resolvedId}`} className="inline-flex items-center gap-2 text-ecoeat-text font-bold hover:text-ecoeat-primary mb-8">
           <ArrowLeft size={20} /> Back to Route
         </Link>
 

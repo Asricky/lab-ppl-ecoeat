@@ -4,13 +4,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import CourierLayout from '@/components/CourierLayout';
-import Sidebar from '@/components/Sidebar';
+import CourierLayout from '@/app/components/CourierLayout';
+import Sidebar from '@/app/components/Sidebar';
 import { ArrowLeft, Phone, Navigation, CheckCircle2, Leaf, MoreVertical, Search, Bell, Settings, AlertTriangle, MapPin } from 'lucide-react';
-import { getOrderById, OrderData } from '@/lib/data';
+import { getOrderById, OrderData, updateOrderStatus } from '@/lib/data';
 
 // Dynamically import RouteMap to avoid SSR issues with Leaflet
-const RouteMap = dynamic(() => import('@/components/RouteMap'), {
+const RouteMap = dynamic(() => import('@/app/components/RouteMap'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full bg-ecoeat-bg animate-pulse flex items-center justify-center text-ecoeat-muted font-semibold">
@@ -58,7 +58,6 @@ export default function RouteView({ params }: { params: any }) {
           setCourierLocation([lat, lng]);
           
           // Mock Axios call to Laravel backend to sync DB
-          // axios.post('/api/courier/location', { id: task.id, lat, lng });
           console.log(`[Real-Time Sync] Sent to Laravel DB: Lat ${lat}, Lng ${lng}`);
         },
         (error) => {
@@ -78,10 +77,13 @@ export default function RouteView({ params }: { params: any }) {
 
   const handleStartDelivery = () => {
     setState('on_delivery');
+    if (resolvedId) {
+        updateOrderStatus(resolvedId, 'on_delivery' as any);
+    }
   };
 
   const handleMarkDelivered = () => {
-    router.push(`/dashboard/kurir/${resolvedId}/upload-proof`);
+    router.push(`/dashboard/kurir/tasks/${resolvedId}/upload-proof`);
   };
 
   const handleReportIssue = () => {
@@ -104,7 +106,7 @@ export default function RouteView({ params }: { params: any }) {
       <div className="flex flex-col h-screen bg-ecoeat-bg items-center justify-center gap-4">
         <AlertTriangle size={48} className="text-gray-400" />
         <p className="text-ecoeat-text font-bold text-xl">Task Not Found</p>
-        <Link href="/" className="px-6 py-2 bg-ecoeat-primary text-white font-bold rounded-xl">
+        <Link href="/dashboard/kurir/home" className="px-6 py-2 bg-ecoeat-primary text-white font-bold rounded-xl">
           Back to Dashboard
         </Link>
       </div>
@@ -113,14 +115,12 @@ export default function RouteView({ params }: { params: any }) {
 
   return (
     <div className="flex h-screen bg-ecoeat-bg">
-      {/* Main Sidebar Component */}
       <Sidebar isOpen={false} setIsOpen={() => {}} />
 
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
-        {/* Top Header */}
         <header className="h-20 border-b border-ecoeat-border flex items-center justify-between px-6 bg-ecoeat-bg/80 backdrop-blur-md z-10 shrink-0">
           <div className="flex items-center gap-6">
-            <Link href="/" className="text-ecoeat-text font-bold hover:text-ecoeat-primary flex items-center gap-2">
+            <Link href="/dashboard/kurir/home" className="text-ecoeat-text font-bold hover:text-ecoeat-primary flex items-center gap-2">
               <ArrowLeft size={20} /> Back to Dashboard
             </Link>
             <span className="text-xs font-bold text-ecoeat-muted uppercase tracking-widest pl-6 border-l border-gray-300">
@@ -133,20 +133,18 @@ export default function RouteView({ params }: { params: any }) {
              <button className="text-ecoeat-muted hover:text-ecoeat-text"><Settings size={20} /></button>
              <div className="flex items-center gap-2 ml-4 pl-4 border-l border-gray-300">
                <div className="text-right">
-                 <p className="font-bold text-sm text-ecoeat-text leading-none">Marcus J.</p>
+                 <p className="font-bold text-sm text-ecoeat-text leading-none">Alex J.</p>
                  <p className="text-[10px] font-bold text-ecoeat-muted uppercase">Eco-Courier</p>
                </div>
                <div className="w-10 h-10 bg-gray-300 rounded-full border-2 border-white shadow-sm overflow-hidden">
-                  <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus" alt="Marcus" />
+                  <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="Alex" />
                </div>
              </div>
           </div>
         </header>
 
-        {/* Content Area */}
         <div className="flex-1 flex p-6 gap-6 relative overflow-hidden">
           
-          {/* Map Area (Hide map if completed) */}
           <div className="flex-1 bg-gray-200 rounded-[32px] overflow-hidden relative shadow-sm border border-black/5 flex flex-col">
             {state === 'completed' ? (
               <div className="flex-1 bg-[#f2f6ef] flex items-center justify-center p-8">
@@ -168,7 +166,6 @@ export default function RouteView({ params }: { params: any }) {
               <>
                 <RouteMap status={state} currentLocation={courierLocation} />
 
-                {/* Overlay Bottom Badge - Hide if failed */}
                 {state !== 'failed' && (
                   <div className="absolute bottom-6 left-6 right-6 lg:right-auto flex items-center gap-4 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-lg z-[1000] animate-in fade-in slide-in-from-bottom-4 duration-300">
                     <div className="w-12 h-12 bg-[#eaf4eb] text-[#388e3c] rounded-xl flex items-center justify-center">
@@ -187,7 +184,6 @@ export default function RouteView({ params }: { params: any }) {
             )}
           </div>
 
-          {/* Right Panel */}
           <div className="w-[420px] shrink-0 bg-white rounded-[32px] shadow-sm border border-black/5 flex flex-col overflow-y-auto">
             <div className="p-8 pb-6 flex-1">
               <div className="flex items-center justify-between mb-4">
@@ -226,7 +222,6 @@ export default function RouteView({ params }: { params: any }) {
                 {task.productName}
               </h2>
 
-              {/* Failed Error Message */}
               {state === 'failed' && (
                 <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl animate-in fade-in slide-in-from-top-4 duration-300">
                   <div className="flex items-center gap-2 text-red-700 mb-2">
@@ -239,12 +234,9 @@ export default function RouteView({ params }: { params: any }) {
                 </div>
               )}
 
-              {/* Locations Timeline */}
               <div className="relative pl-8 mb-8 space-y-8">
-                {/* Vertical line */}
                 <div className="absolute left-[15px] top-3 bottom-8 border-l-2 border-ecoeat-border"></div>
                 
-                {/* Pickup */}
                 <div className="relative">
                   <div className="absolute -left-8 top-1 w-6 h-6 rounded-md bg-[#026829] flex items-center justify-center text-white ring-4 ring-white shadow-sm">
                     <span className="text-[10px] font-bold">A</span>
@@ -263,13 +255,9 @@ export default function RouteView({ params }: { params: any }) {
                         <p className="text-xs text-ecoeat-muted mt-0.5">{task.pickupPhone}</p>
                       </div>
                     </div>
-                    <button className="w-8 h-8 bg-[#eaf4eb] text-[#388e3c] rounded-full flex items-center justify-center hover:bg-[#d4ecd7]">
-                      <Phone size={14} />
-                    </button>
                   </div>
                 </div>
 
-                {/* Destination */}
                 <div className="relative">
                   <div className="absolute -left-8 top-1 w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-white ring-4 ring-white shadow-sm">
                     <MapPin size={12} />
@@ -288,16 +276,12 @@ export default function RouteView({ params }: { params: any }) {
                         <p className="text-xs text-ecoeat-muted mt-0.5">{task.destinationPhone}</p>
                       </div>
                     </div>
-                    <button className="w-8 h-8 bg-[#eaf4eb] text-[#388e3c] rounded-full flex items-center justify-center hover:bg-[#d4ecd7]">
-                      <Phone size={14} />
-                    </button>
                   </div>
                 </div>
               </div>
 
             </div>
             
-            {/* Action Buttons */}
             <div className="p-8 pt-0 mt-auto bg-white relative z-10 transition-all duration-300">
               
               {(state === 'assigned' || state === 'in_progress') && (
@@ -329,7 +313,7 @@ export default function RouteView({ params }: { params: any }) {
 
               {(state === 'failed' || state === 'completed') && (
                 <div className="animate-in fade-in slide-in-from-bottom-2">
-                  <Link href="/" className="w-full bg-ecoeat-text text-white font-bold py-4 rounded-2xl hover:bg-black transition-colors shadow-lg shadow-gray-900/20 text-lg flex items-center justify-center gap-2">
+                  <Link href="/dashboard/kurir/home" className="w-full bg-ecoeat-text text-white font-bold py-4 rounded-2xl hover:bg-black transition-colors shadow-lg shadow-gray-900/20 text-lg flex items-center justify-center gap-2">
                     <ArrowLeft size={20} /> Return to Dashboard
                   </Link>
                 </div>
