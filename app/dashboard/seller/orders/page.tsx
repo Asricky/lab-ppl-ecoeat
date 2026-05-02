@@ -17,13 +17,7 @@ import {
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-// Dummy Data
-const ORDERS = [
-  { id: 'ORD-001', productName: 'Nasi Goreng Spesial', quantity: 2, price: 'Rp 30.000', status: 'Completed', refundStatus: '-' },
-  { id: 'ORD-002', productName: 'Ayam Bakar Madu', quantity: 1, price: 'Rp 25.000', status: 'Refunded', refundStatus: 'Processed' },
-  { id: 'ORD-003', productName: 'Sayur Asem', quantity: 3, price: 'Rp 15.000', status: 'Active', refundStatus: '-' },
-  { id: 'ORD-004', productName: 'Sate Ayam', quantity: 1, price: 'Rp 20.000', status: 'Cancelled', refundStatus: 'Pending' }
-];
+import { SELLER_ORDERS as ORDERS } from '@/lib/sellerMetrics';
 
 const DONATIONS = [
   { id: 'DON-001', productName: 'Roti Gandum (Hampir Expired)', quantity: 5, price: 'Donate', status: 'Completed', refundStatus: '-' },
@@ -80,7 +74,7 @@ export default function OrdersPage() {
             <ListChecks size={24} />
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-500 mb-0.5">Active Listings</p>
+            <p className="text-sm font-medium text-gray-500 mb-0.5">Active products</p>
             <h3 className="text-xl font-bold text-gray-900">18</h3>
           </div>
         </div>
@@ -235,7 +229,9 @@ export default function OrdersPage() {
                 <AlertTriangle size={20} className="text-amber-500 flex-shrink-0 mt-0.5 ml-2" />
                 <div>
                   <h4 className="text-sm font-bold text-amber-700">Low Stock Alert</h4>
-                  <p className="text-xs text-amber-600 mt-1">"Ayam Bakar Madu" has only 2 units left in inventory.</p>
+                  <p className="text-xs text-amber-600 mt-1">
+                    <span className="font-bold">Ayam Bakar Madu</span> has only 2 units left in inventory.
+                  </p>
                 </div>
               </div>
             </div>

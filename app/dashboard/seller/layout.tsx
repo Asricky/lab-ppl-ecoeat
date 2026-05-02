@@ -37,13 +37,14 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
       {/* Sidebar */}
       <aside className="w-64 bg-[#F3F8F2] border-r border-[#E2EFE5] flex flex-col flex-shrink-0">
         <div className="p-6 pb-2">
-          {/* EcoEat Logo matching the top design */}
-          <Link href="/dashboard/seller" className="flex items-center space-x-2 mb-4">
-            <div className="w-8 h-8 bg-[#1A5632] rounded-full flex items-center justify-center relative shadow-sm border-2 border-[#1A5632]">
-               <div className="w-full h-[3px] bg-white absolute top-1/2 -translate-y-1/2"></div>
-               <div className="w-full h-[3px] bg-[#1A5632] absolute top-1/2 -translate-y-[150%] left-1/2 -translate-x-1/2 w-4"></div>
-            </div>
-            <span className="text-2xl font-black text-[#1A5632] tracking-tight">ECOEAT</span>
+          <Link href="/dashboard/seller" className="flex items-center mb-4">
+            {/* Prefer /public/logo-ecoeat.png; repo ships SVG fallback as logo-ecoeat.svg */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-ecoeat.svg"
+              alt="EcoEat — Delivery & Surplus Food"
+              className="h-10 w-auto max-w-[200px] object-contain object-left"
+            />
           </Link>
         </div>
 
@@ -68,7 +69,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
         <div className="p-4 border-t border-[#E2EFE5] space-y-2">
           <Link href="/dashboard/seller/products/create" className="flex items-center justify-center space-x-2 w-full bg-[#1A5632] hover:bg-[#0F351F] text-white px-4 py-3 rounded-xl font-bold transition-colors shadow-sm">
             <Plus size={20} />
-            <span>New Listing</span>
+            <span>Add product</span>
           </Link>
           <button onClick={() => alert("Opening Help Center...")} className="flex items-center justify-center space-x-2 w-full bg-transparent hover:bg-[#E2EFE5] text-gray-600 px-4 py-3 rounded-xl font-medium transition-colors">
             <HelpCircle size={20} />
@@ -80,8 +81,16 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 flex-shrink-0">
-          <div className="flex-1 flex items-center">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 flex-shrink-0 gap-6">
+          <Link href="/dashboard/seller" className="shrink-0 hidden sm:block">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-ecoeat.svg"
+              alt="EcoEat — Delivery & Surplus Food"
+              className="h-9 w-auto max-w-[180px] object-contain object-left"
+            />
+          </Link>
+          <div className="flex-1 flex items-center min-w-0">
             <div className="relative w-full max-w-lg">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-4 w-4 text-gray-400" />

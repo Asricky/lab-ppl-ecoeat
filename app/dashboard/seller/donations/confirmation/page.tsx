@@ -53,7 +53,7 @@ function ConfirmationContent() {
     addDonation({
       id: `DON-${Math.floor(Math.random() * 10000)}`,
       productName: 'ROTI GANDUM (SISA)',
-      weight: '5kg',
+      weight: '5 porsi',
       recipient: selectedOrg.name,
       recipientImage: selectedOrg.image,
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
@@ -89,7 +89,7 @@ function ConfirmationContent() {
           <span>Back</span>
         </button>
         <div className="text-sm font-bold text-gray-400 flex items-center space-x-2">
-          <span>Listings</span>
+          <span>Donations</span>
           <span>›</span>
           <span className="text-gray-900">Confirm Donation</span>
         </div>

@@ -12,7 +12,17 @@ export default function SellOrDonateDecision() {
       {/* Header with Logo */}
       <header className="h-20 px-8 flex items-center justify-between bg-[#F3F8F2]">
         <div className="flex items-center space-x-8">
-           <img src="/logo.jpg" alt="EcoEat Logo" className="h-12 w-auto object-contain" />
+           {/* eslint-disable-next-line @next/next/no-img-element */}
+           <img
+             src="/logo-ecoeat.png"
+             alt="EcoEat"
+             className="h-12 w-auto object-contain"
+             onError={(e) => {
+               const t = e.currentTarget;
+               if (t.src.endsWith('.svg')) return;
+               t.src = '/logo-ecoeat.svg';
+             }}
+           />
            <div className="hidden md:flex space-x-6 text-sm font-bold text-gray-500">
              <Link href="#" className="hover:text-[#1A5632] transition-colors">Marketplace</Link>
              <Link href="#" className="hover:text-[#1A5632] transition-colors">Impact</Link>
@@ -123,8 +133,17 @@ export default function SellOrDonateDecision() {
         </div>
 
         <div className="flex flex-col items-center">
-          <Link href={`/dashboard/seller?flow=${choice}`}>
-            <button className="bg-[#2A824A] hover:bg-[#1A5632] text-white px-10 py-3 rounded-xl font-bold text-sm shadow-sm transition-colors">
+          <Link
+            href={
+              choice === 'sell'
+                ? '/dashboard/seller/products/create'
+                : '/dashboard/seller/donations/new'
+            }
+          >
+            <button
+              type="button"
+              className="bg-[#2A824A] hover:bg-[#1A5632] text-white px-10 py-3 rounded-xl font-bold text-sm shadow-sm transition-colors"
+            >
               Continue
             </button>
           </Link>

@@ -1,44 +1,72 @@
 "use client";
 
 import React, { useState } from 'react';
-import { 
-  Plus, 
-  Package, 
-  AlertTriangle, 
-  Scale, 
-  Heart, 
-  Eye, 
-  Pencil, 
-  Trash2, 
+import {
+  Plus,
+  Package,
+  Eye,
+  Pencil,
+  Trash2,
   Clock,
   X,
   ArrowLeft,
   Leaf,
-  MapPin
+  MapPin,
 } from 'lucide-react';
 import Link from 'next/link';
 
 import { useProductStore } from '@/store/productStore';
 
+type SellerProduct = {
+  id: string;
+  name: string;
+  image: string;
+  type: string;
+  stock: number;
+  price: string;
+  expiry: string;
+  status: string;
+  description?: string;
+};
+
+/** Meals saved in portions: donation records (portion counts) + Donate-product stock. */
+function mealsSavedPortions(
+  donations: { weight: string }[],
+  allProducts: SellerProduct[]
+) {
+  const fromCatalog = allProducts
+    .filter((p) => p.type === 'Donate')
+    .reduce((s, p) => s + p.stock, 0);
+  const fromHistory = donations.reduce((sum, d) => {
+    const low = String(d.weight).toLowerCase();
+    if (low.includes('kg')) return sum;
+    const n = parseFloat(low.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
+    return sum + n;
+  }, 0);
+  return fromCatalog + fromHistory;
+}
+
 export default function ProductsPage() {
-  const [activeTab, setActiveTab] = useState('All');
-  const { products, deleteProduct, updateProduct } = useProductStore();
+  const { products, deleteProduct, updateProduct, donations } = useProductStore();
   
   // Modal states
   const [modalType, setModalType] = useState<'view' | 'edit' | 'delete' | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedProduct, setSelectedProduct] = useState<SellerProduct | null>(null);
 
   // Edit form state
-  const [editForm, setEditForm] = useState({ name: '', stock: 0, price: '', status: '', description: '', type: 'Sell' });
-
-  const filteredProducts = products.filter((p: any) => {
-    if (activeTab === 'All') return true;
-    if (activeTab === 'Selling') return p.type === 'Sell';
-    if (activeTab === 'Donating') return p.type === 'Donate';
-    return true;
+  const [editForm, setEditForm] = useState({
+    name: '',
+    stock: 0,
+    price: '',
+    status: '',
+    description: '',
   });
 
-  const openModal = (type: 'view' | 'edit' | 'delete', product: any) => {
+  const sellProducts = products.filter((p: SellerProduct) => p.type === 'Sell');
+  const activeSellCount = sellProducts.filter((p: SellerProduct) => p.status === 'Active').length;
+  const mealsPortions = mealsSavedPortions(donations, products);
+
+  const openModal = (type: 'view' | 'edit' | 'delete', product: SellerProduct) => {
     setSelectedProduct(product);
     setModalType(type);
     if (type === 'edit') {
@@ -48,7 +76,6 @@ export default function ProductsPage() {
         price: product.price,
         status: product.status,
         description: product.description || '',
-        type: product.type || 'Sell'
       });
     }
   };
@@ -59,12 +86,14 @@ export default function ProductsPage() {
   };
 
   const handleDelete = () => {
+    if (!selectedProduct) return;
     deleteProduct(selectedProduct.id);
     closeModal();
   };
 
   const handleEditSave = () => {
-    updateProduct(selectedProduct.id, editForm);
+    if (!selectedProduct) return;
+    updateProduct(selectedProduct.id, { ...editForm, type: 'Sell' });
     closeModal();
   };
 
@@ -81,27 +110,33 @@ export default function ProductsPage() {
       {/* Header & Tabs */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">My Products</h1>
-          <div className="flex space-x-1 bg-gray-100/80 p-1 rounded-xl w-max">
-            {['All', 'Selling', 'Donating'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-5 py-2 text-sm font-medium rounded-lg transition-all ${
-                  activeTab === tab 
-                    ? 'bg-white text-green-700 shadow-sm' 
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Products</h1>
+          <p className="text-sm text-gray-500 mb-4">
+            Commercial catalogue in IDR (Rp). Donations to partners are managed under{' '}
+            <Link href="/dashboard/seller/donations" className="font-bold text-[#1A5632] hover:underline">
+              Donations
+            </Link>
+            .
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <div className="bg-[#E8F3EB] border border-[#D1E8D7] rounded-xl px-4 py-2">
+              <p className="text-[10px] font-bold text-[#1A5632] uppercase tracking-wider">Active products</p>
+              <p className="text-xl font-black text-gray-900">{activeSellCount}</p>
+            </div>
+            <div className="bg-white border border-gray-100 rounded-xl px-4 py-2 shadow-sm">
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Meals saved (portions)</p>
+              <p className="text-xl font-black text-gray-900">{mealsPortions.toLocaleString('id-ID')}</p>
+              <p className="text-[10px] text-gray-400">Donations + surplus portions</p>
+            </div>
           </div>
         </div>
         <Link href="/dashboard/seller/products/create" className="block">
-          <button className="flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm w-full md:w-auto">
+          <button
+            type="button"
+            className="flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm w-full md:w-auto"
+          >
             <Plus size={20} />
-            <span>Add New Product</span>
+            <span>Add Product</span>
           </button>
         </Link>
       </div>
@@ -116,7 +151,7 @@ export default function ProductsPage() {
           <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Updated just now</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {products.slice(0, 3).map((product: any, idx: number) => (
+          {sellProducts.slice(0, 3).map((product: SellerProduct, idx: number) => (
             <div 
               key={`live-${product.id}`} 
               onClick={() => openModal('view', product)}
@@ -136,13 +171,6 @@ export default function ProductsPage() {
                   <span className="text-gray-300">•</span>
                   <span className="text-[10px] text-gray-500 font-medium">{product.stock} units</span>
                 </div>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
-                      product.type === 'Donate' 
-                        ? 'bg-[#F2E8DF] text-[#7A5B42]' 
-                        : 'bg-blue-50 text-blue-700'
-                    }`}>
-                  {product.type}
-                </span>
               </div>
             </div>
           ))}
@@ -152,7 +180,7 @@ export default function ProductsPage() {
       {/* Product Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">Inventory List</h2>
+          <h2 className="text-lg font-bold text-gray-900">Product inventory</h2>
         </div>
         
         <div className="overflow-x-auto">
@@ -160,7 +188,6 @@ export default function ProductsPage() {
             <thead>
               <tr className="bg-gray-50/80 text-gray-500 text-sm border-b border-gray-100">
                 <th className="px-6 py-4 font-medium">Product</th>
-                <th className="px-6 py-4 font-medium">Type</th>
                 <th className="px-6 py-4 font-medium">Stock</th>
                 <th className="px-6 py-4 font-medium">Expiry</th>
                 <th className="px-6 py-4 font-medium">Status</th>
@@ -168,7 +195,7 @@ export default function ProductsPage() {
               </tr>
             </thead>
             <tbody className="text-sm">
-              {filteredProducts.map((product: any) => (
+              {sellProducts.map((product: SellerProduct) => (
                 <tr key={product.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-3">
@@ -181,15 +208,6 @@ export default function ProductsPage() {
                         <p className="text-xs text-gray-500">{product.id}</p>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold ${
-                      product.type === 'Donate' 
-                        ? 'bg-[#F2E8DF] text-[#7A5B42]' 
-                        : 'bg-blue-50 text-blue-700 border border-blue-100'
-                    }`}>
-                      {product.type}
-                    </span>
                   </td>
                   <td className="px-6 py-4">
                     <span className="font-medium text-gray-700">{product.stock} units</span>
@@ -229,7 +247,7 @@ export default function ProductsPage() {
             </tbody>
           </table>
           
-          {filteredProducts.length === 0 && (
+          {sellProducts.length === 0 && (
             <div className="px-6 py-12 text-center">
               <Package size={40} className="mx-auto text-gray-300 mb-3" />
               <h3 className="text-lg font-medium text-gray-900">No products found</h3>
@@ -317,27 +335,14 @@ export default function ProductsPage() {
               <div className="p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Edit Product</h2>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Name</label>
-                      <input 
-                        type="text" 
-                        value={editForm.name} 
-                        onChange={e => setEditForm({...editForm, name: e.target.value})}
-                        className="w-full bg-[#F3F8F2] border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5632] outline-none transition-colors text-gray-900 font-medium" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Listing Type</label>
-                      <select 
-                        value={editForm.type || 'Sell'} 
-                        onChange={e => setEditForm({...editForm, type: e.target.value})}
-                        className="w-full bg-[#F3F8F2] border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5632] outline-none transition-colors text-gray-900 font-medium appearance-none" 
-                      >
-                        <option value="Sell">Sell (Marketplace)</option>
-                        <option value="Donate">Donate (Charity)</option>
-                      </select>
-                    </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Name</label>
+                    <input
+                      type="text"
+                      value={editForm.name}
+                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      className="w-full bg-[#F3F8F2] border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5632] outline-none transition-colors text-gray-900 font-medium"
+                    />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Description & Storage Details</label>
