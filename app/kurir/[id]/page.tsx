@@ -83,11 +83,7 @@ export default function RouteView({ params }: { params: any }) {
   };
 
   const handleMarkDelivered = () => {
-<<<<<<<< HEAD:app/kurir/[id]/page.tsx
     router.push(`/kurir/${resolvedId}/upload-proof`);
-========
-    router.push(`/dashboard/kurir/tasks/${resolvedId}/upload-proof`);
->>>>>>>> origin/Alya:app/dashboard/kurir/tasks/[id]/page.tsx
   };
 
   const handleReportIssue = () => {
@@ -110,7 +106,7 @@ export default function RouteView({ params }: { params: any }) {
       <div className="flex flex-col h-screen bg-ecoeat-bg items-center justify-center gap-4">
         <AlertTriangle size={48} className="text-gray-400" />
         <p className="text-ecoeat-text font-bold text-xl">Task Not Found</p>
-        <Link href="/dashboard/kurir/home" className="px-6 py-2 bg-ecoeat-primary text-white font-bold rounded-xl">
+        <Link href="/kurir" className="px-6 py-2 bg-ecoeat-primary text-white font-bold rounded-xl">
           Back to Dashboard
         </Link>
       </div>
@@ -124,7 +120,7 @@ export default function RouteView({ params }: { params: any }) {
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
         <header className="h-20 border-b border-ecoeat-border flex items-center justify-between px-6 bg-ecoeat-bg/80 backdrop-blur-md z-10 shrink-0">
           <div className="flex items-center gap-6">
-            <Link href="/dashboard/kurir/home" className="text-ecoeat-text font-bold hover:text-ecoeat-primary flex items-center gap-2">
+            <Link href="/kurir" className="text-ecoeat-text font-bold hover:text-ecoeat-primary flex items-center gap-2">
               <ArrowLeft size={20} /> Back to Dashboard
             </Link>
             <span className="text-xs font-bold text-ecoeat-muted uppercase tracking-widest pl-6 border-l border-gray-300">
@@ -317,7 +313,7 @@ export default function RouteView({ params }: { params: any }) {
 
               {(state === 'failed' || state === 'completed') && (
                 <div className="animate-in fade-in slide-in-from-bottom-2">
-                  <Link href="/dashboard/kurir/home" className="w-full bg-ecoeat-text text-white font-bold py-4 rounded-2xl hover:bg-black transition-colors shadow-lg shadow-gray-900/20 text-lg flex items-center justify-center gap-2">
+                  <Link href="/kurir" className="w-full bg-ecoeat-text text-white font-bold py-4 rounded-2xl hover:bg-black transition-colors shadow-lg shadow-gray-900/20 text-lg flex items-center justify-center gap-2">
                     <ArrowLeft size={20} /> Return to Dashboard
                   </Link>
                 </div>

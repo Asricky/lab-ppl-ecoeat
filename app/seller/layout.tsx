@@ -37,24 +37,12 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
       {/* Sidebar */}
       <aside className="w-64 bg-[#F3F8F2] border-r border-[#E2EFE5] flex flex-col flex-shrink-0">
         <div className="p-6 pb-2">
-<<<<<<< HEAD:app/seller/layout.tsx
-          {/* EcoEat Logo matching the top design */}
           <Link href="/seller" className="flex items-center space-x-2 mb-4">
             <div className="w-8 h-8 bg-[#1A5632] rounded-full flex items-center justify-center relative shadow-sm border-2 border-[#1A5632]">
-               <div className="w-full h-[3px] bg-white absolute top-1/2 -translate-y-1/2"></div>
-               <div className="w-full h-[3px] bg-[#1A5632] absolute top-1/2 -translate-y-[150%] left-1/2 -translate-x-1/2 w-4"></div>
+              <div className="w-full h-[3px] bg-white absolute top-1/2 -translate-y-1/2" />
+              <div className="w-full h-[3px] bg-[#1A5632] absolute top-1/2 -translate-y-[150%] left-1/2 -translate-x-1/2 w-4" />
             </div>
             <span className="text-2xl font-black text-[#1A5632] tracking-tight">ECOEAT</span>
-=======
-          <Link href="/dashboard/seller" className="flex items-center mb-4">
-            {/* Prefer /public/logo-ecoeat.png; repo ships SVG fallback as logo-ecoeat.svg */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logo-ecoeat.svg"
-              alt="EcoEat — Delivery & Surplus Food"
-              className="h-10 w-auto max-w-[200px] object-contain object-left"
-            />
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/layout.tsx
           </Link>
         </div>
 
@@ -92,7 +80,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 flex-shrink-0 gap-6">
-          <Link href="/dashboard/seller" className="shrink-0 hidden sm:block">
+          <Link href="/seller" className="shrink-0 hidden sm:block">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo-ecoeat.svg"

@@ -45,7 +45,7 @@ export default function UploadProofView({ params }: { params: any }) {
       
       alert('Proof uploaded successfully! Order has been marked as delivered and reward credited.');
       
-      router.push('/dashboard/kurir/home');
+      router.push('/kurir');
     }
   };
 
@@ -62,11 +62,10 @@ export default function UploadProofView({ params }: { params: any }) {
   return (
     <CourierLayout>
       <div className="max-w-2xl mx-auto py-8">
-<<<<<<<< HEAD:app/kurir/[id]/upload-proof/page.tsx
-        <Link href={`/kurir/${resolvedId}`} className="inline-flex items-center gap-2 text-ecoeat-text font-bold hover:text-ecoeat-primary mb-8">
-========
-        <Link href={`/dashboard/kurir/tasks/${resolvedId}`} className="inline-flex items-center gap-2 text-ecoeat-text font-bold hover:text-ecoeat-primary mb-8">
->>>>>>>> origin/Alya:app/dashboard/kurir/tasks/[id]/upload-proof/page.tsx
+        <Link
+          href={`/kurir/${resolvedId ?? ''}`}
+          className="inline-flex items-center gap-2 text-ecoeat-text font-bold hover:text-ecoeat-primary mb-8"
+        >
           <ArrowLeft size={20} /> Back to Route
         </Link>
 

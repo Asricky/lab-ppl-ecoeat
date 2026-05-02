@@ -72,16 +72,16 @@ export default function RoleSelectionPage() {
             </p>
           </div>
 
-          {/* Courier Card */}
+          {/* Courier (kurir) Card */}
           <div
-            onClick={() => setSelectedRole("courier")}
+            onClick={() => setSelectedRole('kurir')}
             className={`relative bg-white rounded-2xl p-8 cursor-pointer transition-all duration-200 border-2 ${
-              selectedRole === "courier"
+              selectedRole === 'kurir'
                 ? "border-green-500 shadow-xl shadow-green-900/5 transform scale-[1.02]"
                 : "border-transparent shadow-sm hover:shadow-md"
             }`}
           >
-            {selectedRole === "courier" && (
+            {selectedRole === 'kurir' && (
               <CheckCircle2 className="absolute top-4 right-4 text-green-600 fill-green-100 w-6 h-6" />
             )}
             <div className="bg-gray-100 text-gray-700 w-12 h-12 rounded-xl flex items-center justify-center mb-6">

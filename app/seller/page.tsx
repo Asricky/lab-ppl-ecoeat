@@ -1,10 +1,6 @@
 "use client";
-<<<<<<< HEAD:app/seller/page.tsx
-import React, { Suspense } from 'react';
-=======
 
 import React, { Suspense, useMemo, useState } from 'react';
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/page.tsx
 import Link from 'next/link';
 import {
   Package,
@@ -16,22 +12,17 @@ import {
 } from 'lucide-react';
 
 import { useProductStore } from '@/store/productStore';
-<<<<<<< HEAD:app/seller/page.tsx
-import { useAuthStore } from "@/store/authStore";
-=======
+import { useAuthStore } from '@/store/authStore';
 import {
   buildDonationChartSeries,
   getSellerMetrics,
   maxChartDonations,
   type SellerTimeRange,
 } from '@/lib/sellerMetrics';
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/page.tsx
 
 function DashboardContent() {
   const { products } = useProductStore();
-<<<<<<< HEAD:app/seller/page.tsx
   const { user } = useAuthStore();
-=======
   const [timeRange, setTimeRange] = useState<SellerTimeRange>('This Week');
 
   const [weekRangeLabel] = useState(() => {
@@ -68,20 +59,19 @@ function DashboardContent() {
     }),
     [weekRangeLabel]
   );
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/page.tsx
 
   return (
     <div className="max-w-7xl mx-auto">
       <div className="flex justify-between items-end mb-8">
         <div>
           <p className="text-xs font-bold tracking-wider text-gray-500 uppercase mb-1">Overview</p>
-<<<<<<< HEAD:app/seller/page.tsx
-          <h1 className="text-3xl font-bold text-gray-900">Welcome, {user?.name || 'Seller'}!</h1>
-          <p className="text-sm text-gray-500 mt-1">EcoPay Balance: Rp {(user?.ecoPayBalance || 0).toLocaleString()}</p>
-=======
-          <h1 className="text-3xl font-bold text-gray-900">Seller Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">{dateByTime[timeRange]}</p>
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/page.tsx
+          <h1 className="text-3xl font-bold text-gray-900">
+            Welcome, {user?.name || 'Seller'}!
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            EcoPay Balance: Rp {(user?.ecoPayBalance ?? 0).toLocaleString('id-ID')}
+          </p>
+          <p className="text-sm text-gray-400 mt-0.5">{dateByTime[timeRange]}</p>
         </div>
 
         <div className="relative z-20">
@@ -103,40 +93,10 @@ function DashboardContent() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-<<<<<<< HEAD:app/seller/page.tsx
-        <Link href="/seller/wallet" className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-[#1A5632] hover:shadow-md transition-all group block">
-          <div className="flex justify-between items-start mb-4">
-            <div className="bg-[#E8F3EB] p-2.5 rounded-lg text-[#1A5632]">
-              <Package size={20} />
-            </div>
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-              <TrendingUp size={12} className="mr-1" /> +12%
-            </span>
-          </div>
-          <p className="text-sm text-gray-500 font-medium mb-1">{isDonate ? 'Meals Saved (kg)' : 'Total Revenue'}</p>
-          <h3 className="text-2xl font-bold text-gray-900 group-hover:text-[#1A5632] transition-colors">{isDonate ? '428 kg' : 'Rp 2.4M'}</h3>
-        </Link>
-
-        <Link href="/seller/products" className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-[#1A5632] hover:shadow-md transition-all group block">
-          <div className="flex justify-between items-start mb-4">
-            <div className="bg-blue-50 p-2.5 rounded-lg text-blue-600">
-              <ListChecks size={20} />
-            </div>
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-              <TrendingUp size={12} className="mr-1" /> +4%
-            </span>
-          </div>
-          <p className="text-sm text-gray-500 font-medium mb-1">{isDonate ? 'Donation Milestone' : 'Active Listings'}</p>
-          <h3 className="text-2xl font-bold text-gray-900 group-hover:text-[#1A5632] transition-colors">{isDonate ? 'Silver Partner' : '86'}</h3>
-        </Link>
-
-        <Link href="/seller/orders" className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-[#1A5632] hover:shadow-md transition-all group block">
-=======
         <Link
-          href="/dashboard/seller/orders"
+          href="/seller/orders"
           className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-[#1A5632] hover:shadow-md transition-all group block"
         >
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/page.tsx
           <div className="flex justify-between items-start mb-4">
             <div className="bg-amber-50 p-2.5 rounded-lg text-amber-600">
               <ShoppingCart size={20} />
@@ -148,11 +108,8 @@ function DashboardContent() {
           </h3>
         </Link>
 
-<<<<<<< HEAD:app/seller/page.tsx
-        <Link href="/seller/analytics" className="bg-[#1A5632] rounded-2xl p-6 shadow-sm border border-[#144226] text-white relative overflow-hidden hover:shadow-md hover:scale-[1.02] transition-all group block">
-=======
         <Link
-          href="/dashboard/seller/donations"
+          href="/seller/donations"
           className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-[#1A5632] hover:shadow-md transition-all group block"
         >
           <div className="flex justify-between items-start mb-4">
@@ -167,7 +124,7 @@ function DashboardContent() {
         </Link>
 
         <Link
-          href="/dashboard/seller/products"
+          href="/seller/products"
           className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-[#1A5632] hover:shadow-md transition-all group block"
         >
           <div className="flex justify-between items-start mb-4">
@@ -183,10 +140,9 @@ function DashboardContent() {
         </Link>
 
         <Link
-          href="/dashboard/seller/analytics"
+          href="/seller/analytics"
           className="bg-[#1A5632] rounded-2xl p-6 shadow-sm border border-[#144226] text-white relative overflow-hidden hover:shadow-md hover:scale-[1.02] transition-all group block"
         >
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/page.tsx
           <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform">
             <Leaf size={120} />
           </div>
@@ -207,18 +163,13 @@ function DashboardContent() {
 
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8 overflow-hidden">
         <div className="flex justify-between items-center mb-6">
-<<<<<<< HEAD:app/seller/page.tsx
-          <h2 className="text-lg font-bold text-gray-900">Sales Analysis</h2>
-          <Link href="/seller/analytics" className="text-sm font-bold text-[#1A5632] hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors">Detailed Report</Link>
-=======
           <h2 className="text-lg font-bold text-gray-900">Impact overview</h2>
           <Link
-            href="/dashboard/seller/analytics"
+            href="/seller/analytics"
             className="text-sm font-bold text-[#1A5632] hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors"
           >
             Detailed report
           </Link>
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/page.tsx
         </div>
         <div className="flex gap-0 min-h-[280px]">
           <div className="flex flex-col items-center justify-center w-11 shrink-0 pt-6 pb-10">
@@ -273,16 +224,12 @@ function DashboardContent() {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center">
               <h2 className="text-lg font-bold text-gray-900">Product Overview</h2>
-<<<<<<< HEAD:app/seller/page.tsx
-              <Link href="/seller/products" className="text-sm font-bold text-[#1A5632] hover:text-[#0F351F] px-3 py-1 rounded-lg hover:bg-green-50 transition-colors">View All</Link>
-=======
               <Link
-                href="/dashboard/seller/products"
+                href="/seller/products"
                 className="text-sm font-bold text-[#1A5632] hover:text-[#0F351F] px-3 py-1 rounded-lg hover:bg-green-50 transition-colors"
               >
                 View All
               </Link>
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/page.tsx
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -344,30 +291,16 @@ function DashboardContent() {
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
             <div className="space-y-3">
-<<<<<<< HEAD:app/seller/page.tsx
               <Link href="/seller/products/create" className="block">
-                <button className="w-full flex items-center justify-center space-x-2 bg-[#1A5632] hover:bg-[#0F351F] text-white px-4 py-3 rounded-xl font-bold transition-colors shadow-sm">
-=======
-              <Link href="/dashboard/seller/products/create" className="block">
                 <button
                   type="button"
                   className="w-full flex items-center justify-center space-x-2 bg-[#1A5632] hover:bg-[#0F351F] text-white px-4 py-3 rounded-xl font-bold transition-colors shadow-sm"
                 >
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/page.tsx
                   <PlusCircle size={20} />
                   <span>Add Product</span>
                 </button>
               </Link>
-<<<<<<< HEAD:app/seller/page.tsx
               <Link href="/seller/products" className="block w-full">
-                <button className="w-full flex items-center justify-center space-x-2 bg-[#E8F3EB] hover:bg-[#D1E8D7] text-[#1A5632] px-4 py-3 rounded-xl font-bold transition-colors">
-                  <span>Manage Products</span>
-                </button>
-              </Link>
-              <Link href="/seller/orders" className="block w-full">
-                <button className="w-full flex items-center justify-center space-x-2 bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-3 rounded-xl font-bold transition-colors border border-gray-100">
-=======
-              <Link href="/dashboard/seller/products" className="block w-full">
                 <button
                   type="button"
                   className="w-full flex items-center justify-center space-x-2 bg-[#E8F3EB] hover:bg-[#D1E8D7] text-[#1A5632] px-4 py-3 rounded-xl font-bold transition-colors"
@@ -375,12 +308,11 @@ function DashboardContent() {
                   <span>Manage Products</span>
                 </button>
               </Link>
-              <Link href="/dashboard/seller/orders" className="block w-full">
+              <Link href="/seller/orders" className="block w-full">
                 <button
                   type="button"
                   className="w-full flex items-center justify-center space-x-2 bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-3 rounded-xl font-bold transition-colors border border-gray-100"
                 >
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/page.tsx
                   <ShoppingCart size={20} />
                   <span>Manage Orders</span>
                 </button>
@@ -394,42 +326,30 @@ function DashboardContent() {
               Urgent Alerts
             </h3>
             <div className="space-y-4">
-<<<<<<< HEAD:app/seller/page.tsx
-              <Link href="/seller/products" className="block relative pl-4 border-l-2 border-red-500 hover:bg-gray-50 transition-colors p-2 rounded-r-xl cursor-pointer group">
-=======
               <Link
-                href="/dashboard/seller/products"
+                href="/seller/products"
                 className="block relative pl-4 border-l-2 border-red-500 hover:bg-gray-50 transition-colors p-2 rounded-r-xl cursor-pointer group"
               >
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/page.tsx
                 <p className="text-xs font-bold text-gray-500 uppercase mb-0.5">Expiring Soon</p>
                 <h4 className="text-sm font-bold text-gray-900 group-hover:text-[#1A5632] transition-colors">
                   8kg Heirloom Tomatoes
                 </h4>
                 <p className="text-xs font-medium text-red-600 mt-0.5">Expiring in 6 hours</p>
               </Link>
-<<<<<<< HEAD:app/seller/page.tsx
-              <Link href="/seller/products" className="block relative pl-4 border-l-2 border-amber-400 hover:bg-gray-50 transition-colors p-2 rounded-r-xl cursor-pointer group">
-=======
               <Link
-                href="/dashboard/seller/products"
+                href="/seller/products"
                 className="block relative pl-4 border-l-2 border-amber-400 hover:bg-gray-50 transition-colors p-2 rounded-r-xl cursor-pointer group"
               >
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/page.tsx
                 <p className="text-xs font-bold text-gray-500 uppercase mb-0.5">Low Stock</p>
                 <h4 className="text-sm font-bold text-gray-900 group-hover:text-[#1A5632] transition-colors">
                   Honeycrisp Apples
                 </h4>
                 <p className="text-xs font-medium text-amber-600 mt-0.5">Only 2kg remaining</p>
               </Link>
-<<<<<<< HEAD:app/seller/page.tsx
-              <Link href="/seller/orders" className="block relative pl-4 border-l-2 border-red-500 hover:bg-gray-50 transition-colors p-2 rounded-r-xl cursor-pointer group">
-=======
               <Link
-                href="/dashboard/seller/orders"
+                href="/seller/orders"
                 className="block relative pl-4 border-l-2 border-red-500 hover:bg-gray-50 transition-colors p-2 rounded-r-xl cursor-pointer group"
               >
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/page.tsx
                 <p className="text-xs font-bold text-gray-500 uppercase mb-0.5">Order Overdue</p>
                 <h4 className="text-sm font-bold text-gray-900 group-hover:text-[#1A5632] transition-colors">
                   Order #VH-4921

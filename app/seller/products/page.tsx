@@ -113,7 +113,7 @@ export default function ProductsPage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Products</h1>
           <p className="text-sm text-gray-500 mb-4">
             Commercial catalogue in IDR (Rp). Donations to partners are managed under{' '}
-            <Link href="/dashboard/seller/donations" className="font-bold text-[#1A5632] hover:underline">
+            <Link href="/seller/donations" className="font-bold text-[#1A5632] hover:underline">
               Donations
             </Link>
             .
@@ -130,16 +130,11 @@ export default function ProductsPage() {
             </div>
           </div>
         </div>
-<<<<<<< HEAD:app/seller/products/page.tsx
         <Link href="/seller/products/create" className="block">
-          <button className="flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm w-full md:w-auto">
-=======
-        <Link href="/dashboard/seller/products/create" className="block">
           <button
             type="button"
             className="flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm w-full md:w-auto"
           >
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/products/page.tsx
             <Plus size={20} />
             <span>Add Product</span>
           </button>

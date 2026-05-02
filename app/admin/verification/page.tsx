@@ -120,7 +120,7 @@ export default function AdminVerificationPage() {
                   <td className="px-8 py-6 text-right">
                     {app.status === 'PENDING' ? (
                       <div className="flex items-center justify-end space-x-4">
-                        <Link href={`/dashboard/admin/verification/${app.id}`}>
+                        <Link href={`/admin/verification/${app.id}`}>
                           <span className="text-xs font-bold text-gray-500 hover:text-[#1A5632] transition-colors cursor-pointer">Details</span>
                         </Link>
                         <button onClick={() => alert(`[ACTION: APPROVE]\n\nApplicant: ${app.name}\nDocument: ${app.file}\n\nFast-track approval executed.`)} className="bg-[#1A5632] hover:bg-[#0F351F] text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors shadow-sm">Approve</button>

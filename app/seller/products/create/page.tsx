@@ -306,42 +306,29 @@ export default function CreateCommercialProductPage() {
       </div>
 
       <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
-<<<<<<< HEAD:app/seller/products/create/page.tsx
         <Link href="/seller">
-          <button className="flex items-center space-x-2 text-gray-600 font-bold hover:text-gray-900 transition-colors">
-=======
-        <Link href="/dashboard/seller/products">
           <button
             type="button"
             className="flex items-center space-x-2 text-gray-600 font-bold hover:text-gray-900 transition-colors"
           >
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/products/create/page.tsx
             <ArrowLeft size={20} />
             <span>Back</span>
           </button>
         </Link>
-<<<<<<< HEAD:app/seller/products/create/page.tsx
-        <Link href="/seller/products/create/pricing">
+        <Link href="/seller/products/create/review">
           <div className="flex items-center space-x-4">
             <div className="text-right hidden sm:block">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">NEXT STEP</p>
-              <p className="text-sm font-bold text-gray-900">Price & Inventory</p>
+              <p className="text-sm font-bold text-gray-900">Review & publish</p>
             </div>
-            <button className="bg-[#1A5632] hover:bg-[#0F351F] text-white px-6 py-3 rounded-xl font-bold flex items-center space-x-2 transition-colors shadow-sm">
-              <span>Next Step</span>
+            <button
+              type="button"
+              className="bg-[#1A5632] hover:bg-[#0F351F] text-white px-6 py-3 rounded-xl font-bold flex items-center space-x-2 transition-colors shadow-sm"
+            >
+              <span>Continue to review</span>
               <ArrowRight size={20} />
             </button>
           </div>
-=======
-        <Link href="/dashboard/seller/products/create/review">
-          <button
-            type="button"
-            className="bg-[#1A5632] hover:bg-[#0F351F] text-white px-6 py-3 rounded-xl font-bold flex items-center space-x-2 transition-colors shadow-sm"
-          >
-            <span>Continue to review</span>
-            <ArrowRight size={20} />
-          </button>
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/products/create/page.tsx
         </Link>
       </div>
     </div>

@@ -16,20 +16,12 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const pathname = usePathname();
 
   const menuItems = [
-<<<<<<< HEAD:components/Sidebar.tsx
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
+    { icon: LayoutDashboard, label: 'Dashboard', href: '/kurir' },
     { icon: CheckSquare, label: 'Tasks', href: '/kurir' },
     { icon: Clock, label: 'History', href: '/kurir/history' },
     { icon: Map, label: 'Routes', href: '#' },
     { icon: DollarSign, label: 'Earnings', href: '#' },
     { icon: Settings, label: 'Settings', href: '#' },
-=======
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard/kurir/home' },
-    { icon: CheckSquare, label: 'Tasks', href: '/dashboard/kurir/tasks' },
-    { icon: Clock, label: 'History', href: '/dashboard/kurir/history' },
-    { icon: DollarSign, label: 'Earnings', href: '/dashboard/kurir/earnings' },
-    { icon: Settings, label: 'Settings', href: '/dashboard/kurir/settings' },
->>>>>>> origin/Alya:app/components/Sidebar.tsx
   ];
 
   return (

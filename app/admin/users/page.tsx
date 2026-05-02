@@ -180,7 +180,7 @@ export default function AdminUsersPage() {
                     <td className="px-6 py-4 font-medium text-gray-600">{user.date}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end space-x-2">
-                        <Link href={`/dashboard/admin/users/${user.id}`}>
+                        <Link href={`/admin/users/${user.id}`}>
                           <button className="p-2 text-gray-400 hover:text-[#1A5632] hover:bg-green-50 rounded-lg transition-colors">
                             <Eye size={20} />
                           </button>

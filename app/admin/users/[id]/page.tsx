@@ -64,7 +64,7 @@ export default function UserProfileDetail({ params }: { params: { id: string } }
     <div className="max-w-7xl mx-auto">
       {/* Top Section */}
       <div className="mb-6">
-        <Link href="/dashboard/admin/users" className="inline-flex items-center space-x-2 text-gray-500 hover:text-[#1A5632] font-bold text-sm transition-colors">
+        <Link href="/admin/users" className="inline-flex items-center space-x-2 text-gray-500 hover:text-[#1A5632] font-bold text-sm transition-colors">
           <ChevronLeft size={16} />
           <span>Back to Directory</span>
         </Link>

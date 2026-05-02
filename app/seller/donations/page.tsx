@@ -224,7 +224,10 @@ function DonationsPageInner() {
 
     const catalogP =
       donationCatalogProductId &&
-      products.find((x) => x.id === donationCatalogProductId && x.name.trim() === productName.trim());
+      products.find(
+        (x: CatalogProduct) =>
+          x.id === donationCatalogProductId && x.name.trim() === productName.trim()
+      );
     const donationProductImage =
       catalogP?.image ??
       'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80';
@@ -555,16 +558,6 @@ function DonationsPageInner() {
                   <span className="text-gray-400">③ Konfirmasi</span>
                 </div>
 
-<<<<<<< HEAD:app/seller/donations/page.tsx
-      {/* CTA */}
-      <div className="flex justify-center mt-8">
-        <Link href="/seller/donations/select">
-          <button className="bg-[#1A5632] hover:bg-[#0F351F] text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors shadow-md flex items-center space-x-3">
-            <HeartHandshake size={24} />
-            <span>New Donation</span>
-          </button>
-        </Link>
-=======
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-8 max-w-2xl">
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Produk donasi</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -759,7 +752,6 @@ function DonationsPageInner() {
             ) : null}
           </section>
         )}
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/donations/page.tsx
       </div>
     </div>
   );

@@ -70,13 +70,10 @@ function ConfirmationContent() {
           <CheckCircle2 size={48} className="text-[#1A5632]" />
         </div>
         <h1 className="text-4xl font-extrabold text-gray-900 mb-4">Donation Confirmed!</h1>
-<<<<<<< HEAD:app/seller/donations/confirmation/page.tsx
-        <p className="text-gray-500 text-lg mb-8">Thank you for your contribution. Green Valley Community Kitchen will pick up the items tomorrow at 10:00 AM.</p>
+        <p className="text-gray-500 text-lg mb-8">
+          Thank you for your contribution. {selectedOrg.name} will pick up the items tomorrow at 10:00 AM.
+        </p>
         <Link href="/seller/donations">
-=======
-        <p className="text-gray-500 text-lg mb-8">Thank you for your contribution. {selectedOrg.name} will pick up the items tomorrow at 10:00 AM.</p>
-        <Link href="/dashboard/seller/donations">
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/donations/confirmation/page.tsx
           <button className="bg-[#1A5632] text-white px-8 py-3 rounded-xl font-bold shadow-md hover:bg-[#0F351F] transition-colors">
             View My Donations
           </button>

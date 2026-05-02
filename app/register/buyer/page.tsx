@@ -39,7 +39,7 @@ export default function RegisterBuyerPage() {
     try {
       const { user, token } = await authHandler.register(formData, "buyer");
       setUser(user, token);
-      router.push(`/dashboard/${user.role}`);
+      router.push(`/${user.role}`);
     } catch (error) {
       console.error("Registration failed", error);
     } finally {

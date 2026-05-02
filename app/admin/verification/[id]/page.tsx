@@ -47,7 +47,7 @@ export default function VerificationDetailPage() {
 
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center space-x-4">
-          <Link href="/dashboard/admin/verification" className="text-gray-400 hover:text-gray-900 transition-colors">
+          <Link href="/admin/verification" className="text-gray-400 hover:text-gray-900 transition-colors">
             <ChevronLeft size={24} />
           </Link>
           <h1 className="text-2xl font-bold text-[#1A5632]">Verification Management</h1>

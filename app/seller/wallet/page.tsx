@@ -74,7 +74,6 @@ export default function WalletPage() {
           </div>
         </div>
 
-<<<<<<< HEAD:app/seller/wallet/page.tsx
         {/* Escrow Card */}
         <div className="bg-[#F0F7FF] rounded-3xl p-8 border border-[#D1E5FE] flex flex-col justify-between shadow-sm">
           <div>
@@ -82,19 +81,19 @@ export default function WalletPage() {
               <ShieldCheck className="text-blue-600" size={24} />
               <h3 className="text-lg font-bold text-blue-900">Held in Escrow</h3>
             </div>
-            <h2 className="text-3xl font-extrabold text-blue-900 mb-2">Rp 850.000</h2>
+            <h2 className="text-3xl font-extrabold text-blue-900 mb-2">
+              {isLoading ? '…' : `Rp ${escrowBalance.toLocaleString('id-ID')}`}
+            </h2>
             <p className="text-sm font-medium text-blue-800/80 leading-relaxed">
               Funds from active orders are held securely. They will automatically transfer to your available balance once buyers confirm receipt.
             </p>
           </div>
           <Link href="/seller/orders">
-            <button className="text-sm font-bold text-blue-700 mt-6 flex items-center hover:underline">
+            <button type="button" className="text-sm font-bold text-blue-700 mt-6 flex items-center hover:underline">
               View Active Orders <ArrowUpRight size={16} className="ml-1" />
             </button>
           </Link>
         </div>
-=======
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/wallet/page.tsx
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

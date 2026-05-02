@@ -32,7 +32,7 @@ export const authHandler = {
       id: Math.random().toString(36).substring(2, 9),
       name: data.name || data.email.split('@')[0],
       email: data.email,
-      role: role === 'courier' as any ? 'kurir' : role, // Map courier to kurir if needed
+      role,
       ecoPayBalance: 0,
     };
 

@@ -74,31 +74,20 @@ export default function ReviewPublishPage() {
             &quot;{publishedName}&quot; is now live. Currency: IDR (Rp).
           </p>
           <div className="flex flex-col space-y-3">
-<<<<<<< HEAD:app/seller/products/create/review/page.tsx
             <Link href="/seller/products" className="w-full">
-              <button className="w-full bg-[#1A5632] hover:bg-[#0F351F] text-white px-8 py-3.5 rounded-xl font-bold transition-colors shadow-sm">
-                View My Products
-              </button>
-            </Link>
-            <Link href="/seller" className="w-full">
-              <button className="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 px-8 py-3.5 rounded-xl font-bold transition-colors">
-                Back to Dashboard
-=======
-            <Link href="/dashboard/seller/products" className="w-full">
               <button
                 type="button"
                 className="w-full bg-[#1A5632] hover:bg-[#0F351F] text-white px-8 py-3.5 rounded-xl font-bold transition-colors shadow-sm"
               >
-                View products
+                View My Products
               </button>
             </Link>
-            <Link href="/dashboard/seller" className="w-full">
+            <Link href="/seller" className="w-full">
               <button
                 type="button"
                 className="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 px-8 py-3.5 rounded-xl font-bold transition-colors"
               >
-                Dashboard
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/products/create/review/page.tsx
+                Back to Dashboard
               </button>
             </Link>
           </div>
@@ -251,16 +240,11 @@ export default function ReviewPublishPage() {
         </div>
 
         <div className="flex justify-between items-center p-6 border-t border-gray-200 bg-gray-50/50">
-<<<<<<< HEAD:app/seller/products/create/review/page.tsx
-          <Link href="/seller/products/create/pricing">
-            <button className="flex items-center space-x-2 text-gray-600 font-bold hover:text-gray-900 transition-colors">
-=======
-          <Link href="/dashboard/seller/products/create">
+          <Link href="/seller/products/create">
             <button
               type="button"
               className="flex items-center space-x-2 text-gray-600 font-bold hover:text-gray-900 transition-colors"
             >
->>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/products/create/review/page.tsx
               <ArrowLeft size={20} />
               <span>Edit details</span>
             </button>
