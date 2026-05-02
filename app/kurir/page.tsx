@@ -1,5 +1,6 @@
-"use client";
+import { redirect } from 'next/navigation';
 
+<<<<<<< HEAD:app/kurir/page.tsx
 import React, { useState } from 'react';
 import CourierLayout from '@/components/CourierLayout';
 import ActiveTaskCard from '@/components/ActiveTaskCard';
@@ -86,4 +87,8 @@ export default function KurirDashboardPage() {
       </div>
     </CourierLayout>
   );
+=======
+export default function CourierRoot() {
+  redirect('/dashboard/kurir/home');
+>>>>>>> origin/Alya:app/dashboard/kurir/page.tsx
 }

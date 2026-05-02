@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, CheckSquare, Map, DollarSign, Settings, LogOut, HelpCircle, Leaf, Power, X, Clock } from 'lucide-react';
+import { useCourier } from './CourierLayout';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -11,16 +12,24 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
-  const [isOnline, setIsOnline] = React.useState(false);
+  const { isOnline, setIsOnline } = useCourier();
   const pathname = usePathname();
 
   const menuItems = [
+<<<<<<< HEAD:components/Sidebar.tsx
     { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
     { icon: CheckSquare, label: 'Tasks', href: '/kurir' },
     { icon: Clock, label: 'History', href: '/kurir/history' },
     { icon: Map, label: 'Routes', href: '#' },
     { icon: DollarSign, label: 'Earnings', href: '#' },
     { icon: Settings, label: 'Settings', href: '#' },
+=======
+    { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard/kurir/home' },
+    { icon: CheckSquare, label: 'Tasks', href: '/dashboard/kurir/tasks' },
+    { icon: Clock, label: 'History', href: '/dashboard/kurir/history' },
+    { icon: DollarSign, label: 'Earnings', href: '/dashboard/kurir/earnings' },
+    { icon: Settings, label: 'Settings', href: '/dashboard/kurir/settings' },
+>>>>>>> origin/Alya:app/components/Sidebar.tsx
   ];
 
   return (
@@ -63,7 +72,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         <nav className="px-4 mt-6 space-y-2">
           {menuItems.map((item, index) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const isActive = pathname.startsWith(item.href);
             return (
               <Link
                 key={index}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import CourierLayout from '@/components/CourierLayout';
+import CourierLayout from '@/app/components/CourierLayout';
 import { Download, Package, TrendingUp, Map, Leaf, Search, MoreVertical, Inbox } from 'lucide-react';
 import { dummyOrders } from '@/lib/data';
 
@@ -10,11 +10,30 @@ export default function HistoryView() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // 1. Unified Data Source: Get only COMPLETED or CANCELLED tasks
-  const historyOrders = dummyOrders.filter(order => 
+  let historyOrders = dummyOrders.filter(order => 
     order.status === 'completed' || order.status === 'cancelled'
   ).reverse(); // latest()
 
-  // 2. Client-side filtering
+  // Apply time filter
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  
+  const weekStart = new Date(todayStart);
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Start of this week (Sunday)
+
+  historyOrders = historyOrders.filter(order => {
+    if (!order.date) return true; // fallback if no date
+    const orderDate = new Date(order.date);
+    
+    if (filter === 'today') {
+      return orderDate >= todayStart;
+    } else if (filter === 'this_week') {
+      return orderDate >= weekStart;
+    }
+    return true; // all_time
+  });
+
+  // 2. Client-side filtering by search
   const filteredOrders = historyOrders.filter(order => {
     return order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
            order.productName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -31,8 +50,9 @@ export default function HistoryView() {
       return total + dist;
     }, 0);
 
-  // Mock calculation for carbon saved based on completed deliveries
-  const fuelSaved = (distanceCovered * 0.15).toFixed(1);
+  const totalCompleted = historyOrders.filter(o => o.status === 'completed').length;
+  const totalOrders = historyOrders.length;
+  const successRate = totalOrders > 0 ? Math.round((totalCompleted / totalOrders) * 100) : 0;
 
   return (
     <CourierLayout>
@@ -77,16 +97,16 @@ export default function HistoryView() {
               </div>
             </div>
 
-            {/* Fuel Saved */}
+            {/* Success Rate */}
             <div className="bg-ecoeat-pill rounded-3xl p-6 text-ecoeat-text shadow-sm flex flex-col justify-between">
               <div className="flex justify-between items-start mb-4">
                 <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
-                  <Leaf size={20} className="text-ecoeat-accent" />
+                  <TrendingUp size={20} className="text-ecoeat-accent" />
                 </div>
               </div>
               <div>
-                <p className="text-ecoeat-primary text-sm font-medium mb-1">Fuel / Carbon Saved</p>
-                <p className="text-4xl font-extrabold text-ecoeat-primary">{fuelSaved} <span className="text-lg opacity-70 font-bold">kg</span></p>
+                <p className="text-ecoeat-primary text-sm font-medium mb-1">Success Rate</p>
+                <p className="text-4xl font-extrabold text-ecoeat-primary">{successRate}<span className="text-lg opacity-70 font-bold">%</span></p>
               </div>
             </div>
           </div>
@@ -165,8 +185,12 @@ export default function HistoryView() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="text-sm font-bold text-ecoeat-text">Today</p>
-                        <p className="text-xs text-ecoeat-muted font-medium">Just now</p>
+                        <p className="text-sm font-bold text-ecoeat-text">
+                          {order.date ? new Date(order.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Today'}
+                        </p>
+                        <p className="text-xs text-ecoeat-muted font-medium">
+                           {order.date ? new Date(order.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
+                        </p>
                       </td>
                       <td className="px-6 py-4">
                         {order.status === 'completed' ? (
