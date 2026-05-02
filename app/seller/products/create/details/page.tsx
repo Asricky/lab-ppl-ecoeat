@@ -12,7 +12,7 @@ export default function CreateProductStep1() {
       {/* Header with nav logic */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex space-x-6 text-sm font-bold text-gray-500">
-          <span className="text-[#1A5632] border-b-2 border-[#1A5632] pb-1">Listings</span>
+          <span className="text-[#1A5632] border-b-2 border-[#1A5632] pb-1">Products</span>
           <span className="hover:text-gray-800 cursor-pointer pb-1">Marketplace</span>
         </div>
         
@@ -115,7 +115,7 @@ export default function CreateProductStep1() {
             <div className="p-6">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-xl font-bold text-gray-900">{name || 'Product Name'}</h3>
-                <span className="text-2xl font-extrabold text-[#1A5632]">$0.00</span>
+                <span className="text-2xl font-extrabold text-[#1A5632]">Rp 0</span>
               </div>
               <p className="text-sm text-gray-500 font-medium flex items-center mb-6">
                 <span className="mr-2">🍽</span> 0 portions available
@@ -126,7 +126,7 @@ export default function CreateProductStep1() {
                   <Leaf size={14} />
                 </div>
                 <p className="text-xs font-medium text-gray-600 leading-relaxed">
-                  Creating this listing will save <span className="font-bold text-[#1A5632]">0kg</span> of food from being wasted.
+                  Publishing this product helps save <span className="font-bold text-[#1A5632]">0</span> meal portions from going to waste.
                 </p>
               </div>
             </div>
@@ -134,7 +134,7 @@ export default function CreateProductStep1() {
           
           <div className="bg-[#EAE5DF] rounded-2xl p-4 flex items-center justify-center space-x-2 text-[#4A3D35] font-bold text-xs tracking-wider uppercase border border-[#DCD5CD]">
             <span>🌲</span>
-            <span>YOUR IMPACT: 240KG SAVED THIS MONTH</span>
+            <span>YOUR IMPACT: 240 PORTIONS SAVED THIS MONTH</span>
           </div>
         </div>
       </div>

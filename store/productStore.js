@@ -48,10 +48,34 @@ const INITIAL_PRODUCTS = [
   }
 ];
 
+const INITIAL_DONATIONS = [
+  {
+    id: 'DON-9021',
+    productName: 'Organic Heirloom Tomatoes',
+    weight: '24 porsi',
+    recipient: 'Green Valley Kitchen',
+    recipientImage: 'https://images.unsplash.com/photo-1574314050516-e56593a1fa06?w=400&q=80',
+    date: 'Yesterday, 10:00 AM',
+    status: 'Delivered',
+    image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&q=80'
+  },
+  {
+    id: 'DON-8842',
+    productName: 'Artisan Sourdough Loaf',
+    weight: '15 porsi',
+    recipient: 'Hope Harbor Shelter',
+    recipientImage: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80',
+    date: 'Oct 22, 2023',
+    status: 'Delivered',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80'
+  }
+];
+
 export const useProductStore = create(
   persist(
     (set) => ({
       products: INITIAL_PRODUCTS,
+      donations: INITIAL_DONATIONS,
       draftProduct: {
         name: '',
         category: '',
@@ -61,18 +85,68 @@ export const useProductStore = create(
         price: '',
         expiry: '',
         description: '',
-        image: ''
+        image: '',
+        discountPercent: 20,
       },
       setDraftProduct: (data) => set((state) => ({ draftProduct: { ...state.draftProduct, ...data } })),
-      clearDraft: () => set(() => ({ draftProduct: { name: '', category: '', type: 'Sell', stock: 0, originalPrice: '', price: '', expiry: '', description: '', image: '' } })),
+      clearDraft: () =>
+        set(() => ({
+          draftProduct: {
+            name: '',
+            category: '',
+            type: 'Sell',
+            stock: 0,
+            originalPrice: '',
+            price: '',
+            expiry: '',
+            description: '',
+            image: '',
+            discountPercent: 20,
+          },
+        })),
       addProduct: (product) => set((state) => ({ products: [product, ...state.products] })),
       deleteProduct: (id) => set((state) => ({ products: state.products.filter(p => p.id !== id) })),
       updateProduct: (id, updatedData) => set((state) => ({
         products: state.products.map(p => p.id === id ? { ...p, ...updatedData } : p)
-      }))
+      })),
+      addDonation: (donation) => set((state) => ({ donations: [donation, ...state.donations] }))
     }),
     {
       name: 'ecoeat-product-storage',
+      version: 2,
+      migrate: (persistedState, fromVersion) => {
+        if (fromVersion === 0 || !fromVersion) {
+          return {
+            products: INITIAL_PRODUCTS,
+            donations: INITIAL_DONATIONS,
+            draftProduct: {
+              name: '', category: '', type: 'Sell', stock: 0,
+              originalPrice: '', price: '', expiry: '', description: '', image: '',
+              discountPercent: 20,
+            }
+          };
+        }
+        if (fromVersion < 2 && persistedState?.donations?.length) {
+          return {
+            ...persistedState,
+            donations: persistedState.donations.map((d) => {
+              let recipient = d.recipient;
+              let recipientImage = d.recipientImage;
+              if (recipient === 'Green Valley Community Kitchen') {
+                recipient = 'Green Valley Kitchen';
+                recipientImage =
+                  'https://images.unsplash.com/photo-1574314050516-e56593a1fa06?w=400&q=80';
+              }
+              if (recipient === 'Hope Harbor Shelter') {
+                recipientImage =
+                  'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80';
+              }
+              return { ...d, recipient, recipientImage };
+            }),
+          };
+        }
+        return persistedState;
+      }
     }
   )
 );

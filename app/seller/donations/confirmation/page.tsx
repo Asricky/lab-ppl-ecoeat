@@ -1,11 +1,67 @@
 "use client";
 
-import React, { useState } from 'react';
-import { CheckCircle2, Building, Clock, Leaf, ArrowLeft } from 'lucide-react';
+import React, { useState, Suspense } from 'react';
+import { CheckCircle2, Building, Clock, Leaf, ArrowLeft, Phone } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useProductStore } from '@/store/productStore';
 
-export default function DonationConfirmationPage() {
+const organizations = [
+  {
+    id: 1,
+    name: "City Food Bank",
+    distance: "2.4 miles",
+    address: "1200 Market St.",
+    description: "Central hub for urban food distribution, supporting over 50 local pantries and emergency shelters daily.",
+    image: "https://images.unsplash.com/photo-1593113565694-c6f8716c0296?w=400&q=80",
+    mapColor: "bg-orange-200",
+    coords: [-6.200000, 106.816666],
+    phone: "+62 812-3456-7890"
+  },
+  {
+    id: 2,
+    name: "Green Valley Kitchen",
+    distance: "4.8 miles",
+    address: "45 Valley Rd.",
+    description: "Community-led kitchen providing hot, nutritious meals to seniors and low-income families in the valley district.",
+    image: "https://images.unsplash.com/photo-1574314050516-e56593a1fa06?w=400&q=80",
+    mapColor: "bg-green-200",
+    coords: [-6.914744, 107.609810],
+    phone: "+62 856-1111-2222"
+  },
+  {
+    id: 3,
+    name: "Hope Harbor Shelter",
+    distance: "1.2 miles",
+    address: "202 Harbor Ave.",
+    description: "Sustainable shelter program focusing on fresh food access and temporary housing for displaced individuals.",
+    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80",
+    mapColor: "bg-teal-200",
+    coords: [-6.220000, 106.836666],
+    phone: "+62 813-9999-8888"
+  }
+];
+
+function ConfirmationContent() {
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const searchParams = useSearchParams();
+  const orgId = searchParams.get('orgId') || '2';
+  const selectedOrg = organizations.find(org => org.id.toString() === orgId) || organizations[1];
+  const { addDonation } = useProductStore();
+
+  const handleConfirm = () => {
+    addDonation({
+      id: `DON-${Math.floor(Math.random() * 10000)}`,
+      productName: 'ROTI GANDUM (SISA)',
+      weight: '5 porsi',
+      recipient: selectedOrg.name,
+      recipientImage: selectedOrg.image,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      status: 'Scheduled',
+      image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=80"
+    });
+    setIsConfirmed(true);
+  };
 
   if (isConfirmed) {
     return (
@@ -14,8 +70,13 @@ export default function DonationConfirmationPage() {
           <CheckCircle2 size={48} className="text-[#1A5632]" />
         </div>
         <h1 className="text-4xl font-extrabold text-gray-900 mb-4">Donation Confirmed!</h1>
+<<<<<<< HEAD:app/seller/donations/confirmation/page.tsx
         <p className="text-gray-500 text-lg mb-8">Thank you for your contribution. Green Valley Community Kitchen will pick up the items tomorrow at 10:00 AM.</p>
         <Link href="/seller/donations">
+=======
+        <p className="text-gray-500 text-lg mb-8">Thank you for your contribution. {selectedOrg.name} will pick up the items tomorrow at 10:00 AM.</p>
+        <Link href="/dashboard/seller/donations">
+>>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/donations/confirmation/page.tsx
           <button className="bg-[#1A5632] text-white px-8 py-3 rounded-xl font-bold shadow-md hover:bg-[#0F351F] transition-colors">
             View My Donations
           </button>
@@ -33,7 +94,7 @@ export default function DonationConfirmationPage() {
           <span>Back</span>
         </button>
         <div className="text-sm font-bold text-gray-400 flex items-center space-x-2">
-          <span>Listings</span>
+          <span>Donations</span>
           <span>›</span>
           <span className="text-gray-900">Confirm Donation</span>
         </div>
@@ -69,13 +130,17 @@ export default function DonationConfirmationPage() {
           <div>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">RECIPIENT KITCHEN</p>
             <div className="flex items-start space-x-3">
-              <div className="bg-[#E8F3EB] p-2 rounded-lg text-[#1A5632] shrink-0">
-                <Building size={20} />
+              <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-gray-100">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={selectedOrg.image} alt={selectedOrg.name} className="w-full h-full object-cover" />
               </div>
               <div>
-                <h4 className="font-bold text-gray-900">Green Valley Community Kitchen</h4>
+                <h4 className="font-bold text-gray-900">{selectedOrg.name}</h4>
                 <p className="text-[10px] font-bold text-[#1A5632] flex items-center mt-1 uppercase tracking-wider">
                   <CheckCircle2 size={12} className="mr-1" /> Verified Recipient
+                </p>
+                <p className="text-[11px] font-medium text-gray-500 mt-1 flex items-center">
+                  <Phone size={12} className="mr-1" /> {selectedOrg.phone}
                 </p>
               </div>
             </div>
@@ -95,16 +160,10 @@ export default function DonationConfirmationPage() {
           </div>
         </div>
 
-        {/* Impact Badge */}
-        <div className="bg-[#FAFAFA] border border-gray-200 rounded-xl p-4 flex items-center space-x-3 mb-10 text-sm font-medium text-gray-700">
-          <Leaf size={16} className="text-[#1A5632]" />
-          <p>This donation offsets <span className="font-bold text-gray-900">14.2kg</span> of potential methane emissions.</p>
-        </div>
-
         {/* Actions */}
         <div className="flex flex-col items-center">
           <button
-            onClick={() => setIsConfirmed(true)}
+            onClick={handleConfirm}
             className="w-full bg-[#1A5632] hover:bg-[#0F351F] text-white py-4 rounded-xl font-bold text-lg shadow-md transition-colors flex items-center justify-center space-x-2 mb-4"
           >
             <span>Confirm Donation</span>
@@ -122,5 +181,13 @@ export default function DonationConfirmationPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function DonationConfirmationPage() {
+  return (
+    <Suspense fallback={<div className="max-w-3xl mx-auto py-16 text-center text-gray-500 font-bold">Loading donation details...</div>}>
+      <ConfirmationContent />
+    </Suspense>
   );
 }

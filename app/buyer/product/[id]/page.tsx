@@ -1,11 +1,13 @@
 "use client";
-import { useState } from 'react';
-import { Leaf, Clock, MapPin, Box, Utensils, ShieldCheck, ShoppingCart } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { Leaf, Clock, MapPin, Box, Utensils, ShieldCheck, ShoppingCart, Star } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
+import { useReviewStore } from '@/store/reviewStore';
 
 // Mock product
 const product = {
-  id: '8', name: 'Organic Heirloom Tomatoes', price: 5.80, discountPrice: 3.50, discountPercentage: 40, vendor: 'Green Valley Farm', distance: 1.2, expiresIn: '02h 45m', unit: 'per 100gr',
+  id: '8', name: 'Organic Heirloom Tomatoes', price: 5.80, discountPrice: 3.50, discountPercentage: 40, vendor: 'Green Valley Farm', distance: 1.2, expiresIn: '02h 45m', unit: 'per kg',
   images: [
     'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
     'https://images.unsplash.com/photo-1561136594-7f68413baa99?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
@@ -15,17 +17,27 @@ const product = {
 };
 
 export default function ProductDetailPage() {
+  const router = useRouter();
   const [mainImg, setMainImg] = useState(product.images[0]);
   const [qty, setQty] = useState(1);
-  const addItem = useCartStore(state => state.addItem);
+  const [showToast, setShowToast] = useState(false);
+  const addItem = useCartStore((state) => state.addItem);
+  const allReviews = useReviewStore((state) => state.reviews);
+  const reviews = useMemo(
+    () => allReviews.filter((r: any) => r.productId === product.id),
+    [allReviews]
+  );
+  const avgRating = reviews.length ? (reviews.reduce((acc: any, r: any) => acc + r.rating, 0) / reviews.length).toFixed(1) : 0;
 
   const handleAddToCart = () => {
     addItem({ ...product, quantity: qty, image: product.images[0] });
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
   };
 
   const handleBuyNow = () => {
-    handleAddToCart();
-    window.location.href = '/buyer/checkout';
+    addItem({ ...product, quantity: qty, image: product.images[0] });
+    router.push('/buyer/checkout');
   };
 
   const formatRp = (amount: number) => {
@@ -126,7 +138,6 @@ export default function ProductDetailPage() {
               <span className="w-8 text-center font-bold text-gray-900">{qty}</span>
               <button onClick={() => setQty(qty + 1)} className="px-5 py-2 text-gray-600 hover:text-green-800 transition-colors font-bold text-lg">+</button>
             </div>
-            <p className="text-[10px] text-gray-500 italic mr-auto sm:mr-0 hidden sm:block font-medium">Max 4 per customer due to limited surplus stock</p>
             
             <div className="flex w-full flex-col sm:flex-row gap-3 ml-auto sm:justify-end mt-4 sm:mt-0">
               <button 
@@ -143,6 +154,44 @@ export default function ProductDetailPage() {
               </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Customer Reviews */}
+      <div className="mb-16">
+        <div className="flex items-center space-x-4 mb-8">
+          <h2 className="text-3xl font-extrabold text-gray-900">Customer Reviews</h2>
+          <div className="bg-[#eef3e8] border border-[#d4dec4] px-4 py-2 rounded-xl flex items-center space-x-2 shadow-sm">
+            <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+            <span className="font-extrabold text-gray-900 text-lg">{avgRating}<span className="text-sm text-gray-500 font-medium">/5</span></span>
+            <span className="text-sm text-gray-500 font-medium ml-2">({reviews.length} reviews)</span>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {reviews.map((rev: any) => (
+            <div key={rev.id} className="bg-white rounded-3xl p-6 border border-[#eef3e8] shadow-sm">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h4 className="font-extrabold text-gray-900 text-base">{rev.userName}</h4>
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">
+                    {new Date(rev.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </p>
+                </div>
+                <div className="flex space-x-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className={`w-4 h-4 ${i < rev.rating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`} />
+                  ))}
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 leading-relaxed font-medium">"{rev.comment}"</p>
+            </div>
+          ))}
+          {reviews.length === 0 && (
+            <div className="col-span-full bg-[#f4f7ed] rounded-3xl p-8 border border-[#d4dec4] text-center shadow-sm">
+              <p className="text-gray-500 font-medium text-sm">Belum ada ulasan untuk produk ini.</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -165,6 +214,12 @@ export default function ProductDetailPage() {
           <p className="text-sm text-gray-600 leading-relaxed font-medium">Inspected daily by our regional advocates to ensure that 'near expiry' never means 'low quality'.</p>
         </div>
       </div>
+      {showToast && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-green-800 text-white px-6 py-3 rounded-full shadow-xl font-bold flex items-center z-50 animate-bounce">
+          <ShoppingCart className="w-5 h-5 mr-2" />
+          Produk berhasil ditambahkan ke keranjang!
+        </div>
+      )}
     </div>
   );
 }

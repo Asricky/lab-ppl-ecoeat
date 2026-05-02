@@ -1,63 +1,111 @@
 "use client";
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { LayoutDashboard, ShoppingBag, Heart, Truck, User, X } from 'lucide-react';
 
-export default function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (val: boolean) => void }) {
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { ClipboardList, Heart, LayoutDashboard, Leaf, ShoppingBag, Truck, User, X } from "lucide-react";
+
+type SidebarProps = {
+  desktopCollapsed: boolean;
+  mobileOpen: boolean;
+  onCloseMobile: () => void;
+};
+
+export default function Sidebar({ desktopCollapsed, mobileOpen, onCloseMobile }: SidebarProps) {
   const pathname = usePathname();
-  
+
   const links = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/buyer' },
-    { name: 'Explore', icon: ShoppingBag, path: '/buyer/explore' },
-    { name: 'Orders', icon: ShoppingBag, path: '/buyer/orders' },
-    { name: 'Saved Items', icon: Heart, path: '/buyer/saved' },
-    { name: 'Tracking', icon: Truck, path: '/buyer/tracking' },
-    { name: 'Profile', icon: User, path: '/buyer/profile' },
+    { name: "Dashboard", icon: LayoutDashboard, path: "/buyer" },
+    { name: "Explore", icon: ShoppingBag, path: "/buyer/explore" },
+    { name: "Orders", icon: ClipboardList, path: "/buyer/orders" },
+    { name: "Saved Items", icon: Heart, path: "/buyer/saved" },
+    { name: "Tracking", icon: Truck, path: "/buyer/tracking" },
+    { name: "Profile", icon: User, path: "/buyer/profile" },
   ];
+
+  const rail = desktopCollapsed;
 
   return (
     <>
-      {/* Overlay for mobile */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setIsOpen(false)}
+      {mobileOpen && (
+        <div
+          role="presentation"
+          className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-40 lg:hidden transition-opacity duration-300"
+          onClick={onCloseMobile}
         />
       )}
-      
-      <div className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-[#eef3e8] border-r border-[#d4dec4] transform transition-transform duration-300 ease-in-out z-50 flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="p-6 flex justify-between items-center">
-          <div>
-            <div className="flex items-center text-green-800 font-extrabold text-xl">
-              <svg className="w-8 h-8 mr-2 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-                 <path d="M12 6c-3.31 0-6 2.69-6 6h12c0-3.31-2.69-6-6-6z"/>
-              </svg>
-              ECOEAT
-            </div>
-            <p className="text-xs text-gray-500 mt-1 font-medium">Sustainable Buyer</p>
-          </div>
-          <button className="lg:hidden text-gray-600" onClick={() => setIsOpen(false)}>
+
+      <aside
+        className={[
+          "fixed lg:sticky top-0 left-0 h-screen z-50 flex flex-col shrink-0",
+          "bg-[#eef3e8] border-r border-[#d4dec4]",
+          "transition-[transform,width,padding] duration-300 ease-out",
+          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          rail ? "lg:w-[4.75rem] lg:px-0" : "lg:w-64",
+          "w-64 max-lg:shadow-xl",
+        ].join(" ")}
+      >
+        <div
+          className={`p-4 flex justify-between items-center border-b border-[#d4dec4]/60 shrink-0 ${
+            rail ? "lg:flex-col lg:gap-4 lg:border-0 lg:py-6" : ""
+          }`}
+        >
+          <Link
+            href="/buyer"
+            className={`flex items-center gap-2 text-green-800 font-extrabold tracking-tight ${
+              rail ? "lg:flex-col lg:justify-center w-full lg:gap-1" : ""
+            }`}
+            title="EcoEat"
+          >
+            {rail ? (
+              <Leaf className="w-10 h-10 text-green-600 shrink-0" strokeWidth={2} />
+            ) : (
+              <>
+                <Leaf className="w-8 h-8 text-green-600 shrink-0" strokeWidth={2} />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-lg leading-none">EcoEat</span>
+                  <span className="text-[10px] font-medium text-gray-500 mt-0.5 truncate">Buyer</span>
+                </div>
+              </>
+            )}
+          </Link>
+          <button
+            type="button"
+            className="lg:hidden text-gray-600 hover:text-green-700 p-1 rounded-lg hover:bg-white/60"
+            onClick={onCloseMobile}
+            aria-label="Close menu"
+          >
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <nav className="flex-1 px-4 py-4 space-y-2">
+        <nav className={`flex-1 overflow-y-auto py-3 px-2 space-y-1 ${rail ? "lg:px-1.5 lg:py-4" : "px-2"}`}>
           {links.map((link) => {
-            const isActive = pathname === link.path;
+            const active =
+              link.path === "/buyer"
+                ? pathname === "/buyer"
+                : pathname === link.path || pathname.startsWith(`${link.path}/`);
+            const Icon = link.icon;
             return (
-              <Link 
-                key={link.name} 
+              <Link
+                key={link.path}
                 href={link.path}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors ${isActive ? 'bg-white text-green-800 font-bold shadow-[0_2px_10px_rgba(0,0,0,0.02)]' : 'text-gray-600 hover:bg-white/50 hover:text-green-800 font-medium'}`}
+                title={rail ? link.name : undefined}
+                onClick={() => onCloseMobile()}
+                className={[
+                  "flex items-center rounded-xl transition-all duration-200",
+                  rail ? "justify-center lg:px-2 lg:py-3" : "space-x-3 px-4 py-3",
+                  active
+                    ? "bg-green-800 text-white font-bold shadow-md"
+                    : "text-gray-600 hover:bg-white/70 hover:text-green-900 font-semibold",
+                ].join(" ")}
               >
-                <link.icon className="w-5 h-5" />
-                <span>{link.name}</span>
+                <Icon className={`w-5 h-5 shrink-0 ${active ? "text-white" : ""}`} />
+                {!rail && <span>{link.name}</span>}
               </Link>
-            )
+            );
           })}
         </nav>
-      </div>
+      </aside>
     </>
   );
 }

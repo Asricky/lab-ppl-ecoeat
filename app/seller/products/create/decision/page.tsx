@@ -1,22 +1,16 @@
 "use client";
 
-import React, { useState } from 'react';
-import { ShoppingCart, HeartHandshake, CheckCircle2, Leaf, Bell, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import { useProductStore } from '@/store/productStore';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-export default function SellOrDonateDecision() {
-  const { draftProduct, setDraftProduct } = useProductStore();
-  const [selectedOption, setSelectedOption] = useState<'sell' | 'donate'>(
-    draftProduct.type.toLowerCase() === 'donate' ? 'donate' : 'sell'
-  );
-
-  const handleSelectOption = (option: 'sell' | 'donate') => {
-    setSelectedOption(option);
-    setDraftProduct({ type: option === 'sell' ? 'Sell' : 'Donate' });
-  };
-
+/** Sell/Donate split removed — commercial products start at /products/create */
+export default function DecisionRedirectPage() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/dashboard/seller/products/create');
+  }, [router]);
   return (
+<<<<<<< HEAD:app/seller/products/create/decision/page.tsx
     <div className="min-h-[calc(100vh-4rem)] bg-[#F3F8F2] -m-8 p-8 flex flex-col">
       {/* Top Navbar specifically for this flow */}
       <header className="flex justify-between items-center mb-16 max-w-6xl mx-auto w-full">
@@ -133,6 +127,10 @@ export default function SellOrDonateDecision() {
           <p className="mt-6 text-xs font-bold text-gray-500 tracking-widest uppercase">Step 2 of 4: Distribution Intent</p>
         </div>
       </div>
+=======
+    <div className="max-w-xl mx-auto py-20 text-center text-gray-500 font-medium">
+      Mengalihkan…
+>>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/products/create/decision/page.tsx
     </div>
   );
 }

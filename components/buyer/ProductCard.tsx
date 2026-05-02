@@ -1,9 +1,12 @@
+"use client";
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Heart, ShoppingCart, MapPin, Clock } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useState, useEffect } from 'react';
 
 export default function ProductCard({ product }: { product: any }) {
+  const router = useRouter();
   const addItem = useCartStore(state => state.addItem);
   const [isLoved, setIsLoved] = useState(false);
 
@@ -28,17 +31,28 @@ export default function ProductCard({ product }: { product: any }) {
   };
 
   const formatRp = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount * 10000);
+    return 'Rp' + (amount * 10000).toLocaleString('id-ID');
   };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
-    addItem({ ...product, quantity: 1 });
+    if (addItem) {
+      addItem({ ...product, quantity: 1 });
+      alert("Ditambahkan ke keranjang!");
+    }
+  };
+
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (addItem) {
+      addItem({ ...product, quantity: 1 });
+    }
+    router.push('/buyer/checkout');
   };
 
   return (
-    <Link href={`/buyer/product/${product.id}`} className="block bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-[#eef3e8] relative group">
-      <div className="relative h-48 w-full bg-[#f4f7ed]">
+    <Link href={`/buyer/product/${product.id}`} className="block bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-[#eef3e8] relative group flex flex-col h-full">
+      <div className="relative h-48 w-full bg-[#f4f7ed] flex-shrink-0">
         <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
         <div className="absolute top-4 left-4 bg-[#dc2626] text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
           -{product.discountPercentage}%
@@ -47,7 +61,7 @@ export default function ProductCard({ product }: { product: any }) {
           <Heart className={`w-4 h-4 ${isLoved ? 'fill-current' : ''}`} />
         </button>
       </div>
-      <div className="p-5">
+      <div className="p-5 flex flex-col flex-grow">
         <div className="flex items-center text-[10px] font-bold text-red-600 mb-2 uppercase tracking-wider">
           <Clock className="w-3 h-3 mr-1" /> EXPIRES IN {product.expiresIn}
         </div>
@@ -56,17 +70,28 @@ export default function ProductCard({ product }: { product: any }) {
           <MapPin className="w-3 h-3 mr-1" />
           {product.vendor} • {product.distance} miles
         </div>
-        <div className="flex items-center justify-between mt-auto">
+        
+        <div className="mt-auto flex flex-col gap-4">
           <div>
             <span className="text-gray-400 line-through text-xs font-medium">{formatRp(product.price)}</span>
             <div className="text-xl font-extrabold text-green-700">{formatRp(product.discountPrice)}</div>
           </div>
-          <button 
-            onClick={handleAddToCart}
-            className="bg-green-700 hover:bg-green-800 text-white p-3 rounded-xl transition-colors shadow-md hover:shadow-lg"
-          >
-            <ShoppingCart className="w-5 h-5" />
-          </button>
+          
+          <div className="flex gap-2 w-full">
+            <button 
+              onClick={handleAddToCart}
+              className="flex-1 border border-green-700 text-green-700 hover:bg-green-50 font-bold py-2 rounded-xl transition-colors flex items-center justify-center gap-1 group/btn"
+            >
+              <ShoppingCart className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+              <span className="text-sm">Cart</span>
+            </button>
+            <button 
+              onClick={handleBuyNow}
+              className="flex-1 bg-green-700 hover:bg-green-800 text-white font-bold py-2 rounded-xl transition-colors shadow-md text-sm"
+            >
+              Buy Now
+            </button>
+          </div>
         </div>
       </div>
     </Link>

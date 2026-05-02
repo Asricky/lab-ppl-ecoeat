@@ -25,13 +25,6 @@ export default function SettingsPage() {
               <span>Store Profile</span>
             </button>
             <button 
-              onClick={() => setActiveTab('verification')}
-              className={`flex items-center space-x-3 px-6 py-4 text-left font-bold transition-colors border-l-4 ${activeTab === 'verification' ? 'border-[#1A5632] bg-[#E8F3EB] text-[#1A5632]' : 'border-transparent text-gray-600 hover:bg-gray-50'}`}
-            >
-              <Shield size={20} />
-              <span>Business Verification</span>
-            </button>
-            <button 
               onClick={() => setActiveTab('security')}
               className={`flex items-center space-x-3 px-6 py-4 text-left font-bold transition-colors border-l-4 ${activeTab === 'security' ? 'border-[#1A5632] bg-[#E8F3EB] text-[#1A5632]' : 'border-transparent text-gray-600 hover:bg-gray-50'}`}
             >
@@ -73,47 +66,6 @@ export default function SettingsPage() {
                 <div className="pt-4">
                   <button className="bg-[#1A5632] hover:bg-[#0F351F] text-white px-6 py-3 rounded-xl font-bold shadow-sm transition-colors">
                     Save Changes
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'verification' && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-6 border-b border-gray-100 pb-4">Business Verification</h2>
-              
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start space-x-3 mb-8">
-                <AlertCircle size={20} className="text-amber-600 mt-0.5" />
-                <div>
-                  <h4 className="font-bold text-amber-800 text-sm">Action Required: Update Legal Documents</h4>
-                  <p className="text-sm text-amber-700 mt-1 font-medium">Your current NIB (Nomor Induk Berusaha) is expiring soon. Please upload a renewed document to maintain your verified seller status.</p>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Document Type</label>
-                  <select className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5632] focus:border-[#1A5632] outline-none transition-colors bg-white font-medium text-gray-700">
-                    <option>NIB (Nomor Induk Berusaha)</option>
-                    <option>Izin Usaha Mikro Kecil (IUMK)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Upload Document</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-2xl p-8 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer group">
-                    <div className="bg-white p-3 rounded-full text-gray-400 mb-3 group-hover:text-[#1A5632] transition-colors shadow-sm">
-                      <Upload size={24} />
-                    </div>
-                    <p className="text-gray-700 font-bold text-sm mb-1">Click to upload or drag and drop</p>
-                    <p className="text-xs text-gray-500 font-medium">PDF, JPG, PNG (Max 5MB)</p>
-                  </div>
-                </div>
-
-                <div className="pt-4">
-                  <button className="bg-[#1A5632] hover:bg-[#0F351F] text-white px-6 py-3 rounded-xl font-bold shadow-sm transition-colors">
-                    Submit for Verification
                   </button>
                 </div>
               </div>

@@ -1,11 +1,28 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Wallet, ArrowUpRight, ArrowDownRight, RefreshCcw, ShieldCheck, Download, History, ChevronRight, ArrowLeft, CheckCircle2, X } from 'lucide-react';
 import Link from 'next/link';
 
 export default function WalletPage() {
   const [modalAction, setModalAction] = useState<string | null>(null);
+  const [availableBalance, setAvailableBalance] = useState(0);
+  const [escrowBalance, setEscrowBalance] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchWallet = async () => {
+      setIsLoading(true);
+      
+      // Simulating network delay instead of fetching from non-existent local server
+      setTimeout(() => {
+        setAvailableBalance(1250000);
+        setEscrowBalance(850000);
+        setIsLoading(false);
+      }, 500);
+    };
+    fetchWallet();
+  }, []);
 
   const transactions = [
     { id: 'TRX-9921', type: 'Sale', amount: '+Rp 25.000', status: 'Completed', date: 'Today, 14:30', desc: 'Order #ORD-001' },
@@ -37,8 +54,7 @@ export default function WalletPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        {/* Main Balance Card */}
-        <div className="lg:col-span-2 bg-[#1A5632] rounded-3xl p-8 border border-[#144226] text-white shadow-lg relative overflow-hidden">
+        <div className="lg:col-span-3 bg-[#1A5632] rounded-3xl p-8 border border-[#144226] text-white shadow-lg relative overflow-hidden">
           <div className="absolute right-0 top-0 opacity-10 transform translate-x-12 -translate-y-12">
             <Wallet size={180} />
           </div>
@@ -46,7 +62,7 @@ export default function WalletPage() {
           <div className="relative z-10 flex flex-col h-full justify-between">
             <div>
               <p className="text-sm font-bold text-[#A3D9B5] uppercase tracking-wider mb-2">Available Balance</p>
-              <h2 className="text-5xl font-extrabold text-white mb-2">Rp 1.250.000</h2>
+              <h2 className="text-5xl font-extrabold text-white mb-2">{isLoading ? '...' : `Rp ${availableBalance.toLocaleString('id-ID')}`}</h2>
               <p className="text-sm font-medium text-gray-300">Ready for withdrawal to your bank account.</p>
             </div>
             
@@ -54,13 +70,11 @@ export default function WalletPage() {
               <button onClick={() => setModalAction("Withdrawal Requested")} className="bg-white text-[#1A5632] px-6 py-3 rounded-xl font-bold hover:bg-gray-100 transition-colors shadow-sm">
                 Withdraw Funds
               </button>
-              <button onClick={() => setModalAction("Top Up Form Opened")} className="bg-[#2A7A4A] text-white border border-[#3A8A5A] px-6 py-3 rounded-xl font-bold hover:bg-[#3A8A5A] transition-colors">
-                Top Up
-              </button>
             </div>
           </div>
         </div>
 
+<<<<<<< HEAD:app/seller/wallet/page.tsx
         {/* Escrow Card */}
         <div className="bg-[#F0F7FF] rounded-3xl p-8 border border-[#D1E5FE] flex flex-col justify-between shadow-sm">
           <div>
@@ -79,6 +93,8 @@ export default function WalletPage() {
             </button>
           </Link>
         </div>
+=======
+>>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/wallet/page.tsx
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -165,7 +181,7 @@ export default function WalletPage() {
                 <p className="text-sm text-gray-500 mb-6 font-medium">Transfer available balance to your bank.</p>
                 <div className="bg-[#F3F8F2] p-4 rounded-xl mb-6">
                   <p className="text-xs font-bold text-gray-500 uppercase">Available to withdraw</p>
-                  <p className="text-3xl font-extrabold text-[#1A5632]">Rp 1.250.000</p>
+                  <p className="text-3xl font-extrabold text-[#1A5632]">{isLoading ? '...' : `Rp ${availableBalance.toLocaleString('id-ID')}`}</p>
                 </div>
                 <div className="space-y-4 mb-6">
                   <div>
@@ -185,24 +201,6 @@ export default function WalletPage() {
               </div>
             )}
 
-            {modalAction === "Top Up Form Opened" && (
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Top Up Balance</h3>
-                <p className="text-sm text-gray-500 mb-6 font-medium">Add funds to pay for platform fees or buy products.</p>
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                  {['Rp 50.000', 'Rp 100.000', 'Rp 200.000', 'Rp 500.000'].map(amt => (
-                    <button key={amt} className="border border-gray-200 hover:border-[#1A5632] hover:bg-[#F3F8F2] text-gray-700 font-bold py-3 rounded-xl transition-all">{amt}</button>
-                  ))}
-                </div>
-                <div className="mb-6">
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Custom Amount</label>
-                  <input type="text" placeholder="Rp 0" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-lg font-bold text-gray-900 focus:ring-2 focus:ring-[#1A5632] outline-none" />
-                </div>
-                <button onClick={() => setModalAction("Success")} className="w-full bg-[#1A5632] hover:bg-[#0F351F] text-white px-4 py-3.5 rounded-xl font-bold transition-colors shadow-sm">
-                  Proceed to Payment
-                </button>
-              </div>
-            )}
 
             {modalAction === "Add Bank Account Dialog Opened" && (
               <div>

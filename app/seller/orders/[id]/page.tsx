@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Leaf, CheckCircle2, Navigation, MessageCircle, MapPin } from 'lucide-react';
+import { Leaf, CheckCircle2, Navigation, MessageCircle, MapPin, ArrowLeft } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 const MapContainer = dynamic(() => import('@/components/MapContainer'), {
@@ -48,9 +48,15 @@ export default function OrderTrackingPage() {
         ]} />
         
         {/* Map UI Elements (Floating) */}
-        <div className="absolute top-6 left-6 bg-white rounded-full px-4 py-2 shadow-md flex items-center space-x-2 z-10 pointer-events-none">
-          <Leaf size={16} className="text-[#1A5632]" />
-          <span className="text-sm font-bold text-gray-900">1.2kg CO2 saved this delivery</span>
+        <div className="absolute top-6 left-6 flex space-x-2 z-10 pointer-events-auto">
+          <button onClick={() => window.history.back()} className="bg-white rounded-full px-4 py-2 shadow-md flex items-center space-x-2 text-gray-700 hover:text-[#1A5632] hover:bg-gray-50 transition-colors font-bold text-sm cursor-pointer">
+            <ArrowLeft size={16} />
+            <span>Back</span>
+          </button>
+          <div className="bg-white rounded-full px-4 py-2 shadow-md flex items-center space-x-2 pointer-events-none">
+            <Leaf size={16} className="text-[#1A5632]" />
+            <span className="text-sm font-bold text-gray-900">Est. Arrival: 15 Mins</span>
+          </div>
         </div>
       </div>
 

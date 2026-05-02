@@ -1,73 +1,16 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Search, MapPin, ChevronDown, Leaf, Verified, Map, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import dynamic from 'next/dynamic';
-import 'leaflet/dist/leaflet.css';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-const MapContainer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.MapContainer),
-  { ssr: false, loading: () => <div className="h-24 bg-gray-100 animate-pulse rounded-xl" /> }
-);
-const TileLayer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.TileLayer),
-  { ssr: false }
-);
-const Marker = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Marker),
-  { ssr: false }
-);
-
-export default function SelectDonationDestination() {
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const organizations = [
-    {
-      id: 1,
-      name: "City Food Bank",
-      distance: "2.4 miles",
-      address: "1200 Market St.",
-      description: "Central hub for urban food distribution, supporting over 50 local pantries and emergency shelters daily.",
-      image: "https://images.unsplash.com/photo-1593113565694-c6f8716c0296?w=400&q=80",
-      mapColor: "bg-orange-200",
-      coords: [-6.200000, 106.816666]
-    },
-    {
-      id: 2,
-      name: "Green Valley Kitchen",
-      distance: "4.8 miles",
-      address: "45 Valley Rd.",
-      description: "Community-led kitchen providing hot, nutritious meals to seniors and low-income families in the valley district.",
-      image: "https://images.unsplash.com/photo-1574314050516-e56593a1fa06?w=400&q=80",
-      mapColor: "bg-green-200",
-      coords: [-6.210000, 106.826666]
-    },
-    {
-      id: 3,
-      name: "Hope Harbor Shelter",
-      distance: "1.2 miles",
-      address: "202 Harbor Ave.",
-      description: "Sustainable shelter program focusing on fresh food access and temporary housing for displaced individuals.",
-      image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80",
-      mapColor: "bg-teal-200",
-      coords: [-6.220000, 106.836666]
-    }
-  ];
-
-  // Fix leaflet marker icon issue in browser
-  React.useEffect(() => {
-    import('leaflet').then((leaflet) => {
-      delete leaflet.Icon.Default.prototype._getIconUrl;
-      leaflet.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      });
-    });
-  }, []);
-
+/** Diganti oleh wizard `/donations/new` — pertahankan route untuk tautan lama. */
+export default function SelectDonationRedirectPage() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/dashboard/seller/donations/new');
+  }, [router]);
   return (
+<<<<<<< HEAD:app/seller/donations/select/page.tsx
     <div className="max-w-7xl mx-auto pb-12">
       <div className="mb-8">
         <p className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-2">Surplus Management</p>
@@ -186,6 +129,10 @@ export default function SelectDonationDestination() {
         </Link>
         <div></div>
       </div>
+=======
+    <div className="max-w-xl mx-auto py-20 text-center text-gray-500 font-medium px-4">
+      Mengalihkan ke alur donasi baru…
+>>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/donations/select/page.tsx
     </div>
   );
 }

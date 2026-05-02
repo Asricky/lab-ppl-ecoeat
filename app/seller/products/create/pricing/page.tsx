@@ -1,35 +1,16 @@
 "use client";
 
-import React from 'react';
-import { Rocket, MapPin, Heart, Clock, Leaf, Info, ShieldCheck, ArrowLeft, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
-import { useProductStore } from '@/store/productStore';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-export default function ConfigurePricingPage() {
-  const { draftProduct, setDraftProduct } = useProductStore();
-  
-  const origVal = parseInt(draftProduct.originalPrice?.replace(/\D/g, '') || '50000');
-  const discVal = parseInt(draftProduct.price?.replace(/\D/g, '') || '30000');
-  const currentPercent = origVal && discVal ? Math.round(((origVal - discVal) / origVal) * 100) : 40;
-
-  const handlePercentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let percent = parseInt(e.target.value);
-    if (isNaN(percent)) percent = 0;
-    if (percent > 100) percent = 100;
-    if (percent < 0) percent = 0;
-    
-    const orig = parseInt(draftProduct.originalPrice?.replace(/\D/g, '') || '50000');
-    const newPrice = Math.round(orig * (1 - percent / 100));
-    setDraftProduct({ price: `Rp ${newPrice.toLocaleString('id-ID')}` });
-  };
-
-  const formatPriceInput = (value: string) => {
-    const num = parseInt(value.replace(/\D/g, ''));
-    if (isNaN(num)) return '';
-    return num.toLocaleString('id-ID');
-  };
-
+/** Harga kini digabung di /products/create — pertahankan route untuk bookmark lama. */
+export default function PricingRedirectPage() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/dashboard/seller/products/create');
+  }, [router]);
   return (
+<<<<<<< HEAD:app/seller/products/create/pricing/page.tsx
     <div className="max-w-6xl mx-auto h-[calc(100vh-8rem)] flex flex-col">
       {/* Header with nav logic */}
       <div className="flex items-center justify-between mb-8">
@@ -252,6 +233,10 @@ export default function ConfigurePricingPage() {
           </div>
         </Link>
       </div>
+=======
+    <div className="max-w-xl mx-auto py-20 text-center text-gray-500 font-medium">
+      Mengalihkan ke form produk…
+>>>>>>> repo-sridamai/Sridamai:app/dashboard/seller/products/create/pricing/page.tsx
     </div>
   );
 }

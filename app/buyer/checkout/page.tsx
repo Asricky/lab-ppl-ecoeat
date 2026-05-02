@@ -1,14 +1,45 @@
 "use client";
-import { Truck, Store, MapPin, Wallet, Leaf, Info } from 'lucide-react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Truck, Store, MapPin, Wallet, Leaf, Info, CheckCircle } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
+import { useEcoPayStore } from '@/store/ecoPayStore';
 
 export default function CheckoutPage() {
-  const { items } = useCartStore();
+  const router = useRouter();
+  const { items, clearCart } = useCartStore();
+  const { balance, deductBalance } = useEcoPayStore();
+  const [isSuccess, setIsSuccess] = useState(false);
   const total = items.reduce((acc, item) => acc + (item.discountPrice * item.quantity), 0);
 
   const formatRp = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount * 10000);
+    return 'Rp' + (amount * 10000).toLocaleString('id-ID');
   };
+
+  const handlePayNow = () => {
+    if (balance < total * 10000) {
+      alert("Saldo EcoPay tidak mencukupi!");
+      return;
+    }
+    deductBalance(total * 10000, "Checkout Order");
+    setIsSuccess(true);
+    if (clearCart) clearCart();
+    setTimeout(() => {
+      router.push('/buyer/tracking');
+    }, 2500);
+  };
+
+  if (isSuccess) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center">
+        <div className="animate-bounce mb-6">
+          <CheckCircle className="w-32 h-32 text-green-600 drop-shadow-lg" />
+        </div>
+        <h1 className="text-4xl font-extrabold text-gray-900 mb-2 animate-pulse">Order Successfully Made</h1>
+        <p className="text-lg text-gray-600 font-medium">Redirecting to tracking...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto pb-12">
@@ -92,7 +123,7 @@ export default function CheckoutPage() {
                   <span className="text-xs font-bold text-green-100 tracking-widest uppercase">ECOPAY WALLET</span>
                   <Wallet className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-3xl font-extrabold mb-10">Organic Precision Balance</h3>
+                <h3 className="text-3xl font-extrabold mb-10">Rp{(balance).toLocaleString('id-ID')}</h3>
                 
                 <div className="flex justify-between items-end mt-auto">
                   <div className="bg-white/20 backdrop-blur rounded-2xl p-3 px-4 flex items-center space-x-3 border border-white/30">
@@ -104,7 +135,7 @@ export default function CheckoutPage() {
                       <p className="font-bold text-sm">1.2kg Carbon Offset Today</p>
                     </div>
                   </div>
-                  <button className="bg-white text-green-800 font-bold px-6 py-3 rounded-full hover:bg-green-50 transition-colors shadow-sm flex items-center">
+                  <button onClick={() => router.push('/buyer/profile?tab=topup')} className="bg-white text-green-800 font-bold px-6 py-3 rounded-full hover:bg-green-50 transition-colors shadow-sm flex items-center">
                     <span className="mr-2 text-xl">+</span> Top Up
                   </button>
                 </div>
@@ -159,6 +190,7 @@ export default function CheckoutPage() {
             </div>
 
             <button 
+              onClick={handlePayNow}
               disabled={items.length === 0}
               className="w-full bg-[#388e3c] hover:bg-[#2e7d32] text-white font-bold py-4 rounded-xl transition-colors shadow-md flex items-center justify-center disabled:opacity-50"
             >

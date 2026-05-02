@@ -187,7 +187,6 @@ export default function RegisterCourierPage() {
                   <option value="Motorcycle">Motorcycle</option>
                   <option value="Car">Car</option>
                   <option value="Van">Van</option>
-                  <option value="Bicycle">Bicycle</option>
                 </select>
               </div>
               <div>
