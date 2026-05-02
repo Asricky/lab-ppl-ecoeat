@@ -63,7 +63,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         <nav className="px-4 mt-6 space-y-2">
           {menuItems.map((item, index) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || (item.label === 'Tasks' && pathname.startsWith('/dashboard/kurir/tasks'));
+            const isActive = pathname.startsWith(item.href);
             return (
               <Link
                 key={index}

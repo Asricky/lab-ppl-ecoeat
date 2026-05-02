@@ -1,4 +1,4 @@
-export type OrderStatus = 'assigned' | 'in_progress' | 'completed' | 'cancelled' | 'failed';
+export type OrderStatus = 'pending' | 'assigned' | 'in_progress' | 'completed' | 'cancelled' | 'failed';
 
 export interface OrderData {
   id: string;
