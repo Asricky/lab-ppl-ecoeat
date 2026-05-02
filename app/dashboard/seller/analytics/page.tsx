@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -20,16 +20,46 @@ export default function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState('This Month');
   const [showReportModal, setShowReportModal] = useState(false);
 
-  // Dummy Chart Data
-  const weeklyData = [
-    { day: 'Mon', revenue: 40, donations: 20 },
-    { day: 'Tue', revenue: 60, donations: 30 },
-    { day: 'Wed', revenue: 45000, donations: 50 },
-    { day: 'Thu', revenue: 80000, donations: 40 },
-    { day: 'Fri', revenue: 100000, donations: 60 },
-    { day: 'Sat', revenue: 120000, donations: 80 },
-    { day: 'Sun', revenue: 90000, donations: 50 },
-  ];
+  // Dynamic Data States
+  const [weeklyData, setWeeklyData] = useState([
+    { day: 'Mon', revenue: 0, donations: 0 },
+    { day: 'Tue', revenue: 0, donations: 0 },
+    { day: 'Wed', revenue: 0, donations: 0 },
+    { day: 'Thu', revenue: 0, donations: 0 },
+    { day: 'Fri', revenue: 0, donations: 0 },
+    { day: 'Sat', revenue: 0, donations: 0 },
+    { day: 'Sun', revenue: 0, donations: 0 },
+  ]);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [escrowBalance, setEscrowBalance] = useState(0);
+  const [mealsSaved, setMealsSaved] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch real-time data from Laravel Backend
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      
+      // Simulating network delay instead of fetching from non-existent local server
+      setTimeout(() => {
+        setTotalRevenue(4250000);
+        setEscrowBalance(850000);
+        setMealsSaved(1240);
+        setWeeklyData([
+          { day: 'Mon', revenue: 40000, donations: 20 },
+          { day: 'Tue', revenue: 60000, donations: 30 },
+          { day: 'Wed', revenue: 45000, donations: 50 },
+          { day: 'Thu', revenue: 80000, donations: 40 },
+          { day: 'Fri', revenue: 100000, donations: 60 },
+          { day: 'Sat', revenue: 120000, donations: 80 },
+          { day: 'Sun', revenue: 90000, donations: 50 },
+        ]);
+        setIsLoading(false);
+      }, 500);
+    };
+    
+    fetchData();
+  }, [timeRange]);
 
   const handleExportCSV = () => {
     const headers = ['Day,Revenue(Rp),Donations(kg)'];
@@ -103,7 +133,7 @@ export default function AnalyticsPage() {
             </span>
           </div>
           <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Total Revenue</p>
-          <h3 className="text-2xl font-extrabold text-gray-900">Rp 4.250.000</h3>
+          <h3 className="text-2xl font-extrabold text-gray-900">{isLoading ? '...' : `Rp ${totalRevenue.toLocaleString('id-ID')}`}</h3>
         </div>
 
         <div className="bg-[#1A5632] rounded-2xl p-6 border border-[#144226] shadow-sm text-white relative overflow-hidden">
@@ -120,7 +150,7 @@ export default function AnalyticsPage() {
               </span>
             </div>
             <p className="text-sm font-bold text-[#A3D9B5] uppercase tracking-wider mb-1">Meals Saved</p>
-            <h3 className="text-2xl font-extrabold text-white">1,240 kg</h3>
+            <h3 className="text-2xl font-extrabold text-white">{isLoading ? '...' : `${mealsSaved.toLocaleString('id-ID')} kg`}</h3>
           </div>
         </div>
 
@@ -141,14 +171,14 @@ export default function AnalyticsPage() {
             </div>
           </div>
           <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Escrow Balance</p>
-          <h3 className="text-2xl font-extrabold text-gray-900">Rp 850.000</h3>
+          <h3 className="text-2xl font-extrabold text-gray-900">{isLoading ? '...' : `Rp ${escrowBalance.toLocaleString('id-ID')}`}</h3>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         {/* Chart Section */}
         <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col">
-          <h3 className="text-lg font-bold text-gray-900 mb-6">Revenue vs Impact Overview</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-6">Impact Overview</h3>
           
           <div className="flex-1 relative min-h-[250px] w-full flex items-end pt-8">
             {/* Y Axis Grid Lines */}
@@ -165,25 +195,11 @@ export default function AnalyticsPage() {
             {/* SVG Line Chart */}
             <svg className="absolute inset-0 h-full w-full overflow-visible pb-8" preserveAspectRatio="none">
               <defs>
-                <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2" />
-                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
-                </linearGradient>
                 <linearGradient id="donationGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#1A5632" stopOpacity="0.2" />
                   <stop offset="100%" stopColor="#1A5632" stopOpacity="0" />
                 </linearGradient>
               </defs>
-              
-              {/* Revenue Area & Line */}
-              <path 
-                d="M 5% 70% C 20% 55%, 35% 65%, 50% 40% C 65% 20%, 80% 5%, 95% 30% L 95% 100% L 5% 100% Z" 
-                fill="url(#revenueGradient)" 
-              />
-              <path 
-                d="M 5% 70% C 20% 55%, 35% 65%, 50% 40% C 65% 20%, 80% 5%, 95% 30%" 
-                fill="none" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" 
-              />
               
               {/* Donation Area & Line */}
               <path 
@@ -192,7 +208,7 @@ export default function AnalyticsPage() {
               />
               <path 
                 d="M 5% 85% C 20% 75%, 35% 55%, 50% 65% C 65% 45%, 80% 25%, 95% 55%" 
-                fill="none" stroke="#1A5632" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="6 4"
+                fill="none" stroke="#1A5632" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
               />
             </svg>
 
@@ -202,7 +218,7 @@ export default function AnalyticsPage() {
                 <div key={index} className="flex flex-col items-center group relative pointer-events-auto h-full justify-end">
                   {/* Tooltip */}
                   <div className="absolute -top-4 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs font-bold px-3 py-1.5 rounded-lg whitespace-nowrap z-20 shadow-lg pointer-events-none transform -translate-x-1/2 left-1/2">
-                    Rev: Rp {data.revenue.toLocaleString('id-ID')} | Don: {data.donations}kg
+                    {data.donations} kg Saved
                   </div>
                   {/* Hover Line */}
                   <div className="w-px h-full bg-gray-200 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-8 z-0"></div>
@@ -215,13 +231,9 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-center space-x-6 mt-6 pt-6 border-t border-gray-100">
+          <div className="flex items-center justify-center mt-6 pt-6 border-t border-gray-100">
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-              <span className="text-sm font-bold text-gray-600">Revenue (Rp)</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-1 border-b-2 border-dashed border-[#1A5632]"></div>
+              <div className="w-4 h-1 border-b-2 border-[#1A5632]"></div>
               <span className="text-sm font-bold text-gray-600">Donations (kg)</span>
             </div>
           </div>
@@ -275,7 +287,7 @@ export default function AnalyticsPage() {
           </div>
           <div className="p-4 bg-[#E8F3EB] rounded-xl border border-[#D1E8D7]">
             <p className="text-xs font-bold text-[#1A5632] uppercase tracking-wider mb-1">Held in Escrow (Pending Delivery)</p>
-            <h4 className="text-xl font-bold text-[#1A5632]">Rp 850.000</h4>
+            <h4 className="text-xl font-bold text-[#1A5632]">{isLoading ? '...' : `Rp ${escrowBalance.toLocaleString('id-ID')}`}</h4>
             <p className="mt-3 text-xs font-medium text-[#1A5632]/80">Funds release automatically upon buyer confirmation.</p>
           </div>
           <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
@@ -364,12 +376,12 @@ export default function AnalyticsPage() {
                    <Leaf size={120} className="absolute -right-4 -bottom-4 text-white opacity-10" />
                    <div className="relative z-10 grid grid-cols-2 gap-6">
                      <div>
-                       <p className="text-xs font-bold text-[#A3D9B5] uppercase tracking-wider mb-1">CO2 Emissions Prevented</p>
-                       <p className="text-2xl font-bold">3.1 Tonnes</p>
+                       <p className="text-xs font-bold text-[#A3D9B5] uppercase tracking-wider mb-1">Total Meals Provided</p>
+                       <p className="text-2xl font-bold">{isLoading ? '...' : (mealsSaved * 2.5).toLocaleString('id-ID')} Meals</p>
                      </div>
                      <div>
                        <p className="text-xs font-bold text-[#A3D9B5] uppercase tracking-wider mb-1">Equivalent To</p>
-                       <p className="text-xl font-bold">780 Trees Planted</p>
+                       <p className="text-xl font-bold">Feeding {isLoading ? '...' : Math.floor(mealsSaved / 3)} Families</p>
                      </div>
                    </div>
                 </div>

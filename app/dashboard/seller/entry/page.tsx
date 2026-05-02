@@ -54,7 +54,7 @@ export default function SellOrDonateDecision() {
         <div className="text-center mb-16">
           <div className="inline-flex items-center space-x-2 bg-[#E8F3EB] text-[#1A5632] px-4 py-1.5 rounded-full text-xs font-bold mb-6 border border-[#D1E8D7] shadow-sm">
             <Leaf size={14} />
-            <span>YOUR SURPLUS HAS SAVED 42KG OF CO2 THIS WEEK</span>
+            <span>YOUR SURPLUS HAS PROVIDED 42 MEALS THIS WEEK</span>
           </div>
           <h1 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">What do you want to do with this food?</h1>
           <p className="text-gray-500 text-lg max-w-2xl mx-auto font-medium">Select the path for your surplus produce. Every choice contributes to the EcoEat cycle of sustainability.</p>

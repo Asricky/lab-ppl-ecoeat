@@ -21,44 +21,63 @@ const Marker = dynamic(
 
 export default function SelectDonationDestination() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [category, setCategory] = useState('All');
+  const [radius, setRadius] = useState('All');
+  const [totalFoodSaved] = useState(1240); // dynamic kg
 
   const organizations = [
     {
       id: 1,
       name: "City Food Bank",
-      distance: "2.4 miles",
+      category: "Food Bank",
+      distance: 2.4,
+      distanceStr: "2.4 miles",
       address: "1200 Market St.",
       description: "Central hub for urban food distribution, supporting over 50 local pantries and emergency shelters daily.",
       image: "https://images.unsplash.com/photo-1593113565694-c6f8716c0296?w=400&q=80",
       mapColor: "bg-orange-200",
-      coords: [-6.200000, 106.816666]
+      coords: [-6.200000, 106.816666],
+      phone: "+62 812-3456-7890"
     },
     {
       id: 2,
       name: "Green Valley Kitchen",
-      distance: "4.8 miles",
+      category: "Kitchen",
+      distance: 4.8,
+      distanceStr: "4.8 miles",
       address: "45 Valley Rd.",
       description: "Community-led kitchen providing hot, nutritious meals to seniors and low-income families in the valley district.",
       image: "https://images.unsplash.com/photo-1574314050516-e56593a1fa06?w=400&q=80",
       mapColor: "bg-green-200",
-      coords: [-6.210000, 106.826666]
+      coords: [-6.914744, 107.609810],
+      phone: "+62 856-1111-2222"
     },
     {
       id: 3,
       name: "Hope Harbor Shelter",
-      distance: "1.2 miles",
+      category: "Shelter",
+      distance: 1.2,
+      distanceStr: "1.2 miles",
       address: "202 Harbor Ave.",
       description: "Sustainable shelter program focusing on fresh food access and temporary housing for displaced individuals.",
       image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80",
       mapColor: "bg-teal-200",
-      coords: [-6.220000, 106.836666]
+      coords: [-6.220000, 106.836666],
+      phone: "+62 813-9999-8888"
     }
   ];
+
+  const filteredOrgs = organizations.filter(org => {
+    const matchesSearch = org.name.toLowerCase().includes(searchQuery.toLowerCase()) || org.address.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = category === 'All' || org.category === category;
+    const matchesRadius = radius === 'All' || org.distance <= parseFloat(radius);
+    return matchesSearch && matchesCategory && matchesRadius;
+  });
 
   // Fix leaflet marker icon issue in browser
   React.useEffect(() => {
     import('leaflet').then((leaflet) => {
-      delete leaflet.Icon.Default.prototype._getIconUrl;
+      delete (leaflet.Icon.Default.prototype as any)._getIconUrl;
       leaflet.Icon.Default.mergeOptions({
         iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
         iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -76,7 +95,7 @@ export default function SelectDonationDestination() {
         
         <div className="inline-flex items-center space-x-2 bg-[#F3F8F2] text-[#1A5632] px-4 py-2 rounded-xl text-sm font-bold mt-6">
           <Leaf size={16} />
-          <span>Your community has saved 1,240 lbs of food this week.</span>
+          <span>Your community has saved {totalFoodSaved} kg of food this week.</span>
         </div>
       </div>
 
@@ -96,20 +115,39 @@ export default function SelectDonationDestination() {
         </div>
         
         <div className="flex gap-4">
-          <button onClick={() => alert("Category filter opened")} className="bg-white border border-transparent shadow-sm px-6 py-3 rounded-xl flex items-center space-x-2 text-sm font-bold text-gray-700 hover:bg-gray-50">
-            <span>Category</span>
-            <ChevronDown size={16} className="text-gray-400" />
-          </button>
-          <button onClick={() => alert("Radius filter opened")} className="bg-white border border-transparent shadow-sm px-6 py-3 rounded-xl flex items-center space-x-2 text-sm font-bold text-gray-700 hover:bg-gray-50">
-            <MapPin size={16} className="text-gray-400" />
-            <span>Radius</span>
-          </button>
+          <div className="relative">
+            <select 
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="bg-white border border-gray-200 shadow-sm pl-4 pr-10 py-3 rounded-xl appearance-none text-sm font-bold text-gray-700 hover:bg-gray-50 outline-none focus:ring-2 focus:ring-[#1A5632] cursor-pointer"
+            >
+              <option value="All">All Categories</option>
+              <option value="Food Bank">Food Bank</option>
+              <option value="Kitchen">Kitchen</option>
+              <option value="Shelter">Shelter</option>
+            </select>
+            <ChevronDown size={16} className="text-gray-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+          <div className="relative">
+            <MapPin size={16} className="text-gray-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <select 
+              value={radius}
+              onChange={(e) => setRadius(e.target.value)}
+              className="bg-white border border-gray-200 shadow-sm pl-10 pr-10 py-3 rounded-xl appearance-none text-sm font-bold text-gray-700 hover:bg-gray-50 outline-none focus:ring-2 focus:ring-[#1A5632] cursor-pointer"
+            >
+              <option value="All">Any Radius</option>
+              <option value="2">Under 2 miles</option>
+              <option value="5">Under 5 miles</option>
+              <option value="10">Under 10 miles</option>
+            </select>
+            <ChevronDown size={16} className="text-gray-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
         </div>
       </div>
 
       {/* Organization Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-        {organizations.map((org) => (
+        {filteredOrgs.map((org) => (
           <div key={org.id} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col">
             <div className="h-48 relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -124,7 +162,7 @@ export default function SelectDonationDestination() {
               <h3 className="text-xl font-bold text-gray-900 mb-2">{org.name}</h3>
               <div className="flex items-center text-xs font-bold text-gray-500 mb-4">
                 <MapPin size={14} className="mr-1" />
-                <span>{org.distance}</span>
+                <span>{org.distanceStr}</span>
                 <span className="mx-2">•</span>
                 <span>{org.address}</span>
               </div>
@@ -137,8 +175,8 @@ export default function SelectDonationDestination() {
               <div className="h-32 rounded-xl mb-6 overflow-hidden border border-gray-100 z-0 relative isolate">
                 <MapContainer 
                   center={org.coords as [number, number]} 
-                  zoom={14} 
-                  scrollWheelZoom={false}
+                  zoom={12} 
+                  scrollWheelZoom={true}
                   zoomControl={true}
                   style={{ height: '100%', width: '100%' }}
                 >
@@ -155,7 +193,7 @@ export default function SelectDonationDestination() {
                 </div>
               </div>
               
-              <Link href={`/dashboard/seller/donations/confirmation`} className="block w-full">
+              <Link href={`/dashboard/seller/donations/confirmation?orgId=${org.id}`} className="block w-full">
                 <button className="w-full py-3 rounded-xl bg-[#A3D9B5]/30 hover:bg-[#A3D9B5]/50 text-[#1A5632] font-bold text-sm transition-colors">
                   Select Organization
                 </button>
@@ -178,7 +216,7 @@ export default function SelectDonationDestination() {
 
       {/* Footer Nav */}
       <div className="flex justify-between items-center pt-6 border-t border-gray-200">
-        <Link href="/dashboard/seller-entry">
+        <Link href="/dashboard/seller/entry">
           <button className="flex items-center space-x-2 text-gray-600 font-bold hover:text-gray-900 transition-colors">
             <ArrowLeft size={20} />
             <span>Back</span>

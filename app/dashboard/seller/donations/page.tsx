@@ -1,31 +1,37 @@
 "use client";
 
 import React from 'react';
-import { HeartHandshake, Leaf, MapPin, CheckCircle2 } from 'lucide-react';
+import { HeartHandshake, Leaf, MapPin, CheckCircle2, Map } from 'lucide-react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import 'leaflet/dist/leaflet.css';
 
-const DONATION_HISTORY = [
-  {
-    id: 'DON-9021',
-    productName: 'Organic Heirloom Tomatoes',
-    weight: '10kg',
-    recipient: 'Green Valley Community Kitchen',
-    date: 'Yesterday, 10:00 AM',
-    status: 'Delivered',
-    image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=200&q=80'
-  },
-  {
-    id: 'DON-8842',
-    productName: 'Artisan Sourdough Loaf',
-    weight: '5kg',
-    recipient: 'Hope Harbor Shelter',
-    date: 'Oct 22, 2023',
-    status: 'Delivered',
-    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=80'
-  }
+const MapContainer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.MapContainer),
+  { ssr: false, loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-2xl" /> }
+);
+const TileLayer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+const Marker = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Marker),
+  { ssr: false }
+);
+
+// Map markers for Indonesia LKS locations
+const lksLocations = [
+  { id: 1, lat: -6.200000, lng: 106.816666, name: 'Green Valley Community Kitchen' },
+  { id: 2, lat: -6.914744, lng: 107.609810, name: 'Hope Harbor Shelter' },
+  { id: 3, lat: -7.250445, lng: 112.768845, name: 'Surabaya Food Bank' },
 ];
 
+import { useProductStore } from '@/store/productStore';
+
 export default function DonationsPage() {
+  const [totalFoodSaved] = React.useState(1240); // Dynamic variable for lbs/kg
+  const { donations } = useProductStore();
+
   return (
     <div className="max-w-7xl mx-auto">
       {/* Header & Impact Badge */}
@@ -36,7 +42,7 @@ export default function DonationsPage() {
         </div>
         <div className="bg-[#E8F3EB] text-[#1A5632] px-4 py-2 rounded-full font-bold flex items-center space-x-2 self-start md:self-auto shadow-sm border border-[#D1E8D7]">
           <Leaf size={18} />
-          <span>Your community has saved 1,240 lbs of food this week.</span>
+          <span>Your community has saved {totalFoodSaved} kg of food this week.</span>
         </div>
       </div>
 
@@ -48,7 +54,7 @@ export default function DonationsPage() {
         
         <div className="p-6">
           <div className="space-y-6">
-            {DONATION_HISTORY.map((donation) => (
+            {donations.map((donation: any) => (
               <div key={donation.id} className="flex flex-col md:flex-row md:items-center justify-between p-6 border border-gray-100 rounded-2xl hover:border-green-200 transition-colors bg-white">
                 <div className="flex items-center space-x-6 mb-4 md:mb-0">
                   <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border border-gray-100 shadow-sm">
@@ -65,9 +71,10 @@ export default function DonationsPage() {
                 <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-12">
                   <div>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Recipient Kitchen</p>
-                    <div className="flex items-start space-x-2">
-                      <div className="mt-0.5 bg-[#E8F3EB] p-1.5 rounded-lg text-[#1A5632]">
-                        <HeartHandshake size={16} />
+                    <div className="flex items-start space-x-3">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-100 shadow-sm flex-shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={donation.recipientImage} alt={donation.recipient} className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <p className="font-bold text-gray-900 text-sm">{donation.recipient}</p>
@@ -94,6 +101,29 @@ export default function DonationsPage() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Real-time Indonesia LKS Map */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8 p-6">
+        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+          <Map className="mr-2 text-[#1A5632]" size={20} />
+          Real-Time LKS Locations (Indonesia)
+        </h2>
+        <div className="h-64 rounded-xl overflow-hidden border border-gray-200 isolate z-0">
+          <MapContainer 
+            center={[-2.5489, 118.0149]} 
+            zoom={5} 
+            scrollWheelZoom={true}
+            style={{ height: '100%', width: '100%' }}
+          >
+            <TileLayer
+              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+            />
+            {lksLocations.map(loc => (
+              <Marker key={loc.id} position={[loc.lat, loc.lng]} />
+            ))}
+          </MapContainer>
         </div>
       </div>
 

@@ -29,9 +29,9 @@ export default function ProductsPage() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   // Edit form state
-  const [editForm, setEditForm] = useState({ name: '', stock: 0, price: '', status: '', description: '' });
+  const [editForm, setEditForm] = useState({ name: '', stock: 0, price: '', status: '', description: '', type: 'Sell' });
 
-  const filteredProducts = products.filter(p => {
+  const filteredProducts = products.filter((p: any) => {
     if (activeTab === 'All') return true;
     if (activeTab === 'Selling') return p.type === 'Sell';
     if (activeTab === 'Donating') return p.type === 'Donate';
@@ -47,7 +47,8 @@ export default function ProductsPage() {
         stock: product.stock,
         price: product.price,
         status: product.status,
-        description: product.description || ''
+        description: product.description || '',
+        type: product.type || 'Sell'
       });
     }
   };
@@ -115,7 +116,7 @@ export default function ProductsPage() {
           <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Updated just now</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {products.slice(0, 3).map((product, idx) => (
+          {products.slice(0, 3).map((product: any, idx: number) => (
             <div 
               key={`live-${product.id}`} 
               onClick={() => openModal('view', product)}
@@ -167,7 +168,7 @@ export default function ProductsPage() {
               </tr>
             </thead>
             <tbody className="text-sm">
-              {filteredProducts.map((product) => (
+              {filteredProducts.map((product: any) => (
                 <tr key={product.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-3">

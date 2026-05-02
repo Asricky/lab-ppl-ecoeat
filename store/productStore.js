@@ -48,10 +48,34 @@ const INITIAL_PRODUCTS = [
   }
 ];
 
+const INITIAL_DONATIONS = [
+  {
+    id: 'DON-9021',
+    productName: 'Organic Heirloom Tomatoes',
+    weight: '10kg',
+    recipient: 'Green Valley Community Kitchen',
+    recipientImage: 'https://images.unsplash.com/photo-1593113565694-c6f8716c0296?w=200&q=80',
+    date: 'Yesterday, 10:00 AM',
+    status: 'Delivered',
+    image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=200&q=80'
+  },
+  {
+    id: 'DON-8842',
+    productName: 'Artisan Sourdough Loaf',
+    weight: '5kg',
+    recipient: 'Hope Harbor Shelter',
+    recipientImage: 'https://images.unsplash.com/photo-1574314050516-e56593a1fa06?w=200&q=80',
+    date: 'Oct 22, 2023',
+    status: 'Delivered',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=80'
+  }
+];
+
 export const useProductStore = create(
   persist(
     (set) => ({
       products: INITIAL_PRODUCTS,
+      donations: INITIAL_DONATIONS,
       draftProduct: {
         name: '',
         category: '',
@@ -69,10 +93,25 @@ export const useProductStore = create(
       deleteProduct: (id) => set((state) => ({ products: state.products.filter(p => p.id !== id) })),
       updateProduct: (id, updatedData) => set((state) => ({
         products: state.products.map(p => p.id === id ? { ...p, ...updatedData } : p)
-      }))
+      })),
+      addDonation: (donation) => set((state) => ({ donations: [donation, ...state.donations] }))
     }),
     {
       name: 'ecoeat-product-storage',
+      version: 1, // forces clearing of old unversioned data to fix stale data issues
+      migrate: (persistedState, version) => {
+        if (version === 0 || !version) {
+          return {
+            products: INITIAL_PRODUCTS,
+            donations: INITIAL_DONATIONS,
+            draftProduct: {
+              name: '', category: '', type: 'Sell', stock: 0, 
+              originalPrice: '', price: '', expiry: '', description: '', image: ''
+            }
+          };
+        }
+        return persistedState;
+      }
     }
   )
 );

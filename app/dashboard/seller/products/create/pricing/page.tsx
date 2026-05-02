@@ -10,14 +10,24 @@ export default function ConfigurePricingPage() {
   
   const origVal = parseInt(draftProduct.originalPrice?.replace(/\D/g, '') || '50000');
   const discVal = parseInt(draftProduct.price?.replace(/\D/g, '') || '30000');
-  const currentPercent = origVal && discVal ? Math.round(((origVal - discVal) / origVal) * 100) : 40;
+  const calculatedPercent = origVal && discVal ? Math.round(((origVal - discVal) / origVal) * 100) : 40;
+
+  const [localPercent, setLocalPercent] = React.useState(calculatedPercent.toString());
+
+  React.useEffect(() => {
+    setLocalPercent(calculatedPercent.toString());
+  }, [calculatedPercent]);
 
   const handlePercentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let percent = parseInt(e.target.value);
-    if (isNaN(percent)) percent = 0;
+    setLocalPercent(e.target.value);
+  };
+
+  const handlePercentBlur = () => {
+    let percent = parseInt(localPercent);
+    if (isNaN(percent) || percent < 20) percent = 20;
     if (percent > 100) percent = 100;
-    if (percent < 0) percent = 0;
     
+    setLocalPercent(percent.toString());
     const orig = parseInt(draftProduct.originalPrice?.replace(/\D/g, '') || '50000');
     const newPrice = Math.round(orig * (1 - percent / 100));
     setDraftProduct({ price: `Rp ${newPrice.toLocaleString('id-ID')}` });
@@ -90,13 +100,14 @@ export default function ConfigurePricingPage() {
               <div className="relative">
                 <input 
                   type="number" 
-                  value={currentPercent} 
+                  value={localPercent} 
                   onChange={handlePercentChange}
+                  onBlur={handlePercentBlur}
                   className="w-full bg-[#F3F8F2] border border-transparent rounded-xl px-4 py-4 text-xl focus:ring-2 focus:ring-[#1A5632] outline-none transition-colors text-gray-900 font-bold text-center" 
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">%</span>
               </div>
-              <p className="text-[10px] text-gray-500 mt-2 font-medium">Recommended: 30% - 60%.</p>
+              <p className="text-[10px] text-gray-500 mt-2 font-medium">Recommended: 30% - 60% (Min. 20%).</p>
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">DISCOUNT PRICE</label>

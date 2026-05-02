@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { 
@@ -13,12 +13,6 @@ import {
   TrendingUp,
   MapPin
 } from 'lucide-react';
-import dynamic from 'next/dynamic';
-
-const MapContainer = dynamic(() => import('@/components/MapContainer'), {
-  ssr: false,
-  loading: () => <div className="h-32 w-full bg-gray-100 animate-pulse flex items-center justify-center"><p className="text-xs text-gray-400">Loading Map...</p></div>
-});
 
 import { useProductStore } from '@/store/productStore';
 
@@ -27,6 +21,31 @@ function DashboardContent() {
   const flow = searchParams.get('flow') || 'sell';
   const isDonate = flow === 'donate';
   const { products } = useProductStore();
+  const [timeRange, setTimeRange] = useState('This Week');
+
+  const salesDataByTime: any = {
+    'Today': [
+      { day: '6am', revenue: 12000 }, { day: '9am', revenue: 45000 }, { day: '12pm', revenue: 38000 },
+      { day: '3pm', revenue: 65000 }, { day: '6pm', revenue: 20000 }, { day: '9pm', revenue: 15000 },
+    ],
+    'This Week': [
+      { day: 'Mon', revenue: 45000 }, { day: 'Tue', revenue: 52000 }, { day: 'Wed', revenue: 38000 },
+      { day: 'Thu', revenue: 65000 }, { day: 'Fri', revenue: 85000 }, { day: 'Sat', revenue: 120000 }, { day: 'Sun', revenue: 90000 },
+    ],
+    'This Month': [
+      { day: 'W1', revenue: 245000 }, { day: 'W2', revenue: 352000 }, { day: 'W3', revenue: 438000 }, { day: 'W4', revenue: 565000 },
+    ],
+    'This Year': [
+      { day: 'Q1', revenue: 1245000 }, { day: 'Q2', revenue: 2352000 }, { day: 'Q3', revenue: 3438000 }, { day: 'Q4', revenue: 4565000 },
+    ],
+    'All Time': [
+      { day: '2021', revenue: 4245000 }, { day: '2022', revenue: 8352000 }, { day: '2023', revenue: 12438000 },
+    ]
+  };
+
+  const currentData = salesDataByTime[timeRange];
+  const maxRevenue = Math.max(...currentData.map((d: any) => d.revenue)) * 1.2 || 120000;
+  const yAxisSteps = [maxRevenue, maxRevenue * 0.75, maxRevenue * 0.5, maxRevenue * 0.25, 0];
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -43,7 +62,8 @@ function DashboardContent() {
           <div className="flex items-center space-x-2 bg-white border border-gray-200 shadow-sm px-3 py-2 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors focus-within:ring-2 focus-within:ring-[#1A5632]">
             <select 
               className="bg-transparent outline-none appearance-none pr-4 cursor-pointer focus:outline-none"
-              defaultValue="This Week"
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
             >
               <option value="Today">Today</option>
               <option value="This Week">This Week</option>
@@ -124,29 +144,21 @@ function DashboardContent() {
         </div>
         <div className="relative h-[250px] w-full flex items-end pt-8 mb-4 ml-6 lg:ml-8">
           <div className="absolute inset-0 flex flex-col justify-between pb-8 pointer-events-none">
-            {[120000, 90000, 60000, 30000, 0].map((val, i) => (
+            {yAxisSteps.map((val, i) => (
               <div key={i} className="flex items-center w-full border-b border-gray-100 h-0 relative">
-                <span className="absolute -left-2 -translate-x-full text-[10px] text-gray-400 font-medium">
-                  {val === 0 ? '0' : (val/1000) + 'k'}
+                <span className="absolute -left-2 -translate-x-full text-[10px] text-gray-400 font-medium whitespace-nowrap">
+                  {val === 0 ? '0' : (val >= 1000000 ? (val/1000000).toFixed(1) + 'M' : Math.round(val/1000) + 'k')}
                 </span>
               </div>
             ))}
           </div>
           <div className="flex-1 flex justify-between items-end h-full relative z-10 px-4 md:px-12">
-            {[
-              { day: 'Mon', revenue: 45000 },
-              { day: 'Tue', revenue: 52000 },
-              { day: 'Wed', revenue: 38000 },
-              { day: 'Thu', revenue: 65000 },
-              { day: 'Fri', revenue: 85000 },
-              { day: 'Sat', revenue: 120000 },
-              { day: 'Sun', revenue: 90000 },
-            ].map((data, index) => (
+            {currentData.map((data: any, index: number) => (
               <div key={index} className="flex flex-col items-center group relative pointer-events-auto h-full justify-end">
                 <div className="absolute -top-4 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs font-bold px-3 py-1.5 rounded-lg whitespace-nowrap z-20 shadow-lg pointer-events-none transform -translate-x-1/2 left-1/2">
                   Rp {data.revenue.toLocaleString('id-ID')}
                 </div>
-                <div className="w-8 md:w-12 bg-gradient-to-t from-[#1A5632] to-[#4ade80] rounded-t-lg transition-all duration-300 group-hover:opacity-80" style={{ height: `${(data.revenue / 120000) * 100}%` }}></div>
+                <div className="w-8 md:w-12 bg-gradient-to-t from-[#1A5632] to-[#4ade80] rounded-t-lg transition-all duration-300 group-hover:opacity-80" style={{ height: `${(data.revenue / maxRevenue) * 100}%` }}></div>
                 <span className="text-xs font-bold text-gray-500 mt-3 absolute -bottom-8">{data.day}</span>
               </div>
             ))}
@@ -209,23 +221,6 @@ function DashboardContent() {
               </table>
             </div>
           </div>
-
-          <div className="bg-[#E8F3EB] border border-[#D1E8D7] rounded-2xl p-4 flex items-center justify-between shadow-sm">
-            <div className="flex items-center space-x-4">
-              <div className="bg-white p-2 rounded-xl text-[#1A5632] shadow-sm">
-                <Leaf size={24} />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-[#1A5632] uppercase tracking-wider">Community Impact</h4>
-                <p className="text-sm font-medium text-gray-800">You've saved <span className="font-bold text-gray-900">428kg</span> of food this month!</p>
-              </div>
-            </div>
-            <div className="flex -space-x-2">
-              <div className="w-8 h-8 rounded-full border-2 border-white bg-blue-200 flex items-center justify-center text-xs font-bold text-blue-800 z-30">JD</div>
-              <div className="w-8 h-8 rounded-full border-2 border-white bg-amber-200 flex items-center justify-center text-xs font-bold text-amber-800 z-20">MK</div>
-              <div className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 z-10">+12</div>
-            </div>
-          </div>
         </div>
 
         {/* Side Panel (Right) */}
@@ -280,15 +275,6 @@ function DashboardContent() {
             <button className="w-full mt-6 text-sm font-bold text-[#1A5632] hover:text-[#0F351F] text-center">
               View All Alerts
             </button>
-          </div>
-
-          {/* Primary Pickup Point */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="h-32 rounded-xl mb-4 relative overflow-hidden z-0 border border-gray-200">
-              <MapContainer locations={[{lat: -6.200000, lng: 106.816666, type: 'seller', name: 'Central Market Annex'}]} />
-            </div>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Primary Pickup Point</p>
-            <h4 className="text-sm font-bold text-gray-900">Central Market Annex</h4>
           </div>
         </div>
       </div>
