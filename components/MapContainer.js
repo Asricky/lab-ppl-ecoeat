@@ -49,6 +49,20 @@ export default function MapContainer({ locations }) {
   const defaultCenter = [-6.200000, 106.816666]; // Jakarta
 
   const getCustomIcon = (type) => {
+    if (type === 'courier') {
+      return L.divIcon({
+        className: 'custom-div-icon',
+        html: `
+          <div style="background-color: #1A5632; width: 36px; height: 36px; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; position: relative;">
+            <div style="position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 2px solid #1A5632; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+            <div style="width: 12px; height: 12px; background-color: white; border-radius: 50%; z-index: 2;"></div>
+          </div>
+          <style>@keyframes ping { 75%, 100% { transform: scale(1.5); opacity: 0; } }</style>
+        `,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+      });
+    }
     const isSeller = type === 'seller';
     const color = isSeller ? '#f59e0b' : '#16a34a'; // Amber for seller, Green for LKS
     return L.divIcon({
