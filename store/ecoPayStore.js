@@ -1,7 +1,8 @@
 import { create } from 'zustand';
+import { courierTasks, getCreditedBalance } from '@/lib/dashboardData';
 
 export const useEcoPayStore = create((set) => ({
-  balance: 150000, // Initial mock balance
+  balance: getCreditedBalance(courierTasks), // Dynamic initial balance based on tasks
   transactions: [],
   addBalance: (amount, method = 'Top-up') => set((state) => ({ 
     balance: state.balance + amount,

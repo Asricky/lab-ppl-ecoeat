@@ -164,3 +164,30 @@ export const dummyNotifications: NotificationData[] = [
     isRead: true,
   }
 ];
+
+export const dummyLksNotifications: NotificationData[] = [
+  {
+    id: 'lks1',
+    type: 'system',
+    title: 'Donasi Baru Tersedia',
+    message: 'Ada 10 kg Roti Sisa Penjualan dari Toko Roti Makmur untuk panti Anda.',
+    time: '2 mins ago',
+    isRead: false,
+  },
+  {
+    id: 'lks2',
+    type: 'system',
+    title: 'Kurir Menuju Lokasi',
+    message: 'Alex Green sedang dalam perjalanan mengantar donasi.',
+    time: '15 mins ago',
+    isRead: false,
+  },
+  {
+    id: 'lks3',
+    type: 'system',
+    title: 'Donasi Telah Sampai',
+    message: 'Donasi 8 kg Sayur dari Pasar Minggu telah Anda terima.',
+    time: 'Yesterday',
+    isRead: true,
+  }
+];
