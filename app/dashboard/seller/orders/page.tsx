@@ -9,7 +9,6 @@ import {
   PlusCircle, 
   Settings, 
   AlertTriangle, 
-  Leaf,
   ArrowRight,
   ArrowLeft,
   MapPin
@@ -201,13 +200,18 @@ export default function OrdersPage() {
                   <ArrowRight size={16} />
                 </button>
               </Link>
-              <button className="flex items-center justify-between w-full bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-3 rounded-xl transition-colors font-medium border border-gray-100">
-                <div className="flex items-center space-x-3">
-                  <Settings size={20} />
-                  <span>Manage Products</span>
-                </div>
-                <ArrowRight size={16} />
-              </button>
+              <Link href="/dashboard/seller/products" className="block w-full">
+                <button
+                  type="button"
+                  className="flex items-center justify-between w-full bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-3 rounded-xl transition-colors font-medium border border-gray-100"
+                >
+                  <div className="flex items-center space-x-3">
+                    <Settings size={20} />
+                    <span>Manage Products</span>
+                  </div>
+                  <ArrowRight size={16} />
+                </button>
+              </Link>
             </div>
           </div>
 
@@ -233,26 +237,6 @@ export default function OrdersPage() {
                     <span className="font-bold">Ayam Bakar Madu</span> has only 2 units left in inventory.
                   </p>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Sustainability Impact */}
-          <div className="bg-[#1A5632] rounded-2xl p-6 shadow-sm border border-[#144226] text-white relative overflow-hidden">
-            {/* Background design element */}
-            <div className="absolute -right-4 -top-4 opacity-10">
-              <Leaf size={100} />
-            </div>
-            
-            <div className="relative z-10">
-              <div className="flex items-center space-x-2 mb-2">
-                <Leaf size={18} className="text-[#A3D9B5]" />
-                <h3 className="text-sm font-medium text-gray-200">Sustainability Impact</h3>
-              </div>
-              <h2 className="text-3xl font-bold text-white mb-1">128 kg</h2>
-              <p className="text-sm text-[#A3D9B5]">CO₂ emissions saved this month</p>
-              <div className="mt-4 pt-4 border-t border-[#236A3F] text-xs text-gray-300">
-                Your efforts are equivalent to planting 6 trees!
               </div>
             </div>
           </div>

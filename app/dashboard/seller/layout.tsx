@@ -38,12 +38,16 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
       <aside className="w-64 bg-[#F3F8F2] border-r border-[#E2EFE5] flex flex-col flex-shrink-0">
         <div className="p-6 pb-2">
           <Link href="/dashboard/seller" className="flex items-center mb-4">
-            {/* Prefer /public/logo-ecoeat.png; repo ships SVG fallback as logo-ecoeat.svg */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/logo-ecoeat.svg"
+              src="/logo-ecoeat-new.svg"
               alt="EcoEat — Delivery & Surplus Food"
-              className="h-10 w-auto max-w-[200px] object-contain object-left"
+              className="h-12 w-auto max-w-[200px] object-contain object-left"
+              onError={(e) => {
+                const t = e.currentTarget;
+                if (t.src.endsWith('.png')) return;
+                t.src = '/logo-ecoeat.svg';
+              }}
             />
           </Link>
         </div>
@@ -85,9 +89,14 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
           <Link href="/dashboard/seller" className="shrink-0 hidden sm:block">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/logo-ecoeat.svg"
+              src="/logo-ecoeat-new.svg"
               alt="EcoEat — Delivery & Surplus Food"
-              className="h-9 w-auto max-w-[180px] object-contain object-left"
+              className="h-10 w-auto max-w-[180px] object-contain object-left"
+              onError={(e) => {
+                const t = e.currentTarget;
+                if (t.src.endsWith('.png')) return;
+                t.src = '/logo-ecoeat.svg';
+              }}
             />
           </Link>
           <div className="flex-1 flex items-center min-w-0">

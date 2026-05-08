@@ -64,7 +64,7 @@ export default function KurirDashboard() {
       <CourierModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        onConfirm={(data) => {
+        onConfirm={(data: { otp: string; file: File }) => {
           console.log('Handover confirmed:', data);
           alert('Handover Berhasil diverifikasi!');
         }}

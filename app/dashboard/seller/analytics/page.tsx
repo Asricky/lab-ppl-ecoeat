@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from 'react';
+import Link from 'next/link';
 import {
   Leaf,
   Download,
@@ -94,7 +95,6 @@ export default function AnalyticsPage() {
                 onChange={(e) => setTimeRange(e.target.value as SellerTimeRange)}
                 className="bg-transparent outline-none appearance-none pr-4 cursor-pointer focus:outline-none"
               >
-                <option value="Today">Today</option>
                 <option value="This Week">This Week</option>
                 <option value="This Month">This Month</option>
                 <option value="This Year">This Year</option>
@@ -236,13 +236,14 @@ export default function AnalyticsPage() {
         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-bold text-gray-900">Top performing</h3>
-            <button
-              type="button"
-              onClick={() => alert('Navigating to all products view...')}
-              className="text-sm font-bold text-[#1A5632] hover:underline"
-            >
-              View all
-            </button>
+            <Link href="/dashboard/seller/products">
+              <button
+                type="button"
+                className="text-sm font-bold text-[#1A5632] hover:underline"
+              >
+                View all
+              </button>
+            </Link>
           </div>
 
           <div className="space-y-5">
@@ -314,9 +315,14 @@ export default function AnalyticsPage() {
                   <div className="text-right">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="/logo-ecoeat.svg"
+                      src="/logo-ecoeat-new.svg"
                       alt="EcoEat"
                       className="h-10 w-auto mb-2 inline-block"
+                      onError={(e) => {
+                        const t = e.currentTarget;
+                        if (t.src.endsWith('.png')) return;
+                        t.src = '/logo-ecoeat.svg';
+                      }}
                     />
                     <p className="text-xs font-medium text-gray-400">
                       {new Date().toLocaleDateString('en-GB', {

@@ -74,7 +74,6 @@ function DashboardContent() {
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value as SellerTimeRange)}
             >
-              <option value="Today">Today</option>
               <option value="This Week">This Week</option>
               <option value="This Month">This Month</option>
               <option value="This Year">This Year</option>

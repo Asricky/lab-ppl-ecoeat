@@ -25,6 +25,7 @@ type SellerProduct = {
   stock: number;
   price: string;
   expiry: string;
+  expiryDatetime?: string;
   status: string;
   description?: string;
 };
@@ -58,6 +59,8 @@ export default function ProductsPage() {
     name: '',
     stock: 0,
     price: '',
+    expiry: '',
+    expiryDatetime: '',
     status: '',
     description: '',
   });
@@ -74,6 +77,8 @@ export default function ProductsPage() {
         name: product.name,
         stock: product.stock,
         price: product.price,
+        expiry: product.expiry || '',
+        expiryDatetime: product.expiryDatetime || '',
         status: product.status,
         description: product.description || '',
       });
@@ -332,7 +337,7 @@ export default function ProductsPage() {
             )}
 
             {modalType === 'edit' && selectedProduct && (
-              <div className="p-6">
+              <div className="p-6 overflow-y-auto max-h-[90vh]">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Edit Product</h2>
                 <div className="space-y-4">
                   <div>
@@ -359,7 +364,7 @@ export default function ProductsPage() {
                       <input 
                         type="number" 
                         value={editForm.stock} 
-                        onChange={e => setEditForm({...editForm, stock: parseInt(e.target.value)})}
+                        onChange={e => setEditForm({...editForm, stock: parseInt(e.target.value) || 0})}
                         className="w-full bg-[#F3F8F2] border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5632] outline-none transition-colors text-gray-900 font-medium" 
                       />
                     </div>
@@ -372,6 +377,40 @@ export default function ProductsPage() {
                         className="w-full bg-[#F3F8F2] border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5632] outline-none transition-colors text-gray-900 font-medium" 
                       />
                     </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                      Expiry (Tanggal &amp; Jam)
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={editForm.expiryDatetime}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        if (raw) {
+                          const d = new Date(raw);
+                          const day = String(d.getDate()).padStart(2, '0');
+                          const month = String(d.getMonth() + 1).padStart(2, '0');
+                          const year = d.getFullYear();
+                          const hours = String(d.getHours()).padStart(2, '0');
+                          const mins = String(d.getMinutes()).padStart(2, '0');
+                          setEditForm({
+                            ...editForm,
+                            expiryDatetime: raw,
+                            expiry: `${day}/${month}/${year} ${hours}:${mins}`,
+                          });
+                        } else {
+                          setEditForm({ ...editForm, expiryDatetime: '', expiry: '' });
+                        }
+                      }}
+                      className="w-full bg-[#F3F8F2] border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5632] outline-none transition-colors text-gray-900 font-medium"
+                    />
+                    {editForm.expiry && (
+                      <p className="text-xs text-[#1A5632] font-medium mt-1 flex items-center gap-1">
+                        <Clock size={12} />
+                        {editForm.expiry}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status</label>

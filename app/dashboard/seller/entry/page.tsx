@@ -14,12 +14,12 @@ export default function SellOrDonateDecision() {
         <div className="flex items-center space-x-8">
            {/* eslint-disable-next-line @next/next/no-img-element */}
            <img
-             src="/logo-ecoeat.png"
+             src="/logo-ecoeat-new.svg"
              alt="EcoEat"
              className="h-12 w-auto object-contain"
              onError={(e) => {
                const t = e.currentTarget;
-               if (t.src.endsWith('.svg')) return;
+               if (t.src.endsWith('.png')) return;
                t.src = '/logo-ecoeat.svg';
              }}
            />

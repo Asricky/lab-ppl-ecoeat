@@ -16,11 +16,10 @@ export async function POST(request: Request) {
     if (
       body.discountPercent != null &&
       (typeof body.discountPercent !== 'number' ||
-        body.discountPercent < 20 ||
-        body.discountPercent > 90)
+        body.discountPercent < 20)
     ) {
       return NextResponse.json(
-        { ok: false, error: 'discountPercent must be between 20 and 90' },
+        { ok: false, error: 'discountPercent must be at least 20' },
         { status: 400 }
       );
     }
