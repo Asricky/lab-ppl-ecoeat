@@ -5,6 +5,19 @@ import { Rocket, ArrowLeft, CheckCircle2, ShieldCheck, Tag, ListChecks, Calendar
 import Link from 'next/link';
 import { useProductStore } from '@/store/productStore';
 
+function formatExpiryLabel(value: string) {
+  if (!value) return '—';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleString('id-ID', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 export default function ReviewPublishPage() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
@@ -15,10 +28,7 @@ export default function ReviewPublishPage() {
     setIsPublishing(true);
     const name = draftProduct.name || 'Untitled Product';
 
-    const discountPercent = Math.min(
-      90,
-      Math.max(20, Number(draftProduct.discountPercent) || 20)
-    );
+    const discountPercent = Math.max(20, Number(draftProduct.discountPercent) || 20);
 
     const payload = {
       type: 'sell',
@@ -28,6 +38,7 @@ export default function ReviewPublishPage() {
       originalPrice: draftProduct.originalPrice || '',
       discountPercent,
       salePriceIdr: draftProduct.price || '',
+      expiry: draftProduct.expiry || '',
       description: draftProduct.description || '',
       image:
         draftProduct.image ||
@@ -51,9 +62,10 @@ export default function ReviewPublishPage() {
       type: 'Sell',
       stock: draftProduct.stock || 1,
       price: draftProduct.price || 'Rp 0',
-      expiry: 'N/A',
+      expiry: draftProduct.expiry || '—',
       status: 'Active',
       description: draftProduct.description || 'No description provided.',
+      category: draftProduct.category || '',
     });
 
     setPublishedName(name);
@@ -182,6 +194,24 @@ export default function ReviewPublishPage() {
                   </p>
                   <p className="font-extrabold text-[#1A5632] text-xl">{draftProduct.stock || 0} units</p>
                 </div>
+                <div className="bg-[#F3F8F2] p-4 rounded-xl border border-[#D1E8D7] mt-4">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                    Expiry
+                  </p>
+                  <p className="font-extrabold text-[#1A5632] text-xl">
+                    {formatExpiryLabel(draftProduct.expiry || '')}
+                  </p>
+                </div>
+                {draftProduct.expiryDate && (
+                  <div className="bg-[#F3F8F2] p-4 rounded-xl border border-[#D1E8D7] mt-4">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                      Expiry Date
+                    </p>
+                    <p className="font-extrabold text-[#1A5632] text-xl">
+                      {draftProduct.expiryDate}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -200,7 +230,7 @@ export default function ReviewPublishPage() {
                   <div className="flex justify-between items-center mb-3">
                     <span className="text-sm font-medium text-gray-500">Discount</span>
                     <span className="text-sm font-bold text-[#1A5632]">
-                      {Math.min(90, Math.max(20, Number(draftProduct.discountPercent) || 20))}%
+                      {Math.max(20, Number(draftProduct.discountPercent) || 20)}%
                     </span>
                   </div>
                   <div className="flex justify-between items-center pt-4 border-t border-gray-200">

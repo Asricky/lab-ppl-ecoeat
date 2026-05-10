@@ -16,6 +16,7 @@ export default function SellOrDonateDecision() {
     <div className="min-h-screen bg-[#F3F8F2] flex flex-col">
       <header className="h-20 px-8 flex items-center justify-between bg-[#F3F8F2]">
         <div className="flex items-center space-x-8">
+<<<<<<< HEAD:app/seller/entry/page.tsx
           <Image
             src="/Logo EcoEat.png"
             alt="EcoEat — Delivery & Surplus Food"
@@ -35,6 +36,24 @@ export default function SellOrDonateDecision() {
               History
             </Link>
           </div>
+=======
+           {/* eslint-disable-next-line @next/next/no-img-element */}
+           <img
+             src="/logo-ecoeat-new.svg"
+             alt="EcoEat"
+             className="h-12 w-auto object-contain"
+             onError={(e) => {
+               const t = e.currentTarget;
+               if (t.src.endsWith('.png')) return;
+               t.src = '/logo-ecoeat.svg';
+             }}
+           />
+           <div className="hidden md:flex space-x-6 text-sm font-bold text-gray-500">
+             <Link href="#" className="hover:text-[#1A5632] transition-colors">Marketplace</Link>
+             <Link href="#" className="hover:text-[#1A5632] transition-colors">Impact</Link>
+             <Link href="#" className="hover:text-[#1A5632] transition-colors">History</Link>
+           </div>
+>>>>>>> 5f1abad673b4657fed4de2f55eb275192000ef39:app/dashboard/seller/entry/page.tsx
         </div>
         <div className="flex items-center space-x-5">
           <div className="relative hidden md:block w-64">

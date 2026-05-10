@@ -12,20 +12,52 @@ function formatPriceInput(value: string) {
 }
 
 function clampDiscount(n: number) {
-  return Math.min(90, Math.max(20, Math.round(n)));
+  return Math.max(20, Math.round(n));
+}
+
+function formatExpiryLabel(value: string) {
+  if (!value) return '—';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleString('id-ID', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 export default function CreateCommercialProductPage() {
   const { draftProduct, setDraftProduct, products } = useProductStore();
   const [imagePreview, setImagePreview] = useState<string | null>(draftProduct.image || null);
+  const [discountInput, setDiscountInput] = useState<string>(() => {
+    const initial =
+      typeof draftProduct.discountPercent === 'number' ? draftProduct.discountPercent : 20;
+    return String(Math.max(20, Math.round(initial)));
+  });
+  const [discountTouched, setDiscountTouched] = useState(false);
 
   const discountPct = clampDiscount(
     typeof draftProduct.discountPercent === 'number' ? draftProduct.discountPercent : 20
   );
+  const discountInputNum = useMemo(() => {
+    if (discountInput.trim() === '') return null;
+    const n = parseInt(discountInput, 10);
+    return Number.isFinite(n) ? n : null;
+  }, [discountInput]);
+  const discountIsInvalid = discountTouched && discountInputNum != null && discountInputNum < 20;
 
   useEffect(() => {
     setDraftProduct({ type: 'Sell' });
   }, [setDraftProduct]);
+
+  useEffect(() => {
+    // keep local input in sync when draft changes externally
+    const next =
+      typeof draftProduct.discountPercent === 'number' ? draftProduct.discountPercent : 20;
+    setDiscountInput(String(Math.max(20, Math.round(next))));
+  }, [draftProduct.discountPercent]);
 
   useEffect(() => {
     const o = parseInt(draftProduct.originalPrice?.replace(/\D/g, '') || '0', 10);
@@ -137,6 +169,46 @@ export default function CreateCommercialProductPage() {
               />
             </div>
 
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                Expiry (Tanggal &amp; Jam)
+              </label>
+              <input
+                type="datetime-local"
+                value={draftProduct.expiryDatetime || ''}
+                onChange={(e) => {
+                  const raw = e.target.value; // "2026-05-20T18:00"
+                  setDraftProduct({ expiryDatetime: raw });
+                  if (raw) {
+                    const d = new Date(raw);
+                    const formatted = d.toLocaleString('id-ID', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false,
+                    }).replace(/\./g, ':').replace(',', '');
+                    // Produce "DD/MM/YYYY HH:mm"
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const year = d.getFullYear();
+                    const hours = String(d.getHours()).padStart(2, '0');
+                    const mins = String(d.getMinutes()).padStart(2, '0');
+                    setDraftProduct({ expiry: `${day}/${month}/${year} ${hours}:${mins}` });
+                  } else {
+                    setDraftProduct({ expiry: '' });
+                  }
+                }}
+                className="w-full bg-[#F3F8F2] border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5632] outline-none text-gray-900 font-medium"
+              />
+              {draftProduct.expiry && (
+                <p className="text-xs text-[#1A5632] font-medium mt-1">
+                  Tersimpan: {draftProduct.expiry}
+                </p>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
@@ -166,31 +238,43 @@ export default function CreateCommercialProductPage() {
                   <input
                     type="number"
                     min={20}
-                    max={90}
-                    value={discountPct}
-                    onChange={(e) =>
-                      setDraftProduct({
-                        discountPercent: clampDiscount(parseInt(e.target.value, 10) || 20),
-                      })
-                    }
-                    onBlur={() =>
-                      setDraftProduct({
-                        discountPercent: clampDiscount(
-                          typeof draftProduct.discountPercent === 'number'
-                            ? draftProduct.discountPercent
-                            : 20
-                        ),
-                      })
-                    }
-                    className="w-full bg-[#F3F8F2] border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5632] outline-none text-gray-900 font-bold text-center"
+                    value={discountInput}
+                    onChange={(e) => {
+                      const next = e.target.value;
+                      setDiscountTouched(true);
+                      setDiscountInput(next);
+
+                      if (next.trim() === '') return; // allow clearing while editing
+                      const parsed = parseInt(next, 10);
+                      if (!Number.isFinite(parsed)) return;
+                      if (parsed < 20) return; // below 20 not allowed
+                      setDraftProduct({ discountPercent: clampDiscount(parsed) });
+                    }}
+                    onBlur={() => {
+                      const parsed = discountInputNum;
+                      if (parsed == null || parsed < 20) {
+                        setDiscountInput('20');
+                        setDraftProduct({ discountPercent: 20 });
+                        return;
+                      }
+                      setDiscountInput(String(clampDiscount(parsed)));
+                      setDraftProduct({ discountPercent: clampDiscount(parsed) });
+                    }}
+                    className={`w-full bg-[#F3F8F2] border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5632] outline-none text-gray-900 font-bold text-center ${
+                      discountIsInvalid ? 'ring-2 ring-red-400 focus:ring-red-400' : ''
+                    }`}
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">
                     %
                   </span>
                 </div>
-                <p className="text-[10px] text-gray-500 mt-2 font-medium">
-                  Sale price updates automatically (IDR).
-                </p>
+                {discountIsInvalid ? (
+                  <p className="text-[10px] text-red-600 mt-2 font-bold">Minimal 20%.</p>
+                ) : (
+                  <p className="text-[10px] text-gray-500 mt-2 font-medium">
+                    Sale price updates automatically (IDR).
+                  </p>
+                )}
               </div>
             </div>
 
@@ -270,7 +354,7 @@ export default function CreateCommercialProductPage() {
               </div>
               <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5">
                 <Clock size={14} className="text-[#1A5632]" />
-                <span>Surplus</span>
+                <span>Expiry: {formatExpiryLabel(draftProduct.expiry || '')}</span>
               </div>
             </div>
 
