@@ -3,8 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+<<<<<<<< HEAD:components/Sidebar.tsx
 import { LayoutDashboard, CheckSquare, Map, DollarSign, Settings, LogOut, HelpCircle, Leaf, Power, X, Clock } from 'lucide-react';
 import Image from 'next/image';
+========
+import { LayoutDashboard, CheckSquare, DollarSign, Settings, LogOut, HelpCircle, Leaf, Power, X, Clock, User } from 'lucide-react';
+>>>>>>>> a40049867a3233069c3043db95e7768a5b4a6029:components/kurir/Sidebar.tsx
 import { useCourier } from './CourierLayout';
 
 interface SidebarProps {
@@ -17,12 +21,11 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const pathname = usePathname();
 
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/kurir' },
-    { icon: CheckSquare, label: 'Tasks', href: '/kurir' },
+    { icon: LayoutDashboard, label: 'Dashboard', href: '/kurir/home' },
     { icon: Clock, label: 'History', href: '/kurir/history' },
-    { icon: Map, label: 'Routes', href: '#' },
-    { icon: DollarSign, label: 'Earnings', href: '#' },
-    { icon: Settings, label: 'Settings', href: '#' },
+    { icon: DollarSign, label: 'Earnings', href: '/kurir/earnings' },
+    { icon: User, label: 'Profile', href: '/kurir/profile' },
+    { icon: Settings, label: 'Settings', href: '/kurir/settings' },
   ];
 
   return (

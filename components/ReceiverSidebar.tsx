@@ -3,8 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+<<<<<<<< HEAD:components/ReceiverSidebar.tsx
 import { LayoutDashboard, Inbox, Map, History, User, Heart, X, PlusCircle } from 'lucide-react';
 import Image from 'next/image';
+========
+import { LayoutDashboard, Inbox, History, User, Heart, X, Settings } from 'lucide-react';
+>>>>>>>> a40049867a3233069c3043db95e7768a5b4a6029:components/kurir/ReceiverSidebar.tsx
 
 interface ReceiverSidebarProps {
   isOpen: boolean;
@@ -15,10 +19,9 @@ export default function ReceiverSidebar({ isOpen, setIsOpen }: ReceiverSidebarPr
   const pathname = usePathname();
 
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard/lks-panti/home' },
-    { icon: Inbox, label: 'Incoming Donasi', href: '/dashboard/lks-panti/incoming' },
-    { icon: History, label: 'Riwayat Donasi', href: '/dashboard/lks-panti/history' },
-    { icon: User, label: 'Profil LKS', href: '/dashboard/lks-panti/profile' },
+    { icon: LayoutDashboard, label: 'Dashboard', href: '/lks-panti/home' },
+    { icon: History, label: 'Riwayat Donasi', href: '/lks-panti/history' },
+    { icon: User, label: 'Profil LKS', href: '/lks-panti/profile' },
   ];
 
   return (
@@ -80,13 +83,8 @@ export default function ReceiverSidebar({ isOpen, setIsOpen }: ReceiverSidebarPr
         </nav>
 
         {/* Bottom Actions */}
-        <div className="p-4 mt-auto border-t border-black/5">
-          <button 
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-[#1e8932] text-white hover:bg-[#166b26] hover:shadow-md"
-          >
-            <PlusCircle size={18} /> 
-            <span>Request Pickup</span>
-          </button>
+        <div className="p-4 mt-auto border-t border-black/5 text-xs text-gray-500 font-semibold">
+          EcoEat LKS Panel
         </div>
       </aside>
     </>

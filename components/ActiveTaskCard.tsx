@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ActiveTaskCard() {
@@ -46,9 +46,6 @@ export default function ActiveTaskCard() {
         >
           View Route
         </Link>
-        <button className="w-14 bg-[#eaf4eb] text-[#388e3c] flex items-center justify-center rounded-xl hover:bg-[#d4ecd7] transition-colors shadow-sm">
-          <Phone size={20} />
-        </button>
       </div>
     </div>
   );

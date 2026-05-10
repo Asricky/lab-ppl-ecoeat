@@ -31,12 +31,11 @@ export default function OrderCard({ order, onViewDetails, onAction }: OrderCardP
             {order.type === 'purchase' ? 'Purchase Delivery' : 'Donation Delivery'}
           </span>
         </div>
-        
-        <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-          order.status === 'in_progress' ? 'bg-[#c5e6ce] text-[#125824]' :
+
+        <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${order.status === 'in_progress' ? 'bg-[#c5e6ce] text-[#125824]' :
           order.status === 'completed' ? 'text-[#1e8932] flex items-center gap-1' :
-          'bg-[#e5e5e5] text-[#555]'
-        }`}>
+            'bg-[#e5e5e5] text-[#555]'
+          }`}>
           {isCompleted && <CheckCircle2 size={14} />}
           {order.status === 'in_progress' ? 'IN PROGRESS' : order.status === 'completed' ? 'COMPLETED' : 'ASSIGNED'}
         </div>
@@ -46,7 +45,7 @@ export default function OrderCard({ order, onViewDetails, onAction }: OrderCardP
       <div className="relative pl-6 mb-6 space-y-4">
         {/* Vertical dotted line */}
         <div className="absolute left-[11px] top-2 bottom-2 border-l-2 border-dotted border-gray-300"></div>
-        
+
         {/* Pickup */}
         <div className="relative">
           <div className="absolute -left-6 top-1 w-[10px] h-[10px] rounded-full bg-ecoeat-primary border-2 border-white ring-1 ring-ecoeat-primary"></div>
@@ -105,7 +104,7 @@ export default function OrderCard({ order, onViewDetails, onAction }: OrderCardP
           </button>
         ) : (
           <>
-            <Link 
+            <Link
               href={`/kurir/${order.id}`}
               className="flex-1 bg-[#eaf4eb] text-[#1e8932] font-bold py-3.5 rounded-xl hover:bg-[#d4ecd7] transition-colors text-center"
             >
@@ -119,7 +118,7 @@ export default function OrderCard({ order, onViewDetails, onAction }: OrderCardP
                 Start Delivery
               </Link>
             ) : (
-              <Link 
+              <Link
                 href={`/kurir/${order.id}`}
                 className="flex-1 bg-ecoeat-primary text-white font-bold py-3.5 rounded-xl hover:bg-[#025020] transition-colors shadow-sm text-center"
               >
