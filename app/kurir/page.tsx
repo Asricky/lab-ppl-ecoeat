@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from 'react';
-import CourierLayout from '@/app/components/CourierLayout';
-import ActiveTaskCard from '@/app/components/ActiveTaskCard';
-import AssignedDeliveryList from '@/app/components/AssignedDeliveryList';
-import ImpactWidget from '@/app/components/ImpactWidget';
+import CourierLayout from '@/components/CourierLayout';
+import ActiveTaskCard from '@/components/ActiveTaskCard';
+import AssignedDeliveryList from '@/components/AssignedDeliveryList';
+import ImpactWidget from '@/components/ImpactWidget';
 import { useAuthStore } from '@/store/authStore';
 
 export default function KurirDashboardPage() {

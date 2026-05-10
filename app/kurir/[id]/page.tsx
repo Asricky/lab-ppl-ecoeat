@@ -4,13 +4,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import CourierLayout from '@/app/components/CourierLayout';
-import Sidebar from '@/app/components/Sidebar';
+import CourierLayout from '@/components/CourierLayout';
+import Sidebar from '@/components/Sidebar';
 import { ArrowLeft, Phone, Navigation, CheckCircle2, Leaf, MoreVertical, Search, Bell, Settings, AlertTriangle, MapPin } from 'lucide-react';
 import { getOrderById, OrderData, updateOrderStatus } from '@/lib/data';
 
 // Dynamically import RouteMap to avoid SSR issues with Leaflet
-const RouteMap = dynamic(() => import('@/app/components/RouteMap'), {
+const RouteMap = dynamic(() => import('@/components/RouteMap'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full bg-ecoeat-bg animate-pulse flex items-center justify-center text-ecoeat-muted font-semibold">

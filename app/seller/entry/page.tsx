@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ShoppingCart, HeartHandshake, CheckCircle2, Leaf, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 /** Seller intake: sell vs donate entry (canonical path `/seller/entry`). */
 export default function SellOrDonateDecision() {
@@ -15,16 +16,13 @@ export default function SellOrDonateDecision() {
     <div className="min-h-screen bg-[#F3F8F2] flex flex-col">
       <header className="h-20 px-8 flex items-center justify-between bg-[#F3F8F2]">
         <div className="flex items-center space-x-8">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logo-ecoeat.png"
-            alt="EcoEat"
+          <Image
+            src="/Logo EcoEat.png"
+            alt="EcoEat — Delivery & Surplus Food"
+            width={150}
+            height={48}
+            priority
             className="h-12 w-auto object-contain"
-            onError={(e) => {
-              const t = e.currentTarget;
-              if (t.src.endsWith('.svg')) return;
-              t.src = '/logo-ecoeat.svg';
-            }}
           />
           <div className="hidden md:flex space-x-6 text-sm font-bold text-gray-500">
             <Link href="#" className="hover:text-[#1A5632] transition-colors">

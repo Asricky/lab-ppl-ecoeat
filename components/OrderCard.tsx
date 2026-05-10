@@ -1,7 +1,8 @@
-import React from 'react';
-import { ShoppingBag, MapPin, Navigation, Clock, Heart, CheckCircle2, Leaf } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShoppingBag, MapPin, Navigation, Clock, Heart, CheckCircle2, Leaf, X, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { OrderData, OrderStatus } from '@/lib/data';
+import ChatModal from './ChatModal';
 
 interface OrderCardProps {
   order: OrderData;
@@ -11,9 +12,11 @@ interface OrderCardProps {
 
 export default function OrderCard({ order, onViewDetails, onAction }: OrderCardProps) {
   const isCompleted = order.status === 'completed';
+  const [showReceipt, setShowReceipt] = useState(false);
 
   return (
-    <div className="bg-white rounded-[24px] p-5 shadow-sm border border-black/5 flex flex-col h-full relative">
+    <>
+      <div className="bg-white rounded-[24px] p-5 shadow-sm border border-black/5 flex flex-col h-full relative">
       {order.isHighPriority && (
         <div className="absolute -top-3 right-4 bg-[#f0e6e6] text-[#8a5a5a] text-xs font-bold px-3 py-1 rounded-full shadow-sm">
           High Priority
@@ -61,6 +64,14 @@ export default function OrderCard({ order, onViewDetails, onAction }: OrderCardP
         </div>
       </div>
 
+      {/* Reward Display */}
+      {order.reward && (
+        <div className="bg-[#eaf4eb] rounded-xl p-3 mb-6 flex justify-between items-center border border-[#c5e6ce]">
+          <span className="text-xs font-bold text-[#1e8932] uppercase tracking-wider">Task Reward</span>
+          <span className="font-extrabold text-ecoeat-text">Rp{order.reward.toLocaleString('id-ID')}</span>
+        </div>
+      )}
+
       {/* Stats Pills */}
       {!isCompleted && (
         <div className="flex gap-3 mb-6">
@@ -81,19 +92,15 @@ export default function OrderCard({ order, onViewDetails, onAction }: OrderCardP
         </div>
       )}
 
-      {isCompleted && order.carbonSaved && (
-        <div className="bg-ecoeat-pill rounded-xl p-3 flex items-center gap-2 text-ecoeat-accent font-semibold text-sm mb-6 border border-[#c5e6ce]">
-          <Leaf size={16} />
-          {order.carbonSaved}
-        </div>
-      )}
-
       <div className="mt-auto"></div>
 
       {/* Action Buttons */}
       <div className="flex gap-3 mt-4">
         {isCompleted ? (
-          <button className="flex-1 bg-[#eaf4eb] text-[#1e8932] font-bold py-3.5 rounded-xl hover:bg-[#d4ecd7] transition-colors">
+          <button 
+            onClick={() => setShowReceipt(true)}
+            className="flex-1 bg-white text-ecoeat-primary border-2 border-ecoeat-primary font-bold py-3.5 rounded-xl hover:bg-ecoeat-primary hover:text-white transition-all shadow-[0_4px_14px_0_rgba(18,88,36,0.15)] active:scale-[0.98]"
+          >
             Summary Receipt
           </button>
         ) : (
@@ -116,12 +123,83 @@ export default function OrderCard({ order, onViewDetails, onAction }: OrderCardP
                 href={`/kurir/${order.id}`}
                 className="flex-1 bg-ecoeat-primary text-white font-bold py-3.5 rounded-xl hover:bg-[#025020] transition-colors shadow-sm text-center"
               >
-                Finish Delivery
+                Start Delivery
               </Link>
             )}
           </>
         )}
       </div>
-    </div>
+      </div>
+
+      {/* Receipt Modal */}
+      {showReceipt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-[24px] p-6 shadow-xl w-full max-w-sm relative animate-in fade-in zoom-in duration-200">
+            <button 
+              onClick={() => setShowReceipt(false)}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <X size={20} />
+            </button>
+            
+            <div className="flex items-center gap-2 text-ecoeat-primary mb-6">
+              <CheckCircle2 size={24} />
+              <h3 className="font-bold text-xl">Delivery Receipt</h3>
+            </div>
+            
+            <div className="space-y-5">
+              <div className="border-b border-gray-100 pb-4">
+                <p className="text-xs text-ecoeat-muted uppercase font-bold tracking-wider mb-2">Order Details</p>
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-sm font-semibold text-ecoeat-text">Order ID</span>
+                  <span className="text-sm font-medium text-gray-600">{order.id}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold text-ecoeat-text">Completed</span>
+                  <span className="text-sm font-medium text-gray-600">May 2, 2026, 09:30 AM</span>
+                </div>
+              </div>
+
+              <div className="border-b border-gray-100 pb-4">
+                <p className="text-xs text-ecoeat-muted uppercase font-bold tracking-wider mb-2">Items Delivered</p>
+                <p className="text-sm font-medium text-ecoeat-text bg-ecoeat-pill p-3 rounded-xl border border-[#c5e6ce]">{order.productName}</p>
+              </div>
+
+              <div className="border-b border-gray-100 pb-4">
+                <p className="text-xs text-ecoeat-muted uppercase font-bold tracking-wider mb-2">Proof of Delivery</p>
+                <div className="w-full h-36 bg-gray-50 rounded-xl overflow-hidden border-2 border-gray-100 flex items-center justify-center">
+                  {order.photoProofUrl ? (
+                    <img 
+                      src={order.photoProofUrl} 
+                      alt="Proof of handover" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="text-center text-gray-400 p-4">
+                      <p className="text-xs font-bold uppercase">No Photo Provided</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-ecoeat-muted uppercase font-bold tracking-wider mb-2">Recipient</p>
+                <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                  <img src={order.destinationAvatar} alt={order.destinationContact} className="w-10 h-10 rounded-full border border-gray-200" />
+                  <p className="text-sm font-bold text-ecoeat-text">{order.destinationContact}</p>
+                </div>
+              </div>
+            </div>
+            
+            <button 
+              onClick={() => setShowReceipt(false)}
+              className="w-full mt-6 bg-ecoeat-primary text-white font-bold py-3.5 rounded-xl hover:bg-[#025020] transition-colors"
+            >
+              Close Receipt
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

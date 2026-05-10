@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Leaf, CheckCircle2, Navigation, MessageCircle, MapPin, ArrowLeft } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
-const MapContainer = dynamic(() => import('@/app/components/MapContainer'), {
+const MapContainer = dynamic(() => import('@/components/MapContainer'), {
   ssr: false,
   loading: () => (
     <div className="h-full w-full bg-gray-100 animate-pulse flex items-center justify-center">

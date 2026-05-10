@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, CheckSquare, Map, DollarSign, Settings, LogOut, HelpCircle, Leaf, Power, X, Clock } from 'lucide-react';
+import Image from 'next/image';
 import { useCourier } from './CourierLayout';
 
 interface SidebarProps {
@@ -43,14 +44,14 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         {/* Header / Logo */}
         <div className="flex items-center justify-between p-6">
           <div className="flex items-center gap-3 text-ecoeat-primary">
-            {/* Custom Logo approximation */}
-            <div className="relative flex items-center justify-center w-10 h-10 bg-ecoeat-primary rounded-full text-white">
-              <Leaf size={24} fill="currentColor" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-xl leading-none">EcoEat</span>
-              <span className="text-[10px] font-medium text-ecoeat-text mt-1">Sustainable Delivery</span>
-            </div>
+            <Image
+              src="/Logo EcoEat.png"
+              alt="EcoEat — Delivery & Surplus Food"
+              width={150}
+              height={36}
+              priority
+              className="h-9 w-auto object-contain"
+            />
           </div>
           <button 
             className="md:hidden text-ecoeat-text p-1 -mt-4 -mr-2"

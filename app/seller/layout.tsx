@@ -3,6 +3,7 @@
 import React from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   LayoutDashboard, 
   Package, 
@@ -38,11 +39,14 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
       <aside className="w-64 bg-[#F3F8F2] border-r border-[#E2EFE5] flex flex-col flex-shrink-0">
         <div className="p-6 pb-2">
           <Link href="/seller" className="flex items-center space-x-2 mb-4">
-            <div className="w-8 h-8 bg-[#1A5632] rounded-full flex items-center justify-center relative shadow-sm border-2 border-[#1A5632]">
-              <div className="w-full h-[3px] bg-white absolute top-1/2 -translate-y-1/2" />
-              <div className="w-full h-[3px] bg-[#1A5632] absolute top-1/2 -translate-y-[150%] left-1/2 -translate-x-1/2 w-4" />
-            </div>
-            <span className="text-2xl font-black text-[#1A5632] tracking-tight">ECOEAT</span>
+            <Image
+              src="/Logo EcoEat.png"
+              alt="EcoEat — Delivery & Surplus Food"
+              width={150}
+              height={36}
+              priority
+              className="h-9 w-auto object-contain"
+            />
           </Link>
         </div>
 
@@ -81,11 +85,13 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
         {/* Topbar */}
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 flex-shrink-0 gap-6">
           <Link href="/seller" className="shrink-0 hidden sm:block">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logo-ecoeat.svg"
+            <Image
+              src="/Logo EcoEat.png"
               alt="EcoEat — Delivery & Surplus Food"
-              className="h-9 w-auto max-w-[180px] object-contain object-left"
+              width={150}
+              height={36}
+              priority
+              className="h-9 w-auto object-contain object-left"
             />
           </Link>
           <div className="flex-1 flex items-center min-w-0">

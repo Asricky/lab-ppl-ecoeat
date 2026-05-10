@@ -13,6 +13,7 @@ import {
   ShoppingCart,
   ListChecks,
 } from 'lucide-react';
+import Image from 'next/image';
 
 import { useProductStore } from '@/store/productStore';
 import {
@@ -312,10 +313,12 @@ export default function AnalyticsPage() {
                     </p>
                   </div>
                   <div className="text-right">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src="/logo-ecoeat.svg"
-                      alt="EcoEat"
+                    <Image
+                      src="/Logo EcoEat.png"
+                      alt="EcoEat — Delivery & Surplus Food"
+                      width={150}
+                      height={40}
+                      priority
                       className="h-10 w-auto mb-2 inline-block"
                     />
                     <p className="text-xs font-medium text-gray-400">

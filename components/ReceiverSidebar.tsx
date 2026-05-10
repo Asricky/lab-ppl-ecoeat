@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Inbox, Map, History, User, Heart, X, PlusCircle } from 'lucide-react';
+import Image from 'next/image';
 
 interface ReceiverSidebarProps {
   isOpen: boolean;
@@ -39,13 +40,14 @@ export default function ReceiverSidebar({ isOpen, setIsOpen }: ReceiverSidebarPr
         {/* Header / Logo */}
         <div className="flex items-center justify-between p-6">
           <div className="flex items-center gap-3 text-ecoeat-primary">
-            <div className="relative flex items-center justify-center w-10 h-10 bg-ecoeat-primary rounded-xl text-white shadow-sm">
-              <Heart size={20} fill="currentColor" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-xl leading-none tracking-tight">EcoEat</span>
-              <span className="text-[10px] font-bold text-ecoeat-muted uppercase tracking-wider mt-1">LKS / Panti</span>
-            </div>
+            <Image
+              src="/Logo EcoEat.png"
+              alt="EcoEat — Delivery & Surplus Food"
+              width={150}
+              height={36}
+              priority
+              className="h-9 w-auto object-contain"
+            />
           </div>
           <button 
             className="md:hidden text-ecoeat-text p-1 -mt-4 -mr-2"

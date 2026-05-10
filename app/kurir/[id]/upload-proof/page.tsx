@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Camera, CheckCircle2, ShieldAlert } from 'lucide-react';
-import CourierLayout from '@/app/components/CourierLayout';
+import CourierLayout from '@/components/CourierLayout';
 import { getOrderById, updateOrderStatus, updateOrderPhoto, OrderData } from '@/lib/data';
 
 export default function UploadProofView({ params }: { params: any }) {

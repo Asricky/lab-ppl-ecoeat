@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import CourierLayout from '@/app/components/CourierLayout';
+import CourierLayout from '@/components/CourierLayout';
 import { Download, Package, TrendingUp, Map, Leaf, Search, MoreVertical, Inbox } from 'lucide-react';
 import { dummyOrders } from '@/lib/data';
 
