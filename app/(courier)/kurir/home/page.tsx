@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from 'react';
-import TaskCard from '@/components/kurir/TaskCard';
+import TaskCard from '@/components/TaskCard';
 import { useTaskStore } from '@/store/taskStore';
 import { useEcoPayStore } from '@/store/ecoPayStore';
 import { SlidersHorizontal, ChevronDown, Maximize2, Wallet } from 'lucide-react';

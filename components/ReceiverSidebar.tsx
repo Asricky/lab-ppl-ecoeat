@@ -3,12 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-<<<<<<<< HEAD:components/ReceiverSidebar.tsx
-import { LayoutDashboard, Inbox, Map, History, User, Heart, X, PlusCircle } from 'lucide-react';
+import { LayoutDashboard, Inbox, Map, History, User, Heart, X, PlusCircle, Settings } from 'lucide-react';
 import Image from 'next/image';
-========
-import { LayoutDashboard, Inbox, History, User, Heart, X, Settings } from 'lucide-react';
->>>>>>>> a40049867a3233069c3043db95e7768a5b4a6029:components/kurir/ReceiverSidebar.tsx
 
 interface ReceiverSidebarProps {
   isOpen: boolean;
@@ -44,7 +40,7 @@ export default function ReceiverSidebar({ isOpen, setIsOpen }: ReceiverSidebarPr
         <div className="flex items-center justify-between p-6">
           <div className="flex items-center gap-3 text-ecoeat-primary">
             <Image
-              src="/Logo EcoEat.png"
+              src="/logo-ecoeat.png"
               alt="EcoEat — Delivery & Surplus Food"
               width={150}
               height={36}

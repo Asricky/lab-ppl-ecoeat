@@ -8,7 +8,7 @@ import { CourierTask } from '@/lib/dashboardData';
 import { useTaskStore } from '@/store/taskStore';
 import dynamic from 'next/dynamic';
 
-const MapContainer = dynamic(() => import('@/components/kurir/MapContainer'), {
+const MapContainer = dynamic(() => import('@/components/MapContainer'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full bg-gray-100 animate-pulse flex items-center justify-center text-gray-400 font-semibold rounded-xl">

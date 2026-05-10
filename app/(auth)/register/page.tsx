@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/store/authStore";
-import { ShoppingBasket, Store, Truck, CheckCircle2 } from "lucide-react";
+import { ShoppingBasket, Store, Truck, CheckCircle2, Building2 } from "lucide-react";
 
 export default function RoleSelectionPage() {
   const router = useRouter();
@@ -29,7 +29,7 @@ export default function RoleSelectionPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {/* Buyer Card */}
           <div
             onClick={() => setSelectedRole("buyer")}
@@ -90,6 +90,27 @@ export default function RoleSelectionPage() {
             <h3 className="text-xl font-bold text-gray-900 mb-3">Courier</h3>
             <p className="text-gray-500 text-sm leading-relaxed">
               Deliver food to buyers and organizations. Join our flexible network of green logistics.
+            </p>
+          </div>
+
+          {/* LKS Panti Card */}
+          <div
+            onClick={() => setSelectedRole('lks-panti')}
+            className={`relative bg-white rounded-2xl p-8 cursor-pointer transition-all duration-200 border-2 ${
+              selectedRole === 'lks-panti'
+                ? "border-green-500 shadow-xl shadow-green-900/5 transform scale-[1.02]"
+                : "border-transparent shadow-sm hover:shadow-md"
+            }`}
+          >
+            {selectedRole === 'lks-panti' && (
+              <CheckCircle2 className="absolute top-4 right-4 text-green-600 fill-green-100 w-6 h-6" />
+            )}
+            <div className="bg-gray-100 text-gray-700 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
+              <Building2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">LKS / Panti Sosial</h3>
+            <p className="text-gray-500 text-sm leading-relaxed">
+              Register your organization to receive surplus food donations from businesses.
             </p>
           </div>
         </div>

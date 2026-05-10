@@ -315,7 +315,7 @@ export default function AnalyticsPage() {
                   </div>
                   <div className="text-right">
                     <Image
-                      src="/Logo EcoEat.png"
+                      src="/logo-ecoeat.png"
                       alt="EcoEat — Delivery & Surplus Food"
                       width={150}
                       height={40}

@@ -62,7 +62,7 @@ npm run build
 ```txt
 ecoeat/
 ├── public/
-│   └── Logo EcoEat.png
+│   └── logo-ecoeat.png
 ├── src/
 │   ├── app/
 │   │   ├── (auth)/
@@ -241,7 +241,7 @@ Scheduler/checker membaca expired_at → jika melewati batas aman → status tak
 - [ ] Tidak ada border 1px sebagai divider.
 - [ ] Semua card memakai `rounded-2xl`.
 - [ ] Semua modal memakai `rounded-3xl`.
-- [ ] Logo menggunakan `Logo EcoEat.png`.
+- [ ] Logo menggunakan `logo-ecoeat.png`.
 - [ ] Button primer memiliki `text-white`.
 - [ ] Empty state tersedia pada list kosong.
 

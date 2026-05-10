@@ -40,7 +40,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
         <div className="p-6 pb-2">
           <Link href="/seller" className="flex items-center space-x-2 mb-4">
             <Image
-              src="/Logo EcoEat.png"
+              src="/logo-ecoeat.png"
               alt="EcoEat — Delivery & Surplus Food"
               width={150}
               height={36}
@@ -86,7 +86,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 flex-shrink-0 gap-6">
           <Link href="/seller" className="shrink-0 hidden sm:block">
             <Image
-              src="/Logo EcoEat.png"
+              src="/logo-ecoeat.png"
               alt="EcoEat — Delivery & Surplus Food"
               width={150}
               height={36}

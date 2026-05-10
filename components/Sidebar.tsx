@@ -3,12 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-<<<<<<<< HEAD:components/Sidebar.tsx
-import { LayoutDashboard, CheckSquare, Map, DollarSign, Settings, LogOut, HelpCircle, Leaf, Power, X, Clock } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, Map, DollarSign, Settings, LogOut, HelpCircle, Leaf, Power, X, Clock, User } from 'lucide-react';
 import Image from 'next/image';
-========
-import { LayoutDashboard, CheckSquare, DollarSign, Settings, LogOut, HelpCircle, Leaf, Power, X, Clock, User } from 'lucide-react';
->>>>>>>> a40049867a3233069c3043db95e7768a5b4a6029:components/kurir/Sidebar.tsx
 import { useCourier } from './CourierLayout';
 
 interface SidebarProps {
@@ -48,7 +44,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         <div className="flex items-center justify-between p-6">
           <div className="flex items-center gap-3 text-ecoeat-primary">
             <Image
-              src="/Logo EcoEat.png"
+              src="/logo-ecoeat.png"
               alt="EcoEat — Delivery & Surplus Food"
               width={150}
               height={36}

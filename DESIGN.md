@@ -133,7 +133,7 @@ Dilarang menggunakan shadow gelap pekat atau neumorphism ekstrem.
 Semua penggunaan logo wajib memakai file gambar resmi:
 
 ```txt
-public/Logo EcoEat.png
+public/logo-ecoeat.png
 ```
 
 Aturan:
@@ -147,7 +147,7 @@ Contoh:
 
 ```tsx
 <Image
-  src="/Logo EcoEat.png"
+  src="/logo-ecoeat.png"
   alt="EcoEat — Delivery & Surplus Food"
   width={150}
   height={64}
@@ -308,7 +308,7 @@ Sekunder:
 - Gunakan `rounded-2xl` untuk mayoritas kartu.
 - Gunakan `shadow-ambient` hanya untuk elemen penting.
 - Gunakan whitespace dan tonal layer sebagai pemisah.
-- Gunakan logo resmi `Logo EcoEat.png`.
+- Gunakan logo resmi `logo-ecoeat.png`.
 - Pastikan semua dashboard responsif.
 - Pastikan LKS memiliki dashboard lengkap.
 
