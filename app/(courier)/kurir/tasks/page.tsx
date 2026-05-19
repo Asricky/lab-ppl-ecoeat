@@ -3,13 +3,13 @@
 import Link from 'next/link';
 import { courierTasks } from '@/lib/dashboardData';
 
-const statusLabel = {
+const statusLabel: Record<string, string> = {
   assigned: 'Assigned',
   in_progress: 'In Progress',
   completed: 'Completed',
 };
 
-const statusClass = {
+const statusClass: Record<string, string> = {
   assigned: 'bg-amber-100 text-amber-700',
   in_progress: 'bg-sky-100 text-sky-700',
   completed: 'bg-emerald-100 text-emerald-700',

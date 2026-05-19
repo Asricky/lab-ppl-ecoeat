@@ -4,12 +4,12 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  HeartHandshake, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  HeartHandshake,
+  BarChart3,
   Settings,
   Search,
   Bell,
@@ -55,11 +55,10 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
             const isActive = pathname === item.href;
             return (
               <Link key={item.name} href={item.href}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all font-medium ${
-                  isActive 
-                    ? 'bg-white text-[#1A5632] shadow-sm' 
+                className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all font-medium ${isActive
+                    ? 'bg-white text-[#1A5632] shadow-sm'
                     : 'text-gray-600 hover:bg-[#E2EFE5] hover:text-[#1A5632]'
-                }`}
+                  }`}
               >
                 <item.icon size={20} className={isActive ? 'text-[#1A5632]' : 'text-gray-500'} />
                 <span>{item.name}</span>
@@ -67,7 +66,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
             );
           })}
         </nav>
-        
+
         <div className="p-4 border-t border-[#E2EFE5] space-y-2">
           <Link href="/seller/products/create" className="flex items-center justify-center space-x-2 w-full bg-[#1A5632] hover:bg-[#0F351F] text-white px-4 py-3 rounded-xl font-bold transition-colors shadow-sm">
             <Plus size={20} />
@@ -110,7 +109,6 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
                 }}
               />
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <span className="text-[10px] font-bold text-gray-400 border border-gray-200 rounded px-1.5 py-0.5 bg-white shadow-sm">Ctrl K</span>
               </div>
             </div>
           </div>
@@ -139,7 +137,8 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
       </div>
 
       {/* Global Print Styles */}
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @media print {
           body * {
             visibility: hidden;

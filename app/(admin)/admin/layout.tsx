@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import {
   LayoutDashboard,
   Users,
@@ -41,11 +42,15 @@ export default function AdminLayout({
         <div>
           <div className="p-6 flex flex-col items-center justify-center">
             <div className="flex flex-col items-center justify-center space-y-2">
-              <div className="bg-[#1A5632] p-3 rounded-full text-white">
-                <Leaf size={32} />
-              </div>
+              <Image
+                src="/logo-ecoeat.png"
+                alt="EcoEat — Delivery & Surplus Food"
+                width={150}
+                height={36}
+                priority
+                className="h-9 w-auto object-contain"
+              />
               <div className="text-center">
-                <h1 className="text-xl font-black text-[#1A5632] tracking-wider uppercase">EcoEat</h1>
                 <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Admin Console</p>
               </div>
             </div>

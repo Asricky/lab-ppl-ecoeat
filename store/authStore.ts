@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type Role = 'admin' | 'seller' | 'buyer' | 'kurir' | null;
+export type Role = 'admin' | 'seller' | 'buyer' | 'kurir' | 'lks-panti' | null;
 
 export interface User {
   id: string;

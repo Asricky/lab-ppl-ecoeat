@@ -2,7 +2,7 @@
 import { useState, useEffect, Suspense, useMemo } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Wallet, MapPin, Settings, HelpCircle, LogOut, Download, Plus } from "lucide-react";
+import { Wallet, MapPin, Settings, HelpCircle, LogOut, Download, Plus, CheckCircle2, AlertCircle, X, Info } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useEcoPayStore } from "@/store/ecoPayStore";
 import { useBuyerAddressesStore } from "@/store/buyerAddressesStore";
@@ -30,6 +30,24 @@ function ProfileContent() {
   const [withdrawBank, setWithdrawBank] = useState('');
   const [withdrawAccount, setWithdrawAccount] = useState('');
 
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'info';
+  } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setNotification({ message, type });
+  };
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
   const formatRp = (amount: number) => {
     return 'Rp' + amount.toLocaleString('id-ID');
   };
@@ -41,9 +59,9 @@ function ProfileContent() {
 
   const handleTopup = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!topupAmount || !topupBank) return alert("Pilih bank dan masukkan nominal!");
+    if (!topupAmount || !topupBank) return showToast("Pilih bank dan masukkan nominal!", "error");
     addBalance(Number(topupAmount), `Top-up via ${topupBank}`);
-    alert("Top-up berhasil!");
+    showToast("Top-up berhasil!", "success");
     setTopupAmount('');
     setActiveTab('ecopay');
   };
@@ -61,10 +79,10 @@ function ProfileContent() {
 
   const handleWithdraw = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!withdrawAmount || !withdrawBank || !withdrawAccount) return alert("Lengkapi data penarikan!");
-    if (Number(withdrawAmount) > balance) return alert("Saldo tidak mencukupi!");
+    if (!withdrawAmount || !withdrawBank || !withdrawAccount) return showToast("Lengkapi data penarikan!", "error");
+    if (Number(withdrawAmount) > balance) return showToast("Saldo tidak mencukupi!", "error");
     deductBalance(Number(withdrawAmount), `Withdraw to ${withdrawBank}`);
-    alert("Penarikan berhasil!");
+    showToast("Penarikan berhasil!", "success");
     setWithdrawAmount('');
     setWithdrawAccount('');
     setActiveTab('ecopay');
@@ -152,7 +170,7 @@ function ProfileContent() {
                     <label className="block text-sm font-bold text-gray-700 mb-3">Pilih Nominal Cepat</label>
                     <div className="grid grid-cols-3 gap-3 mb-4">
                       {[50000, 100000, 250000].map(amount => (
-                        <button 
+                        <button
                           key={amount}
                           type="button"
                           onClick={() => setTopupAmount(amount.toString())}
@@ -207,19 +225,19 @@ function ProfileContent() {
                       const typeBadge =
                         t.type === 'refund' ? 'Refund' : t.type === 'topup' ? 'Top-up' : t.type === 'withdraw' ? 'Tarik tunai / bayar' : t.type;
                       return (
-                      <div key={t.id} className="flex justify-between gap-4 items-start p-4 border-b border-gray-100 last:border-0 rounded-2xl hover:bg-[#f4f7ed]/50 transition-colors">
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-2 mb-1">
-                            <span className="text-[10px] font-bold uppercase tracking-wide text-green-900/70 bg-green-50 border border-green-100 px-2 py-0.5 rounded-lg">{typeBadge}</span>
+                        <div key={t.id} className="flex justify-between gap-4 items-start p-4 border-b border-gray-100 last:border-0 rounded-2xl hover:bg-[#f4f7ed]/50 transition-colors">
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                              <span className="text-[10px] font-bold uppercase tracking-wide text-green-900/70 bg-green-50 border border-green-100 px-2 py-0.5 rounded-lg">{typeBadge}</span>
+                            </div>
+                            <p className="font-bold text-gray-900 truncate">{t.method}</p>
+                            <p className="text-xs text-gray-500">{new Date(t.date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                           </div>
-                          <p className="font-bold text-gray-900 truncate">{t.method}</p>
-                          <p className="text-xs text-gray-500">{new Date(t.date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                          <span className={`font-extrabold tabular-nums shrink-0 ${amountClass}`}>
+                            {prefix}{formatRp(t.amount)}
+                          </span>
                         </div>
-                        <span className={`font-extrabold tabular-nums shrink-0 ${amountClass}`}>
-                          {prefix}{formatRp(t.amount)}
-                        </span>
-                      </div>
-                    );
+                      );
                     })}
                   </div>
                 ) : (
@@ -250,9 +268,8 @@ function ProfileContent() {
                 {sortedAddresses.map((a) => (
                   <li
                     key={a.id}
-                    className={`rounded-2xl border p-5 transition-shadow ${
-                      a.isPrimary ? "border-green-700 bg-[#eef3e8] shadow-sm" : "border-[#d4dec4] bg-[#f4f7ed]/40 hover:border-green-700/35"
-                    }`}
+                    className={`rounded-2xl border p-5 transition-shadow ${a.isPrimary ? "border-green-700 bg-[#eef3e8] shadow-sm" : "border-[#d4dec4] bg-[#f4f7ed]/40 hover:border-green-700/35"
+                      }`}
                   >
                     <div className="flex flex-wrap items-center gap-2 mb-3">
                       {a.isPrimary && (
@@ -298,6 +315,29 @@ function ProfileContent() {
           </div>
         )}
       </div>
+
+      {/* Premium Toast Notification */}
+      {notification && (
+        <div className="fixed bottom-5 right-5 z-[9999] animate-in fade-in slide-in-from-bottom-5 duration-300">
+          <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl border backdrop-blur-md ${notification.type === 'success'
+              ? 'bg-[#EAF3E1]/95 border-[#1A5632]/20 text-[#1A5632]'
+              : notification.type === 'error'
+                ? 'bg-red-50/95 border-red-200 text-red-950'
+                : 'bg-blue-50/95 border-blue-200 text-blue-950'
+            }`}>
+            {notification.type === 'success' && <CheckCircle2 className="w-5 h-5 text-green-700 shrink-0" />}
+            {notification.type === 'error' && <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />}
+            {notification.type === 'info' && <Info className="w-5 h-5 text-blue-600 shrink-0" />}
+            <p className="text-sm font-bold">{notification.message}</p>
+            <button
+              onClick={() => setNotification(null)}
+              className="text-gray-400 hover:text-gray-600 transition-colors ml-2"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

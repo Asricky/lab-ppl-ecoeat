@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ClipboardList, Heart, LayoutDashboard, Leaf, ShoppingBag, Truck, User, X } from "lucide-react";
+import Image from "next/image";
 
 type SidebarProps = {
   desktopCollapsed: boolean;
@@ -45,27 +46,28 @@ export default function Sidebar({ desktopCollapsed, mobileOpen, onCloseMobile }:
         ].join(" ")}
       >
         <div
-          className={`p-4 flex justify-between items-center border-b border-[#d4dec4]/60 shrink-0 ${
-            rail ? "lg:flex-col lg:gap-4 lg:border-0 lg:py-6" : ""
-          }`}
+          className={`p-4 flex justify-between items-center border-b border-[#d4dec4]/60 shrink-0 ${rail ? "lg:flex-col lg:gap-4 lg:border-0 lg:py-6" : ""
+            }`}
         >
           <Link
             href="/buyer"
-            className={`flex items-center gap-2 text-green-800 font-extrabold tracking-tight ${
-              rail ? "lg:flex-col lg:justify-center w-full lg:gap-1" : ""
-            }`}
+            className={`flex items-center gap-2 text-green-800 font-extrabold tracking-tight ${rail ? "lg:flex-col lg:justify-center w-full lg:gap-1" : ""
+              }`}
             title="EcoEat"
           >
             {rail ? (
               <Leaf className="w-10 h-10 text-green-600 shrink-0" strokeWidth={2} />
             ) : (
-              <>
-                <Leaf className="w-8 h-8 text-green-600 shrink-0" strokeWidth={2} />
-                <div className="flex flex-col min-w-0">
-                  <span className="text-lg leading-none">EcoEat</span>
-                  <span className="text-[10px] font-medium text-gray-500 mt-0.5 truncate">Buyer</span>
-                </div>
-              </>
+              <div className="flex flex-col min-w-0">
+                <Image
+                  src="/logo-ecoeat.png"
+                  alt="EcoEat — Delivery & Surplus Food"
+                  width={150}
+                  height={36}
+                  priority
+                  className="h-9 w-auto object-contain"
+                />
+              </div>
             )}
           </Link>
           <button
