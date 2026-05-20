@@ -9,7 +9,7 @@ import PartnerMarquee from "@/components/landing/PartnerMarquee";
 import FooterLanding from "@/components/landing/FooterLanding";
 
 export const metadata = {
-  title: "EcoEat — Penyelamatan Makanan Surplus & Cegah Sampah Organik",
+  title: "EcoEat - Penyelamatan Makanan Surplus & Cegah Sampah Organik",
   description: "Selamatkan makanan surplus lezat berdiskon tinggi dari merchant lokal favorit Anda. Mari berkolaborasi cegah sampah organik demi bumi berkelanjutan bersama EcoEat.",
 };
 
@@ -29,6 +29,7 @@ export default function Home() {
 
         {/* Category Showcase Section */}
         <CategorySection />
+
         {/* National Partner Distribution Map */}
         <MitraMapSection />
 

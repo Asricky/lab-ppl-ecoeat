@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Upload, Info, User, Truck, MapPin, FileCheck } from "lucide-react";
-import { FormEvent, useState, useRef } from "react";
+import { Upload, Info, User, Truck, MapPin, FileCheck, CheckCircle2, AlertCircle, X } from "lucide-react";
+import { FormEvent, useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { authHandler } from "@/lib/auth-handler";
@@ -28,17 +28,32 @@ export default function RegisterCourierPage() {
   const simInputRef = useRef<HTMLInputElement>(null);
   const stnkInputRef = useRef<HTMLInputElement>(null);
 
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'info';
+  } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setNotification({ message, type });
+  };
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
   const handleFileChange = (type: 'sim' | 'stnk') => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setErrors({ ...errors, [type]: "File size must be less than 5MB" });
+        showToast(`${type.toUpperCase()} file size must be less than 5MB`, "error");
         if (type === 'sim') setSimFile(null);
         else setStnkFile(null);
       } else {
-        const newErrors = { ...errors };
-        delete newErrors[type];
-        setErrors(newErrors);
         if (type === 'sim') setSimFile(file);
         else setStnkFile(file);
       }
@@ -50,13 +65,10 @@ export default function RegisterCourierPage() {
     const file = e.dataTransfer.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setErrors({ ...errors, [type]: "File size must be less than 5MB" });
+        showToast(`${type.toUpperCase()} file size must be less than 5MB`, "error");
         if (type === 'sim') setSimFile(null);
         else setStnkFile(null);
       } else {
-        const newErrors = { ...errors };
-        delete newErrors[type];
-        setErrors(newErrors);
         if (type === 'sim') setSimFile(file);
         else setStnkFile(file);
       }
@@ -65,16 +77,37 @@ export default function RegisterCourierPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const newErrors: Record<string, string> = {};
 
-    if (!formData.email.includes("@")) newErrors.email = "Invalid email format";
-    if (formData.password.length < 8) newErrors.password = "Password must be at least 8 characters";
-    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match";
-    if (!simFile) newErrors.sim = "Please upload your Driver License (SIM)";
-    if (!stnkFile) newErrors.stnk = "Please upload your Vehicle Registration (STNK)";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    if (!formData.name.trim()) {
+      showToast("Full Name is required", "error");
+      return;
+    }
+    if (!formData.email.includes("@")) {
+      showToast("Invalid email format", "error");
+      return;
+    }
+    if (formData.password.length < 8) {
+      showToast("Password must be at least 8 characters", "error");
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      showToast("Passwords do not match", "error");
+      return;
+    }
+    if (!formData.plateNumber.trim()) {
+      showToast("Plate number is required", "error");
+      return;
+    }
+    if (!formData.coverageArea.trim()) {
+      showToast("Coverage Area is required", "error");
+      return;
+    }
+    if (!simFile) {
+      showToast("Please upload your Driver License (SIM)", "error");
+      return;
+    }
+    if (!stnkFile) {
+      showToast("Please upload your Vehicle Registration (STNK)", "error");
       return;
     }
 
@@ -82,9 +115,13 @@ export default function RegisterCourierPage() {
     try {
       const { user, token } = await authHandler.register(formData, 'kurir');
       setUser(user, token);
-      router.push(`/${user.role}`);
+      showToast("Registration successful!", "success");
+      setTimeout(() => {
+        router.push(`/${user.role}`);
+      }, 1000);
     } catch (error) {
       console.error("Registration failed", error);
+      showToast("Registration failed. Please try again.", "error");
     } finally {
       setIsLoading(false);
     }
@@ -133,36 +170,33 @@ export default function RegisterCourierPage() {
                 <input
                   type="email"
                   placeholder="julian@example.com"
-                  className={`w-full bg-[#eef1ed] border-transparent rounded-lg px-4 py-3.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow ${errors.email ? 'ring-2 ring-red-500' : ''}`}
+                  className="w-full bg-[#eef1ed] border-transparent rounded-lg px-4 py-3.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required
                 />
-                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Password</label>
                 <input
                   type="password"
                   placeholder="••••••••"
-                  className={`w-full bg-[#eef1ed] border-transparent rounded-lg px-4 py-3.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow ${errors.password ? 'ring-2 ring-red-500' : ''}`}
+                  className="w-full bg-[#eef1ed] border-transparent rounded-lg px-4 py-3.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required
                 />
-                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Confirm Password</label>
                 <input
                   type="password"
                   placeholder="••••••••"
-                  className={`w-full bg-[#eef1ed] border-transparent rounded-lg px-4 py-3.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow ${errors.confirmPassword ? 'ring-2 ring-red-500' : ''}`}
+                  className="w-full bg-[#eef1ed] border-transparent rounded-lg px-4 py-3.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                   required
                 />
-                {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
               </div>
             </div>
           </section>
@@ -238,7 +272,7 @@ export default function RegisterCourierPage() {
               <div>
                 <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Driver License (SIM)</label>
                 <div 
-                  className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${errors.sim ? 'border-red-400 bg-red-50' : 'border-green-200 bg-[#f9faf9] hover:bg-green-50 cursor-pointer'}`}
+                  className="border-2 border-dashed rounded-xl p-6 text-center transition-colors border-green-200 bg-[#f9faf9] hover:bg-green-50 cursor-pointer"
                   onClick={() => simInputRef.current?.click()}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={handleDrop('sim')}
@@ -256,14 +290,13 @@ export default function RegisterCourierPage() {
                     )}
                   </div>
                 </div>
-                {errors.sim && <p className="text-red-500 text-xs mt-2">{errors.sim}</p>}
               </div>
 
               {/* STNK Upload */}
               <div>
                 <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Vehicle Registration (STNK)</label>
                 <div 
-                  className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${errors.stnk ? 'border-red-400 bg-red-50' : 'border-green-200 bg-[#f9faf9] hover:bg-green-50 cursor-pointer'}`}
+                  className="border-2 border-dashed rounded-xl p-6 text-center transition-colors border-green-200 bg-[#f9faf9] hover:bg-green-50 cursor-pointer"
                   onClick={() => stnkInputRef.current?.click()}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={handleDrop('stnk')}
@@ -281,7 +314,6 @@ export default function RegisterCourierPage() {
                     )}
                   </div>
                 </div>
-                {errors.stnk && <p className="text-red-500 text-xs mt-2">{errors.stnk}</p>}
               </div>
             </div>
           </section>
@@ -308,6 +340,28 @@ export default function RegisterCourierPage() {
           Already have an account? <Link href="/login" className="text-green-700 font-bold hover:underline">Login</Link>
         </p>
       </div>
+
+      {/* Premium Toast Notification */}
+      {notification && (
+        <div className="fixed bottom-5 right-5 z-[9999] animate-in fade-in slide-in-from-bottom-5 duration-300">
+          <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl border backdrop-blur-md ${notification.type === 'success'
+              ? 'bg-[#EAF3E1]/95 border-[#1A5632]/20 text-[#1A5632]'
+              : notification.type === 'error'
+                ? 'bg-red-50/95 border-red-200 text-red-950'
+                : 'bg-blue-50/95 border-blue-200 text-blue-950'
+            }`}>
+            <CheckCircle2 className="w-5 h-5 text-green-700 shrink-0" />
+            <p className="text-sm font-bold text-gray-800">{notification.message}</p>
+            <button
+              onClick={() => setNotification(null)}
+              className="text-gray-400 hover:text-gray-600 transition-colors ml-2"
+              type="button"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

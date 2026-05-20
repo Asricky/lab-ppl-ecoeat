@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CheckCircle2, AlertCircle, X, Info } from "lucide-react";
 import { useBuyerAddressesStore } from "@/store/buyerAddressesStore";
 
 export default function AddAddressPage() {
@@ -20,6 +20,24 @@ export default function AddAddressPage() {
   const [streetDetail, setStreetDetail] = useState("");
   const [isPrimary, setIsPrimary] = useState(false);
 
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'info';
+  } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setNotification({ message, type });
+  };
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const labelFinal = label.trim() || "Alamat";
@@ -31,12 +49,12 @@ export default function AddAddressPage() {
       !district.trim() ||
       !streetDetail.trim()
     ) {
-      alert("Lengkapi semua kolom yang wajib diisi.");
+      showToast("Lengkapi semua kolom yang wajib diisi.", "error");
       return;
     }
     const pos = postalCode.replace(/\D/g, "");
     if (pos.length !== 5) {
-      alert("Kode pos wajib 5 digit.");
+      showToast("Kode pos wajib 5 digit.", "error");
       return;
     }
     addAddress({
@@ -50,7 +68,10 @@ export default function AddAddressPage() {
       streetDetail: streetDetail.trim(),
       isPrimary,
     });
-    router.push("/buyer/profile?tab=address");
+    showToast("Alamat berhasil ditambahkan!", "success");
+    setTimeout(() => {
+      router.push("/buyer/profile?tab=address");
+    }, 800);
   };
 
   const fieldClass =
@@ -133,6 +154,29 @@ export default function AddAddressPage() {
           </button>
         </form>
       </div>
+
+      {/* Premium Toast Notification */}
+      {notification && (
+        <div className="fixed bottom-5 right-5 z-[9999] animate-in fade-in slide-in-from-bottom-5 duration-300">
+          <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl border backdrop-blur-md ${notification.type === 'success'
+              ? 'bg-[#EAF3E1]/95 border-[#1A5632]/20 text-[#1A5632]'
+              : notification.type === 'error'
+                ? 'bg-red-50/95 border-red-200 text-red-950'
+                : 'bg-blue-50/95 border-blue-200 text-blue-950'
+            }`}>
+            {notification.type === 'success' && <CheckCircle2 className="w-5 h-5 text-green-700 shrink-0" />}
+            {notification.type === 'error' && <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />}
+            {notification.type === 'info' && <Info className="w-5 h-5 text-blue-600 shrink-0" />}
+            <p className="text-sm font-bold">{notification.message}</p>
+            <button
+              onClick={() => setNotification(null)}
+              className="text-gray-400 hover:text-gray-600 transition-colors ml-2"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

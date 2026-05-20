@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Leaf } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { Leaf, CheckCircle2, AlertCircle, X, Info } from "lucide-react";
+import { FormEvent, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { authHandler } from "@/lib/auth-handler";
@@ -19,19 +19,45 @@ export default function RegisterBuyerPage() {
     terms: false,
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'info';
+  } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setNotification({ message, type });
+  };
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const newErrors: Record<string, string> = {};
 
-    if (!formData.email.includes("@")) newErrors.email = "Invalid email format";
-    if (formData.password.length < 8) newErrors.password = "Password must be at least 8 characters";
-    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match";
-    if (!formData.terms) newErrors.terms = "You must accept the terms";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    if (!formData.name.trim()) {
+      showToast("Full Name is required", "error");
+      return;
+    }
+    if (!formData.email.includes("@")) {
+      showToast("Invalid email format", "error");
+      return;
+    }
+    if (formData.password.length < 8) {
+      showToast("Password must be at least 8 characters", "error");
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      showToast("Passwords do not match", "error");
+      return;
+    }
+    if (!formData.terms) {
+      showToast("You must accept the terms", "error");
       return;
     }
 
@@ -39,9 +65,13 @@ export default function RegisterBuyerPage() {
     try {
       const { user, token } = await authHandler.register(formData, "buyer");
       setUser(user, token);
-      router.push(`/${user.role}`);
+      showToast("Registration successful!", "success");
+      setTimeout(() => {
+        router.push(`/${user.role}`);
+      }, 1000);
     } catch (error) {
       console.error("Registration failed", error);
+      showToast("Registration failed. Please try again.", "error");
     } finally {
       setIsLoading(false);
     }
@@ -82,12 +112,11 @@ export default function RegisterBuyerPage() {
             <input
               type="email"
               placeholder="julian@example.com"
-              className={`w-full bg-[#eef1ed] border-transparent rounded-lg px-4 py-3.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow ${errors.email ? 'ring-2 ring-red-500' : ''}`}
+              className="w-full bg-[#eef1ed] border-transparent rounded-lg px-4 py-3.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
             />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -98,12 +127,11 @@ export default function RegisterBuyerPage() {
               <input
                 type="password"
                 placeholder="••••••••"
-                className={`w-full bg-[#eef1ed] border-transparent rounded-lg px-4 py-3.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow ${errors.password ? 'ring-2 ring-red-500' : ''}`}
+                className="w-full bg-[#eef1ed] border-transparent rounded-lg px-4 py-3.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
               />
-              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">
@@ -112,12 +140,11 @@ export default function RegisterBuyerPage() {
               <input
                 type="password"
                 placeholder="••••••••"
-                className={`w-full bg-[#eef1ed] border-transparent rounded-lg px-4 py-3.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow ${errors.confirmPassword ? 'ring-2 ring-red-500' : ''}`}
+                className="w-full bg-[#eef1ed] border-transparent rounded-lg px-4 py-3.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow"
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 required
               />
-              {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
             </div>
           </div>
 
@@ -133,7 +160,6 @@ export default function RegisterBuyerPage() {
               I agree to the <span className="font-bold text-green-700">Terms of Service</span> and <span className="font-bold text-green-700">Privacy Policy</span>.
             </label>
           </div>
-          {errors.terms && <p className="text-red-500 text-xs">{errors.terms}</p>}
 
           <div className="pt-4">
             <button
@@ -161,6 +187,30 @@ export default function RegisterBuyerPage() {
           <p className="text-gray-900 font-bold"><span className="text-xl">1,420kg CO2</span> saved today</p>
         </div>
       </div>
+
+      {/* Premium Toast Notification */}
+      {notification && (
+        <div className="fixed bottom-5 right-5 z-[9999] animate-in fade-in slide-in-from-bottom-5 duration-300">
+          <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl border backdrop-blur-md ${notification.type === 'success'
+              ? 'bg-[#EAF3E1]/95 border-[#1A5632]/20 text-[#1A5632]'
+              : notification.type === 'error'
+                ? 'bg-red-50/95 border-red-200 text-red-950'
+                : 'bg-blue-50/95 border-blue-200 text-blue-950'
+            }`}>
+            {notification.type === 'success' && <CheckCircle2 className="w-5 h-5 text-green-700 shrink-0" />}
+            {notification.type === 'error' && <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />}
+            {notification.type === 'info' && <Info className="w-5 h-5 text-blue-600 shrink-0" />}
+            <p className="text-sm font-bold">{notification.message}</p>
+            <button
+              onClick={() => setNotification(null)}
+              className="text-gray-400 hover:text-gray-600 transition-colors ml-2"
+              type="button"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,32 +1,44 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
-import { Camera, Edit2, Check, X, Car, Hash, Info, User as UserIcon } from 'lucide-react';
+import { Camera, Edit2, Check, X, Car, Hash, Info, User as UserIcon, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function KurirProfilePage() {
   const { user, updateUser } = useAuthStore();
   
   const [isEditingName, setIsEditingName] = useState(false);
   const [editName, setEditName] = useState(user?.name || 'Alex Green');
-  const [showToast, setShowToast] = useState(false);
+  
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'info';
+  } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setNotification({ message, type });
+  };
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSaveName = () => {
     updateUser({ name: editName });
     setIsEditingName(false);
-    triggerToast();
+    showToast("Profil berhasil diperbarui!", "success");
   };
 
   const handleCancelEdit = () => {
     setEditName(user?.name || 'Alex Green');
     setIsEditingName(false);
-  };
-
-  const triggerToast = () => {
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
   };
 
   const handlePhotoClick = () => {
@@ -41,17 +53,33 @@ export default function KurirProfilePage() {
       // Simulate file upload by creating a local object URL
       const imageUrl = URL.createObjectURL(file);
       updateUser({ avatar: imageUrl });
-      triggerToast();
+      showToast("Foto profil berhasil diperbarui!", "success");
     }
   };
 
   return (
     <div className="space-y-6 relative">
-      {/* Toast Notification */}
-      {showToast && (
-        <div className="fixed top-24 right-8 bg-[#1e8932] text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-in fade-in slide-in-from-top-4 z-50">
-          <Check size={20} />
-          <p className="font-bold text-sm">Profil berhasil diperbarui!</p>
+      {/* Premium Toast Notification */}
+      {notification && (
+        <div className="fixed bottom-5 right-5 z-[9999] animate-in fade-in slide-in-from-bottom-5 duration-300">
+          <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl border backdrop-blur-md ${
+            notification.type === 'success'
+              ? 'bg-[#EAF3E1]/95 border-[#1A5632]/20 text-[#1A5632]'
+              : notification.type === 'error'
+                ? 'bg-red-50/95 border-red-200 text-red-950'
+                : 'bg-blue-50/95 border-blue-200 text-blue-950'
+          }`}>
+            {notification.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0" />}
+            {notification.type === 'error' && <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />}
+            {notification.type === 'info' && <Info className="w-5 h-5 text-blue-600 shrink-0" />}
+            <p className="text-sm font-bold">{notification.message}</p>
+            <button
+              onClick={() => setNotification(null)}
+              className="text-gray-400 hover:text-gray-600 transition-colors ml-2"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
       )}
 

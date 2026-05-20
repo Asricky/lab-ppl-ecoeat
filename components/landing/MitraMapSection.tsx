@@ -15,8 +15,8 @@ interface RegionData {
 
 const regionDataList: RegionData[] = [
   {
-    id: "sumatra",
-    name: "Sumatra",
+    id: "Sumatera",
+    name: "Sumatera",
     partners: 35,
     mealsSaved: 8500,
     co2Prevented: "20.4 Ton",
@@ -25,7 +25,7 @@ const regionDataList: RegionData[] = [
     topPartners: [
       "Bumi Lestari Bakery",
       "Medan Green Hotel",
-      "Sumatra Food Rescue",
+      "Sumatera Food Rescue",
     ],
   },
   {
@@ -107,7 +107,7 @@ const regionDataList: RegionData[] = [
 // Accurate SVG path data from SVGRepo (CC0 License)
 // Original viewBox: 0 0 260 82, scaled 3.8x for display in 0 0 1000 320
 const ISLAND_PATHS: Record<string, { paths: string[]; labelPos: { x: number; y: number } }> = {
-  sumatra: {
+  Sumatera: {
     paths: [
       "M63.888,47.288l-2.69-4.46l-4.034-0.377l-3.115-6.607l-5.19-1.25l1.462-5.427l-7.196-2.524l-2.053-3.233l-3.846-1.557l-2.099-2.69l-4.224-1.652l-3.232-3.303l-8.14-4.624L14.859,3.26L7.238,3.285L2,1.939l1.392,3.988l5.757,5.403l2.572,0.708l5.073,7.573l2.005,0.425l3.775,3.445l2.525,6.913l3.374,1.392l7.786,12.953l14.888,12.293l3.964,3.681l8.069,0.472l-0.306-8.99L63.888,47.288z",
     ],
@@ -165,7 +165,7 @@ const ISLAND_PATHS: Record<string, { paths: string[]; labelPos: { x: number; y: 
 
 // Pin dot positions (in the original 260x82 coordinate space)
 const PIN_POSITIONS: Record<string, { x: number; y: number }> = {
-  sumatra: { x: 38, y: 32 },
+  Sumatera: { x: 38, y: 32 },
   jawa: { x: 90, y: 67 },
   kalimantan: { x: 112, y: 26 },
   sulawesi: { x: 155, y: 30 },

@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { TrendingUp, ShieldCheck } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { TrendingUp, ShieldCheck, CheckCircle2, AlertCircle, X, Info } from "lucide-react";
+import { FormEvent, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { authHandler } from "@/lib/auth-handler";
@@ -15,15 +15,39 @@ export default function LoginPage() {
   const router = useRouter();
   const { setUser } = useAuthStore();
 
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'info';
+  } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setNotification({ message, type });
+  };
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
       const { user, token } = await authHandler.login(email, password);
       setUser(user, token);
-      router.push(`/${user.role}`);
+      showToast("Login berhasil!", "success");
+      // Add a tiny delay to let the toast show up
+      setTimeout(() => {
+        router.push(`/${user.role}`);
+      }, 800);
     } catch (error) {
       console.error("Login failed", error);
+      const msg = error instanceof Error ? error.message : "Email atau password salah!";
+      showToast(msg, "error");
     } finally {
       setIsLoading(false);
     }
@@ -145,6 +169,29 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
+      {/* Premium Toast Notification */}
+      {notification && (
+        <div className="fixed bottom-5 right-5 z-[9999] animate-in fade-in slide-in-from-bottom-5 duration-300">
+          <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl border backdrop-blur-md ${notification.type === 'success'
+              ? 'bg-[#EAF3E1]/95 border-[#1A5632]/20 text-[#1A5632]'
+              : notification.type === 'error'
+                ? 'bg-red-50/95 border-red-200 text-red-950'
+                : 'bg-blue-50/95 border-blue-200 text-blue-950'
+            }`}>
+            {notification.type === 'success' && <CheckCircle2 className="w-5 h-5 text-green-700 shrink-0" />}
+            {notification.type === 'error' && <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />}
+            {notification.type === 'info' && <Info className="w-5 h-5 text-blue-600 shrink-0" />}
+            <p className="text-sm font-bold">{notification.message}</p>
+            <button
+              onClick={() => setNotification(null)}
+              className="text-gray-400 hover:text-gray-600 transition-colors ml-2"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
