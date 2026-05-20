@@ -10,8 +10,6 @@ import {
   Clock,
   X,
   ArrowLeft,
-  Leaf,
-  MapPin,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -146,42 +144,6 @@ export default function ProductsPage() {
         </Link>
       </div>
 
-      {/* Live Feed: Recently Registered Products */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-gray-900 flex items-center">
-            <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse mr-2.5 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
-            Live: Newly Registered Products
-          </h2>
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Updated just now</span>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {sellProducts.slice(0, 3).map((product: SellerProduct, idx: number) => (
-            <div 
-              key={`live-${product.id}`} 
-              onClick={() => openModal('view', product)}
-              className="bg-white rounded-2xl p-4 shadow-sm border border-green-100 hover:border-green-300 hover:shadow-md cursor-pointer flex items-start space-x-4 relative overflow-hidden group transition-all"
-            >
-              <div className="absolute top-0 right-0 bg-green-500 text-white text-[9px] font-bold px-2 py-1 rounded-bl-xl uppercase tracking-wider z-10 shadow-sm">
-                {idx === 0 ? 'Just Now' : `${idx + 1}m ago`}
-              </div>
-              <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-gray-100">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-              </div>
-              <div className="pr-4">
-                <h3 className="font-bold text-gray-900 text-sm leading-tight mb-1 group-hover:text-[#1A5632] transition-colors line-clamp-1">{product.name}</h3>
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-xs font-bold text-[#1A5632]">{product.price}</span>
-                  <span className="text-gray-300">•</span>
-                  <span className="text-[10px] text-gray-500 font-medium">{product.stock} units</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Product Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
@@ -278,12 +240,24 @@ export default function ProductsPage() {
 
             {modalType === 'view' && selectedProduct && (
               <div className="bg-[#F4F8EC] min-h-[400px] flex flex-col pt-12 p-6">
+                {/* Product image */}
+                <div className="w-full h-48 rounded-2xl overflow-hidden mb-6 bg-gray-100 shadow-sm">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={selectedProduct.image}
+                    alt={selectedProduct.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&h=300&q=80';
+                    }}
+                  />
+                </div>
+
                 <div className="mb-6">
-                  <h2 className="text-3xl font-extrabold text-gray-900 leading-tight mb-2">{selectedProduct.name}</h2>
+                  <h2 className="text-2xl font-extrabold text-gray-900 leading-tight mb-2">{selectedProduct.name}</h2>
                   <div className="flex items-end space-x-3">
-                    <span className="text-3xl font-extrabold text-[#1A5632]">{selectedProduct.price}</span>
-                    <span className="text-sm font-bold text-gray-400 line-through mb-1.5">Rp {(parseInt(selectedProduct.price.replace(/\D/g,'')) * 1.5).toLocaleString('id-ID')}</span>
-                    <span className="text-xs font-bold text-gray-500 mb-1.5">per unit</span>
+                    <span className="text-2xl font-extrabold text-[#1A5632]">{selectedProduct.price}</span>
+                    <span className="text-xs font-bold text-gray-500 mb-1">per unit</span>
                   </div>
                 </div>
 
@@ -291,46 +265,29 @@ export default function ProductsPage() {
                   <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center space-x-2 text-red-700 font-bold text-sm">
                       <Clock size={18} />
-                      <span>Expires in: {selectedProduct.expiry}</span>
+                      <span>Expires: {selectedProduct.expiry}</span>
                     </div>
-                    <div className="flex space-x-2">
-                      <span className="bg-white border border-gray-200 text-gray-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider shadow-sm">Near Expiry</span>
-                      <span className="bg-white border border-gray-200 text-gray-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider shadow-sm">Surplus</span>
-                    </div>
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                      selectedProduct.status === 'Expiring Soon'
+                        ? 'bg-rose-100 text-rose-700'
+                        : selectedProduct.status === 'Sold Out'
+                        ? 'bg-gray-100 text-gray-600'
+                        : 'bg-emerald-100 text-emerald-700'
+                    }`}>{selectedProduct.status}</span>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                      <div className="w-1/4 h-full bg-red-600 rounded-full"></div>
-                    </div>
-                    <span className="text-[10px] font-bold text-red-700 uppercase tracking-wider">Only {selectedProduct.stock} left - Selling Fast!</span>
-                  </div>
-                </div>
-
-                <div className="bg-[#EAF3EA] rounded-2xl p-5 mb-6 flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-[#D1E8D7] rounded-full flex items-center justify-center text-[#1A5632] shrink-0">
-                    <Leaf size={24} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-bold text-gray-900">Green Valley Farm</h4>
-                      <span className="text-xs font-bold text-[#1A5632]">1.2 miles away</span>
-                    </div>
-                    <div className="flex justify-between items-end mt-1">
-                      <p className="text-xs font-medium text-gray-600 flex items-center">
-                        <MapPin size={12} className="mr-1" /> Downtown Market, Sector 4
-                      </p>
-                      <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Local Vendor</span>
-                    </div>
+                  <div className="flex items-center justify-between text-sm font-medium text-gray-600">
+                    <span>Stock remaining</span>
+                    <span className="font-extrabold text-gray-900">{selectedProduct.stock} units</span>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-3xl p-6 shadow-sm mb-2">
+                <div className="bg-white rounded-2xl p-5 shadow-sm mb-2">
                   <h4 className="flex items-center space-x-2 font-bold text-gray-900 mb-3 text-sm">
                     <Package size={16} className="text-gray-500" />
-                    <span>Handling & Storage</span>
+                    <span>Handling &amp; Storage</span>
                   </h4>
                   <p className="text-sm font-medium text-gray-600 leading-relaxed">
-                    {selectedProduct.description || "Store at room temperature. Best used within 2 days of purchase. Eco-friendly compostable packaging provided to maintain freshness during transport."}
+                    {selectedProduct.description || 'Store at room temperature. Best used within 2 days of purchase.'}
                   </p>
                 </div>
               </div>

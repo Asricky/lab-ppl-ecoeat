@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Users, AlertCircle, FileText, ArrowUpRight, Check, X, File, TrendingUp, Receipt, Leaf, Link as LinkIcon, Download, ZoomIn, CheckCircle2 } from 'lucide-react';
+import { Users, AlertCircle, FileText, ArrowUpRight, Check, X, File, TrendingUp, Receipt, Link as LinkIcon, Download, ZoomIn, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminDashboardPage() {
@@ -102,7 +102,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-10"><Users size={48} /></div>
           <h3 className="text-sm font-bold text-gray-500 mb-2">Total Active Users</h3>
@@ -113,13 +113,10 @@ export default function AdminDashboardPage() {
           <div className="absolute top-0 right-0 p-4 opacity-10"><TrendingUp size={48} /></div>
           <h3 className="text-sm font-bold text-gray-500 mb-2">Platform Revenue</h3>
           <p className="text-3xl font-black text-[#1A5632]">Rp 45.2M</p>
-          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded mt-3 inline-block">+Rp 4.2M this week</span>
-        </div>
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-10"><Leaf size={48} /></div>
-          <h3 className="text-sm font-bold text-gray-500 mb-2">Total Meals Saved</h3>
-          <p className="text-3xl font-black text-gray-900">12.4k</p>
-          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded mt-3 inline-block">Equivalent to 400 families</span>
+          <p className="text-[10px] font-medium text-gray-400 mt-2 leading-relaxed">
+            5% admin fee from seller profit + Rp 10.000 per buyer transaction
+          </p>
+          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded mt-2 inline-block">+Rp 4.2M this week</span>
         </div>
         <div className="bg-[#1A5632] p-6 rounded-3xl shadow-sm border border-[#0F351F] relative overflow-hidden text-white">
           <div className="absolute top-0 right-0 p-4 opacity-10 text-white"><AlertCircle size={48} /></div>
@@ -257,20 +254,29 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
 
-        {/* Impact Summary */}
+        {/* Revenue Breakdown */}
         <div className="bg-[#1A5632] rounded-3xl p-6 shadow-sm relative overflow-hidden flex flex-col justify-between">
-          <div className="absolute top-0 right-0 p-4 opacity-10 text-white"><Leaf size={100} /></div>
+          <div className="absolute top-0 right-0 p-4 opacity-10 text-white"><TrendingUp size={100} /></div>
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-sm font-bold text-emerald-100 uppercase tracking-wider">Weekly Impact</h3>
-              <Leaf size={18} className="text-emerald-400" />
+              <h3 className="text-sm font-bold text-emerald-100 uppercase tracking-wider">Revenue Breakdown</h3>
+              <Receipt size={18} className="text-emerald-400" />
             </div>
-            
-            <h2 className="text-5xl font-black text-white mb-2">840<span className="text-2xl text-emerald-300">kg</span></h2>
-            <p className="text-sm font-medium text-emerald-100 mb-8">Surplus food redirected this week. This equates to 2,100 meals provided to communities.</p>
+            <h2 className="text-4xl font-black text-white mb-4">Rp 45.2M</h2>
+            <div className="space-y-3">
+              <div className="bg-white/10 rounded-xl p-3">
+                <p className="text-xs font-bold text-emerald-200 uppercase tracking-wider mb-1">Seller Admin Fee</p>
+                <p className="text-lg font-black text-white">Rp 32.1M</p>
+                <p className="text-[10px] text-emerald-300 mt-0.5">5% dari keuntungan seller per produk</p>
+              </div>
+              <div className="bg-white/10 rounded-xl p-3">
+                <p className="text-xs font-bold text-emerald-200 uppercase tracking-wider mb-1">Buyer Transaction Fee</p>
+                <p className="text-lg font-black text-white">Rp 13.1M</p>
+                <p className="text-[10px] text-emerald-300 mt-0.5">Rp 10.000 per transaksi buyer</p>
+              </div>
+            </div>
           </div>
-          
-          <button onClick={() => handleDownloadPdf('EcoEat_Impact_Report.pdf')} className="w-full bg-emerald-500 hover:bg-emerald-400 text-white py-3 rounded-xl font-bold transition-colors shadow-sm">
+          <button onClick={() => handleDownloadPdf('EcoEat_Revenue_Report.pdf')} className="w-full mt-4 bg-emerald-500 hover:bg-emerald-400 text-white py-3 rounded-xl font-bold transition-colors shadow-sm">
             Export Report
           </button>
         </div>
