@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -14,7 +15,11 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, HasUuids, Notifiable;
+
+    public $incrementing = false;
+
+    protected $keyType = 'string';
 
     /**
      * The attributes that are mass assignable.
@@ -22,13 +27,19 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'full_name',
         'email',
-        'password',
+        'password_hash',
         'role',
-        'status',
-        'latitude',
-        'longitude',
+        'avatar_url',
+        'phone_number',
+        'is_verified',
+        'verification_status',
+        'is_active',
+        'suspended_at',
+        'suspended_reason',
+        'suspended_by',
+        'last_login_at',
     ];
 
     /**
@@ -37,23 +48,28 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
-        'password',
+        'password_hash',
         'remember_token',
     ];
 
-    public function kycDocuments(): HasMany
+    public function getAuthPassword(): string
     {
-        return $this->hasMany(KycDocument::class);
+        return $this->password_hash;
     }
 
-    public function products(): HasMany
+    public function courierProfile(): HasOne
     {
-        return $this->hasMany(Product::class, 'seller_id');
+        return $this->hasOne(CourierProfile::class, 'user_id');
     }
 
-    public function wallet(): HasOne
+    public function courierOrders(): HasMany
     {
-        return $this->hasOne(Wallet::class);
+        return $this->hasMany(Order::class, 'courier_id');
+    }
+
+    public function courierDeliveries(): HasMany
+    {
+        return $this->hasMany(Delivery::class, 'courier_id');
     }
 
     /**
@@ -64,10 +80,11 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'latitude' => 'float',
-            'longitude' => 'float',
+            'is_verified' => 'boolean',
+            'is_active' => 'boolean',
+            'suspended_at' => 'datetime',
+            'last_login_at' => 'datetime',
+            'password_hash' => 'hashed',
         ];
     }
 }

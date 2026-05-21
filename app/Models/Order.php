@@ -2,49 +2,53 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
-    use HasFactory;
+    use HasUuids;
 
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_ASSIGNED = 'assigned';
-    public const STATUS_DELIVERING = 'delivering';
-    public const STATUS_COMPLETED = 'completed';
-    public const STATUS_CANCELLED = 'cancelled';
+    public $incrementing = false;
 
-    public const STATUSES = [
-        self::STATUS_PENDING,
-        self::STATUS_ASSIGNED,
-        self::STATUS_DELIVERING,
-        self::STATUS_COMPLETED,
-        self::STATUS_CANCELLED,
-    ];
+    protected $keyType = 'string';
 
-    public $timestamps = false;
+    public const UPDATED_AT = null;
 
     protected $fillable = [
+        'order_code',
         'buyer_id',
         'seller_id',
         'courier_id',
-        'total_price',
-        'status',
-        'delivery_type',
+        'lks_id',
+        'order_type',
+        'order_status',
+        'subtotal',
+        'delivery_fee',
+        'platform_fee',
+        'total_amount',
+        'total_portions',
+        'delivery_address_id',
+        'cancellation_reason',
+        'cancelled_by',
+        'cancelled_at',
+        'notes',
+        'ordered_at',
+        'completed_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'buyer_id' => 'integer',
-            'seller_id' => 'integer',
-            'courier_id' => 'integer',
-            'total_price' => 'decimal:2',
-            'created_at' => 'datetime',
+            'subtotal' => 'decimal:2',
+            'delivery_fee' => 'decimal:2',
+            'platform_fee' => 'decimal:2',
+            'total_amount' => 'decimal:2',
+            'cancelled_at' => 'datetime',
+            'ordered_at' => 'datetime',
+            'completed_at' => 'datetime',
         ];
     }
 
@@ -63,18 +67,13 @@ class Order extends Model
         return $this->belongsTo(User::class, 'courier_id');
     }
 
-    public function items(): HasMany
+    public function lks(): BelongsTo
     {
-        return $this->hasMany(OrderItem::class);
+        return $this->belongsTo(LksProfile::class, 'lks_id');
     }
 
-    public function transactions(): HasMany
+    public function delivery(): HasOne
     {
-        return $this->hasMany(Transaction::class);
-    }
-
-    public function feedback(): HasOne
-    {
-        return $this->hasOne(Feedback::class);
+        return $this->hasOne(Delivery::class, 'order_id');
     }
 }
