@@ -3,40 +3,44 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class AdminApprovalController extends Controller
 {
-    public function approve(Request $request, User $user): JsonResponse
-    {
-        if ($request->user()?->role !== 'admin') {
-            return response()->json([
-                'message' => 'Forbidden. Admin access required.',
-            ], 403);
-        }
+    use ApiResponse;
 
+    /**
+     * Approve a user account and their KYC documents.
+     *
+     * @param  User  $user
+     * @return JsonResponse
+     */
+    public function approve(User $user): JsonResponse
+    {
         $user->update(['status' => 'approved']);
         $user->kycDocuments()->update(['status' => 'approved']);
 
-        return response()->json([
-            'message' => 'User approved successfully',
-        ]);
+        return $this->successResponse(
+            ['user' => $user->fresh()],
+            'User approved successfully.'
+        );
     }
 
-    public function reject(Request $request, User $user): JsonResponse
+    /**
+     * Reject a user account and their KYC documents.
+     *
+     * @param  User  $user
+     * @return JsonResponse
+     */
+    public function reject(User $user): JsonResponse
     {
-        if ($request->user()?->role !== 'admin') {
-            return response()->json([
-                'message' => 'Forbidden. Admin access required.',
-            ], 403);
-        }
-
         $user->update(['status' => 'rejected']);
         $user->kycDocuments()->update(['status' => 'rejected']);
 
-        return response()->json([
-            'message' => 'User rejected',
-        ]);
+        return $this->successResponse(
+            ['user' => $user->fresh()],
+            'User rejected.'
+        );
     }
 }
