@@ -10,9 +10,21 @@ use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function (): void {
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register'])->name('register');
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
 });
+
+Route::middleware(['auth:sanctum'])
+    ->prefix('auth')
+    ->group(function (): void {
+        Route::post('/logout', [AuthController::class, 'logout']);
+    });
+
+Route::middleware(['auth:sanctum'])
+    ->prefix('user')
+    ->group(function (): void {
+        Route::get('/profile', [\App\Http\Controllers\UserController::class, 'profile']);
+    });
 
 Route::post('/kyc/documents', [KycController::class, 'store']);
 
