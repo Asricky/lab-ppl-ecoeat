@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Wallet extends Model
+class SellerProfile extends Model
 {
     use HasUuids;
 
@@ -17,22 +17,15 @@ class Wallet extends Model
 
     public const UPDATED_AT = null;
 
-    protected $fillable = [
-        'user_id',
-        'balance',
-    ];
-
-    protected $casts = [
-        'balance' => 'decimal:2',
-    ];
+    protected $guarded = [];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function transactions(): HasMany
+    public function products(): HasMany
     {
-        return $this->hasMany(WalletTransaction::class, 'wallet_id');
+        return $this->hasMany(Product::class, 'seller_profile_id');
     }
 }

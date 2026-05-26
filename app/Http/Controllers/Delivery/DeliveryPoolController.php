@@ -12,11 +12,11 @@ class DeliveryPoolController extends Controller
 {
     public function __invoke(GetAvailableDeliveryRequest $request, DeliveryPoolService $service): JsonResponse
     {
+        $paginator = $service->available($request->user(), $request->validated('filter'));
+        
         return response()->json([
             'success' => true,
-            'data' => AvailableDeliveryResource::collection(
-                $service->available($request->user(), $request->validated('filter'))
-            ),
+            'data' => AvailableDeliveryResource::collection($paginator)->response()->getData(true),
         ]);
     }
 }

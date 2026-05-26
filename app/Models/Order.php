@@ -15,6 +15,7 @@ class Order extends Model
 
     protected $keyType = 'string';
 
+    public const CREATED_AT = null;
     public const UPDATED_AT = null;
 
     protected $fillable = [

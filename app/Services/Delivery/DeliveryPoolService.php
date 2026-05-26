@@ -10,7 +10,7 @@ use Throwable;
 
 class DeliveryPoolService extends BaseDeliveryService
 {
-    public function available(object $courier, ?string $filter = null): Collection
+    public function available(object $courier, ?string $filter = null, int $perPage = 15)
     {
         try {
             $this->assertCourierCanWork($courier);
@@ -19,7 +19,9 @@ class DeliveryPoolService extends BaseDeliveryService
                 ->with(['seller', 'delivery'])
                 ->whereNull('orders.courier_id')
                 ->where('orders.order_status', OrderStatus::READY_FOR_DELIVERY->value)
-                ->whereHas('delivery');
+                ->whereHas('delivery', function ($q) {
+                    $q->where('delivery_status', \App\Enums\Delivery\DeliveryStatus::AVAILABLE_FOR_COURIER->value);
+                });
 
             if ($filter === 'nearest') {
                 $query->join('deliveries', 'deliveries.order_id', '=', 'orders.id')
@@ -33,7 +35,7 @@ class DeliveryPoolService extends BaseDeliveryService
                     ->select('orders.*');
             }
 
-            return $query->orderBy('orders.ordered_at')->get();
+            return $query->orderBy('orders.ordered_at')->paginate($perPage);
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (Throwable) {

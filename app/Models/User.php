@@ -62,6 +62,26 @@ class User extends Authenticatable
         return $this->hasOne(CourierProfile::class, 'user_id');
     }
 
+    public function sellerProfile(): HasOne
+    {
+        return $this->hasOne(SellerProfile::class, 'user_id');
+    }
+
+    public function lksProfile(): HasOne
+    {
+        return $this->hasOne(LksProfile::class, 'user_id');
+    }
+
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(Wallet::class, 'user_id');
+    }
+
+    public function withdrawalRequests(): HasMany
+    {
+        return $this->hasMany(WithdrawalRequest::class, 'user_id');
+    }
+
     public function courierOrders(): HasMany
     {
         return $this->hasMany(Order::class, 'courier_id');

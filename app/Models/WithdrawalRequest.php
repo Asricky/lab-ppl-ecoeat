@@ -5,9 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Wallet extends Model
+class WithdrawalRequest extends Model
 {
     use HasUuids;
 
@@ -19,11 +18,18 @@ class Wallet extends Model
 
     protected $fillable = [
         'user_id',
-        'balance',
+        'wallet_id',
+        'amount',
+        'bank_name',
+        'account_name',
+        'account_number',
+        'status',
+        'completed_at',
     ];
 
     protected $casts = [
-        'balance' => 'decimal:2',
+        'amount' => 'decimal:2',
+        'completed_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -31,8 +37,8 @@ class Wallet extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function transactions(): HasMany
+    public function wallet(): BelongsTo
     {
-        return $this->hasMany(WalletTransaction::class, 'wallet_id');
+        return $this->belongsTo(Wallet::class, 'wallet_id');
     }
 }

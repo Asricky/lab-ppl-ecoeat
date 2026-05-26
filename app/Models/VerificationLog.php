@@ -5,9 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Wallet extends Model
+class VerificationLog extends Model
 {
     use HasUuids;
 
@@ -19,11 +18,10 @@ class Wallet extends Model
 
     protected $fillable = [
         'user_id',
-        'balance',
-    ];
-
-    protected $casts = [
-        'balance' => 'decimal:2',
+        'reviewed_by',
+        'old_status',
+        'new_status',
+        'notes',
     ];
 
     public function user(): BelongsTo
@@ -31,8 +29,8 @@ class Wallet extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function transactions(): HasMany
+    public function reviewer(): BelongsTo
     {
-        return $this->hasMany(WalletTransaction::class, 'wallet_id');
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 }

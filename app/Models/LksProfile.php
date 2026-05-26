@@ -12,4 +12,13 @@ class LksProfile extends Model
     public $incrementing = false;
 
     protected $keyType = 'string';
+
+    public const UPDATED_AT = null;
+
+    protected $guarded = [];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

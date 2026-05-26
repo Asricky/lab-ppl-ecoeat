@@ -2,43 +2,29 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasUuids;
 
-    protected $fillable = [
-        'seller_id',
-        'category_id',
-        'name',
-        'description',
-        'price',
-        'type',
-        'stock',
-        'image_url',
-        'expiry_date',
-        'status',
+    public $incrementing = false;
+
+    protected $keyType = 'string';
+
+    public const UPDATED_AT = null;
+
+    protected $guarded = [];
+
+    protected $casts = [
+        'is_donation' => 'boolean',
+        'expiry_date' => 'datetime',
     ];
 
-    protected function casts(): array
+    public function sellerProfile(): BelongsTo
     {
-        return [
-            'price' => 'decimal:2',
-            'stock' => 'integer',
-            'expiry_date' => 'date',
-        ];
-    }
-
-    public function seller(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'seller_id');
-    }
-
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(SellerProfile::class, 'seller_profile_id');
     }
 }

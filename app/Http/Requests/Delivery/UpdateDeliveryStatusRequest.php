@@ -9,6 +9,9 @@ class UpdateDeliveryStatusRequest extends BaseCourierRequest
 {
     protected function prepareForValidation(): void
     {
+        if ($this->has('status') && !$this->has('delivery_status')) {
+            $this->merge(['delivery_status' => $this->input('status')]);
+        }
         if ($this->has('notes')) {
             $this->merge(['notes' => trim((string) $this->input('notes'))]);
         }

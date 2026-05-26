@@ -14,6 +14,8 @@ class CourierProfile extends Model
 
     protected $keyType = 'string';
 
+    public const UPDATED_AT = null;
+
     protected $fillable = [
         'user_id',
         'vehicle_type',
