@@ -1,67 +1,37 @@
 <?php
 
-use App\Http\Controllers\Api\ProductController as PublicProductController;
-use App\Http\Controllers\Seller\ProductController as SellerProductController;
-use App\Http\Controllers\Seller\ProductImageController;
+use App\Http\Controllers\Delivery\CourierLocationController;
+use App\Http\Controllers\Delivery\DeliveryAssignmentController;
+use App\Http\Controllers\Delivery\DeliveryDetailController;
+use App\Http\Controllers\Delivery\DeliveryPoolController;
+use App\Http\Controllers\Delivery\DeliveryTrackingController;
+use App\Http\Controllers\Delivery\DeliveryTrackingLogController;
+use App\Http\Controllers\Delivery\FailedDeliveryController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Prefix  : /api  (auto-applied by Laravel)
-| Auth    : Bearer token via Laravel Sanctum
-|
-*/
-
-// ──────────────────────────────────────────────────────────────────────────
-// PUBLIC — No authentication required
-// ──────────────────────────────────────────────────────────────────────────
-
-Route::prefix('products')->name('products.')->group(function (): void {
-    Route::get('/', [PublicProductController::class, 'index'])->name('index');
-    Route::get('/{id}', [PublicProductController::class, 'show'])->name('show');
+Route::middleware('auth:sanctum')->prefix('courier')->group(function (): void {
+    Route::get('deliveries/available', DeliveryPoolController::class);
+    Route::post('deliveries/{orderId}/take', DeliveryAssignmentController::class);
+    Route::get('deliveries/{deliveryId}', DeliveryDetailController::class);
+    Route::patch('deliveries/{deliveryId}/status', DeliveryTrackingController::class);
+    Route::patch('deliveries/{deliveryId}/failed', FailedDeliveryController::class);
+    Route::get('deliveries/{deliveryId}/tracking', DeliveryTrackingLogController::class);
+    Route::post('deliveries/{deliveryId}/location', CourierLocationController::class);
 });
 
-// ──────────────────────────────────────────────────────────────────────────
-// SELLER — Requires Sanctum Bearer token
-// ──────────────────────────────────────────────────────────────────────────
-
-Route::middleware('auth:sanctum')->prefix('seller')->name('seller.')->group(function (): void {
-    /*
-    |------------------------------------------------------------------
-    | Seller Product CRUD
-    | GET    /api/seller/products
-    | POST   /api/seller/products
-    | PUT    /api/seller/products/{id}
-    | DELETE /api/seller/products/{id}
-    |------------------------------------------------------------------
-    */
-    Route::get('products', [SellerProductController::class, 'index'])->name('products.index');
-    Route::post('products', [SellerProductController::class, 'store'])->name('products.store');
-    Route::get('products/{id}', [SellerProductController::class, 'show'])->name('products.show');
-    Route::put('products/{id}', [SellerProductController::class, 'update'])->name('products.update');
-    Route::delete('products/{id}', [SellerProductController::class, 'destroy'])->name('products.destroy');
-
-    /*
-    |------------------------------------------------------------------
-    | Seller Product Images
-    | GET    /api/seller/products/{productId}/images
-    | POST   /api/seller/products/{productId}/images
-    | PATCH  /api/seller/products/{productId}/images/{imageId}/primary
-    | DELETE /api/seller/products/{productId}/images/{imageId}
-    |------------------------------------------------------------------
-    */
-    Route::prefix('products/{productId}/images')->name('products.images.')->group(function (): void {
-        Route::get('/', [ProductImageController::class, 'index'])->name('index');
-        Route::post('/', [ProductImageController::class, 'store'])->name('store');
-        Route::patch('/{imageId}/primary', [ProductImageController::class, 'setPrimary'])->name('set-primary');
-        Route::delete('/{imageId}', [ProductImageController::class, 'destroy'])->name('destroy');
+Route::middleware('auth:sanctum')->group(function (): void {
+    Route::prefix('seller')->group(function (): void {
+        Route::post('donations', [\App\Http\Controllers\Donation\SellerDonationController::class, 'store']);
+    });
+    
+    Route::prefix('lks')->group(function (): void {
+        Route::get('donations/incoming', [\App\Http\Controllers\Donation\LksDonationController::class, 'incoming']);
+        Route::patch('donations/{deliveryId}/accept', [\App\Http\Controllers\Donation\LksDonationController::class, 'accept']);
+        Route::patch('donations/{deliveryId}/reject', [\App\Http\Controllers\Donation\LksDonationController::class, 'reject']);
+        Route::get('donations/history', [\App\Http\Controllers\Donation\LksDashboardController::class, 'history']);
+        Route::get('dashboard', [\App\Http\Controllers\Donation\LksDashboardController::class, 'index']);
     });
 });
-<<<<<<< Updated upstream
-=======
 
 // Analytics Route Groups
 use App\Http\Controllers\Analytics\SellerAnalyticsController;
@@ -125,11 +95,7 @@ Route::prefix('products')->name('products.')->group(function (): void {
 });
 
 
-<<<<<<< Updated upstream
-Route::middleware('auth:sanctum')->prefix('seller')->name('seller.')->group(function (): void {
-=======
 Route::middleware(['auth:sanctum', 'role:seller'])->prefix('seller')->name('seller.')->group(function (): void {
->>>>>>> Stashed changes
 
     Route::get('products', [SellerProductController::class, 'index'])->name('products.index');
     Route::post('products', [SellerProductController::class, 'store'])->name('products.store');
@@ -143,17 +109,20 @@ Route::middleware(['auth:sanctum', 'role:seller'])->prefix('seller')->name('sell
         Route::patch('/{imageId}/primary', [ProductImageController::class, 'setPrimary'])->name('set-primary');
         Route::delete('/{imageId}', [ProductImageController::class, 'destroy'])->name('destroy');
     });
+
+    // ── Orders ────────────────────────────────────────────────────────
+    Route::patch('orders/{id}/status', [\App\Http\Controllers\Seller\OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::post('orders/{id}/refund', [\App\Http\Controllers\Seller\OrderController::class, 'refund'])->name('orders.refund');
+
+    // ── Reviews ───────────────────────────────────────────────────────
+    Route::post('reviews/{id}/reply', [\App\Http\Controllers\Seller\ReviewController::class, 'reply'])->name('reviews.reply');
 });
 
 use App\Http\Controllers\Buyer\CartController;
 use App\Http\Controllers\Buyer\WishlistController;
 
 // Buyer Cart & Wishlist Routes
-<<<<<<< Updated upstream
-Route::middleware('auth:sanctum')->prefix('buyer')->name('buyer.')->group(function (): void {
-=======
 Route::middleware(['auth:sanctum', 'role:buyer'])->prefix('buyer')->name('buyer.')->group(function (): void {
->>>>>>> Stashed changes
     // ── Cart ─────────────────────────────────────────────────────────
     // GET    /api/buyer/cart               → tampilkan isi keranjang + subtotal
     // POST   /api/buyer/cart               → tambah item (auto-merge jika duplikat)
@@ -177,13 +146,6 @@ Route::middleware(['auth:sanctum', 'role:buyer'])->prefix('buyer')->name('buyer.
     Route::post('wishlist', [WishlistController::class, 'store'])->name('wishlist.store');
     Route::delete('wishlist/{wishlistItemId}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
     Route::delete('wishlist', [WishlistController::class, 'clear'])->name('wishlist.clear');
-<<<<<<< Updated upstream
-});
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
 
     // ── Checkout ──────────────────────────────────────────────────────
     Route::post('checkout/direct', [\App\Http\Controllers\Buyer\CheckoutController::class, 'storeDirect'])->name('checkout.direct');
@@ -193,8 +155,8 @@ Route::middleware(['auth:sanctum', 'role:buyer'])->prefix('buyer')->name('buyer.
     Route::get('orders', [\App\Http\Controllers\Buyer\OrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{id}', [\App\Http\Controllers\Buyer\OrderController::class, 'show'])->name('orders.show');
     Route::patch('orders/{id}/cancel', [\App\Http\Controllers\Buyer\OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::patch('orders/{id}/pickup', [\App\Http\Controllers\Buyer\OrderController::class, 'pickup'])->name('orders.pickup');
 
     // ── Reviews ───────────────────────────────────────────────────────
     Route::post('orders/{orderId}/reviews', [\App\Http\Controllers\Buyer\ReviewController::class, 'store'])->name('reviews.store');
 });
->>>>>>> Stashed changes

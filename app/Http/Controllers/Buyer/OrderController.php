@@ -57,4 +57,27 @@ class OrderController extends Controller
             ], 400);
         }
     }
+
+    public function pickup(Request $request, $id)
+    {
+        $order = Order::where('buyer_id', $request->user()->id)->findOrFail($id);
+
+        if ($order->delivery_address_id !== null) {
+            return response()->json(['message' => 'This order is not for pickup'], 400);
+        }
+
+        if ($order->order_status !== 'ready_for_delivery') {
+            return response()->json(['message' => 'Order is not ready for pickup yet'], 400);
+        }
+
+        $order->update([
+            'order_status' => 'completed',
+            'completed_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'Order picked up successfully',
+            'order' => $order
+        ]);
+    }
 }

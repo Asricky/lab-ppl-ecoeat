@@ -2,27 +2,30 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SellerProfile extends Model
 {
-    protected $table = 'seller_profiles';
+    use HasUuids;
 
-    protected $keyType = 'string';
     public $incrementing = false;
 
-    protected $fillable = [
-        'id',
-        'user_id',
-        // add other seller_profiles columns as needed
-    ];
+    protected $keyType = 'string';
 
-    /**
-     * Products owned by this seller.
-     */
+    public const UPDATED_AT = null;
+
+    protected $guarded = [];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function products(): HasMany
     {
-        return $this->hasMany(Product::class, 'seller_profile_id', 'id');
+        return $this->hasMany(Product::class, 'seller_profile_id');
     }
 }

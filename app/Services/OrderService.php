@@ -231,4 +231,70 @@ class OrderService
             return $order;
         });
     }
+
+    public function updateOrderStatus(User $seller, Order $order, string $status)
+    {
+        if ($order->seller_id !== $seller->id) {
+            throw new Exception('Unauthorized to update this order');
+        }
+
+        $validStatuses = ['processing', 'ready_for_delivery'];
+        if (!in_array($status, $validStatuses)) {
+            throw new Exception('Invalid status update for seller');
+        }
+
+        $order->update([
+            'order_status' => $status,
+        ]);
+
+        return $order;
+    }
+
+    public function refundOrder(User $seller, Order $order, string $reason)
+    {
+        return DB::transaction(function () use ($seller, $order, $reason) {
+            if ($order->seller_id !== $seller->id) {
+                throw new Exception('Unauthorized to refund this order');
+            }
+
+            if (in_array($order->order_status, ['completed', 'refunded', 'cancelled'])) {
+                throw new Exception('Order cannot be refunded at this stage');
+            }
+
+            $order->update([
+                'order_status' => 'refunded',
+                'cancellation_reason' => $reason,
+                'cancelled_by' => $seller->id,
+                'cancelled_at' => now(),
+            ]);
+
+            // Restore product stock
+            $items = OrderItem::where('order_id', $order->id)->get();
+            foreach ($items as $item) {
+                $product = Product::find($item->product_id);
+                if ($product) {
+                    $product->stock_quantity += $item->quantity;
+                    $product->save();
+                }
+            }
+
+            // Refund to wallet
+            $wallet = $order->buyer->wallet;
+            if ($wallet) {
+                $wallet->balance += $order->total_amount;
+                $wallet->save();
+
+                WalletTransaction::create([
+                    'wallet_id' => $wallet->id,
+                    'order_id' => $order->id,
+                    'transaction_type' => 'refund',
+                    'transaction_status' => 'completed',
+                    'amount' => $order->total_amount,
+                    'description' => 'Refund for order ' . $order->order_code . ' - Reason: ' . $reason,
+                ]);
+            }
+
+            return $order;
+        });
+    }
 }

@@ -315,6 +315,73 @@ class QaTest extends TestCase
                 '02', 'Reviews', "/api/buyer/orders/{id}/reviews", 'POST', 'Create review fails (order not completed)', 'Order cancelled or processing', [], $reviewData, 404, 'Not Found or Error', $response
             ); // Using 404 because controller uses findOrFail with where('order_status', 'completed')
         }
+        
+        // ---------------------------------------------------------
+        // MODULE: ORDER LIFECYCLE, REFUND & PICKUP (NEW)
+        // ---------------------------------------------------------
+        
+        $pickupOrder = Order::create([
+            'id' => Str::uuid(),
+            'order_code' => 'ORD-PU-' . Str::random(5),
+            'buyer_id' => $buyer->id,
+            'seller_id' => $seller->id,
+            'order_type' => 'purchase',
+            'order_status' => 'processing',
+            'subtotal' => 10000,
+            'delivery_fee' => 0,
+            'platform_fee' => 0,
+            'total_amount' => 10000,
+            'total_portions' => 1,
+            'delivery_address_id' => null,
+            'notes' => 'QA_SESSION:' . $this->qaSession,
+        ]);
+
+        // TC-ORD-05: Seller update order status
+        $statusData = ['status' => 'ready_for_delivery'];
+        $response = $this->actingAs($seller)->patchJson("/api/seller/orders/{$pickupOrder->id}/status", $statusData);
+        $this->recordResult(
+            '05', 'Orders', "/api/seller/orders/{id}/status", 'PATCH', 'Seller update status to ready for delivery', 'Order is processing', [], $statusData, 200, 'Status updated', $response
+        );
+
+        // TC-ORD-06: Buyer complete pickup order
+        $response = $this->actingAs($buyer)->patchJson("/api/buyer/orders/{$pickupOrder->id}/pickup");
+        $this->recordResult(
+            '06', 'Orders', "/api/buyer/orders/{id}/pickup", 'PATCH', 'Buyer completes pickup order', 'Order is ready for delivery', [], [], 200, 'Order completed', $response
+        );
+
+        $refundOrder = Order::create([
+            'id' => Str::uuid(),
+            'order_code' => 'ORD-RF-' . Str::random(5),
+            'buyer_id' => $buyer->id,
+            'seller_id' => $seller->id,
+            'order_type' => 'purchase',
+            'order_status' => 'processing',
+            'subtotal' => 10000,
+            'delivery_fee' => 0,
+            'platform_fee' => 0,
+            'total_amount' => 10000,
+            'total_portions' => 1,
+            'notes' => 'QA_SESSION:' . $this->qaSession,
+        ]);
+
+        // TC-ORD-07: Seller refund order
+        $refundData = ['reason' => 'Item is out of stock'];
+        $response = $this->actingAs($seller)->postJson("/api/seller/orders/{$refundOrder->id}/refund", $refundData);
+        $this->recordResult(
+            '07', 'Orders', "/api/seller/orders/{id}/refund", 'POST', 'Seller refund order', 'Order is processing', [], $refundData, 200, 'Order refunded', $response
+        );
+
+        // TC-REV-03: Seller reply to review
+        $review = \App\Models\Review::where('order_id', $completedOrder->id)->first();
+        $reviewId = $review ? $review->id : null;
+
+        if ($reviewId) {
+            $replyData = ['seller_reply' => 'Thank you for the feedback! We will improve.'];
+            $response = $this->actingAs($seller)->postJson("/api/seller/reviews/{$reviewId}/reply", $replyData);
+            $this->recordResult(
+                '03', 'Reviews', "/api/seller/reviews/{id}/reply", 'POST', 'Seller replies to review', 'Review exists without reply', [], $replyData, 200, 'Reply saved', $response
+            );
+        }
 
         $this->assertTrue(true);
     }

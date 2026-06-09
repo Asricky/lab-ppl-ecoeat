@@ -1,1 +1,1 @@
-{"version":2,"defects":[],"times":{"Tests\\Unit\\ExampleTest::test_that_true_is_true":0.678,"Tests\\Feature\\ExampleTest::test_the_application_returns_a_successful_response":7.409}}
+{"version":2,"defects":{"Tests\\Feature\\QaTest::test_all_modules":8},"times":{"Tests\\Unit\\ExampleTest::test_that_true_is_true":0.678,"Tests\\Feature\\ExampleTest::test_the_application_returns_a_successful_response":7.409,"Tests\\Feature\\QaTest::test_all_modules":31.862}}
