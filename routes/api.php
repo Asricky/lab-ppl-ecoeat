@@ -170,4 +170,7 @@ Route::middleware('auth:sanctum')->prefix('buyer')->name('buyer.')->group(functi
     Route::delete('wishlist/{wishlistItemId}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
     Route::delete('wishlist', [WishlistController::class, 'clear'])->name('wishlist.clear');
 });
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
