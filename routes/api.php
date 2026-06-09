@@ -125,7 +125,11 @@ Route::prefix('products')->name('products.')->group(function (): void {
 });
 
 
+<<<<<<< Updated upstream
 Route::middleware('auth:sanctum')->prefix('seller')->name('seller.')->group(function (): void {
+=======
+Route::middleware(['auth:sanctum', 'role:seller'])->prefix('seller')->name('seller.')->group(function (): void {
+>>>>>>> Stashed changes
 
     Route::get('products', [SellerProductController::class, 'index'])->name('products.index');
     Route::post('products', [SellerProductController::class, 'store'])->name('products.store');
@@ -145,7 +149,11 @@ use App\Http\Controllers\Buyer\CartController;
 use App\Http\Controllers\Buyer\WishlistController;
 
 // Buyer Cart & Wishlist Routes
+<<<<<<< Updated upstream
 Route::middleware('auth:sanctum')->prefix('buyer')->name('buyer.')->group(function (): void {
+=======
+Route::middleware(['auth:sanctum', 'role:buyer'])->prefix('buyer')->name('buyer.')->group(function (): void {
+>>>>>>> Stashed changes
     // ── Cart ─────────────────────────────────────────────────────────
     // GET    /api/buyer/cart               → tampilkan isi keranjang + subtotal
     // POST   /api/buyer/cart               → tambah item (auto-merge jika duplikat)
@@ -169,8 +177,24 @@ Route::middleware('auth:sanctum')->prefix('buyer')->name('buyer.')->group(functi
     Route::post('wishlist', [WishlistController::class, 'store'])->name('wishlist.store');
     Route::delete('wishlist/{wishlistItemId}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
     Route::delete('wishlist', [WishlistController::class, 'clear'])->name('wishlist.clear');
+<<<<<<< Updated upstream
 });
 <<<<<<< Updated upstream
 >>>>>>> Stashed changes
 =======
+>>>>>>> Stashed changes
+=======
+
+    // ── Checkout ──────────────────────────────────────────────────────
+    Route::post('checkout/direct', [\App\Http\Controllers\Buyer\CheckoutController::class, 'storeDirect'])->name('checkout.direct');
+    Route::post('checkout/cart', [\App\Http\Controllers\Buyer\CheckoutController::class, 'storeCart'])->name('checkout.cart');
+
+    // ── Orders ────────────────────────────────────────────────────────
+    Route::get('orders', [\App\Http\Controllers\Buyer\OrderController::class, 'index'])->name('orders.index');
+    Route::get('orders/{id}', [\App\Http\Controllers\Buyer\OrderController::class, 'show'])->name('orders.show');
+    Route::patch('orders/{id}/cancel', [\App\Http\Controllers\Buyer\OrderController::class, 'cancel'])->name('orders.cancel');
+
+    // ── Reviews ───────────────────────────────────────────────────────
+    Route::post('orders/{orderId}/reviews', [\App\Http\Controllers\Buyer\ReviewController::class, 'store'])->name('reviews.store');
+});
 >>>>>>> Stashed changes

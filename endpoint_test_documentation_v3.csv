@@ -1,0 +1,103 @@
+Test Case ID,Modul/Fitur,Endpoint,Method,Skenario Pengujian,Pre-condition,Headers,Request Body,Expected Status Code,Expected Response,Actual Status Code,Actual Response,Status (Pass/Fail)
+TC-Products-01,Products,/api/products,GET,Get all products successfully,None,[],[],200,Array of products,200,"{
+  ""success"": true,
+  ""message"": ""Daftar produk berhasil diambil."",
+  ""data"": ""[15 items, total: 54]""
+}",Pass
+TC-Products-02,Products,/api/products/04e97987-7d10-45dd-937d-e8868ce7bc79,GET,Get product details successfully,Product exists,[],[],200,Product object,200,"{
+  ""success"": true,
+  ""message"": ""Detail produk berhasil diambil."",
+  ""data"": {
+    ""id"": ""04e97987-7d10-45dd-937d-e8868ce7bc79"",
+    ""title"": ""QA Product avzRl [QA_TAG:endpoint_documentation] [QA_SESSION:0c3c3679-0f75-4e0f-a6a9-cc53cc4b58de]""
+  }
+}",Pass
+TC-Products-03,Products,/api/seller/products,POST,Create product successfully (Seller),Logged in as seller,"{""Authorization"":""Bearer token""}","{""title"":""New QA Prod [QA_TAG:endpoint_documentation] [QA_SESSION:0c3c3679-0f75-4e0f-a6a9-cc53cc4b58de]"",""description"":""New desc"",""price"":20000,""stock_quantity"":5,""portion_quantity"":5,""expiry_date"":""2026-06-14 15:06:53"",""is_donation"":false}",201,Created product,201,"{
+  ""success"": true,
+  ""message"": ""Produk berhasil dibuat."",
+  ""data"": {
+    ""id"": ""019eacec-16c5-734b-ae1f-ecf9ec42594d"",
+    ""title"": ""New QA Prod [QA_TAG:endpoint_documentation] [QA_SESSION:0c3c3679-0f75-4e0f-a6a9-cc53cc4b58de]""
+  }
+}",Pass
+TC-Products-04,Products,/api/seller/products,POST,Create product fails (Buyer),Logged in as buyer,"{""Authorization"":""Bearer token""}","{""title"":""New QA Prod [QA_TAG:endpoint_documentation] [QA_SESSION:0c3c3679-0f75-4e0f-a6a9-cc53cc4b58de]"",""description"":""New desc"",""price"":20000,""stock_quantity"":5,""portion_quantity"":5,""expiry_date"":""2026-06-14 15:06:53"",""is_donation"":false}",403,Forbidden,403,"{
+  ""success"": false,
+  ""message"": ""Forbidden. Access restricted to active seller only.""
+}",Pass
+TC-Products-05,Products,/api/seller/products,POST,Create product validation error,Logged in as seller,"{""Authorization"":""Bearer token""}","{""title"":""...""}",422,Validation errors,422,"{
+  ""message"": ""Deskripsi produk wajib diisi. (and 4 more errors)"",
+  ""errors"": {
+    ""description"": [
+      ""Deskripsi produk wajib diisi.""
+    ],
+    ""price"": [
+      ""Harga produk wajib diisi.""
+    ],
+    ""stock_quantity"": [
+      ""Jumlah stok wajib diisi.""
+    ],
+    ""portion_quantity"": [
+      ""Jumlah porsi wajib diisi.""
+    ],
+    ""expiry_date"": [
+      ""Tanggal kadaluarsa wajib diisi.""
+    ]
+  }
+}",Pass
+TC-Cart-01,Cart,/api/buyer/cart,GET,Get cart successfully,Logged in as buyer,[],[],200,Array of cart items,200,"{
+  ""success"": true,
+  ""message"": ""Keranjang berhasil diambil."",
+  ""data"": {
+    ""items"": ""[0 items]""
+  }
+}",Pass
+TC-Cart-02,Cart,/api/buyer/cart,POST,Add item to cart,Logged in as buyer,[],"{""product_id"":""04e97987-7d10-45dd-937d-e8868ce7bc79"",""quantity"":2}",201,Cart item created,201,"{
+  ""success"": true,
+  ""message"": ""Produk berhasil ditambahkan ke keranjang."",
+  ""data"": {
+    ""id"": ""019eacec-1cdf-7361-a94d-b4d3f6778779"",
+    ""quantity"": 2
+  }
+}",Pass
+TC-Cart-03,Cart,/api/buyer/cart/{id},PATCH,Update cart item quantity,Cart item exists,[],"{""quantity"":3}",200,Cart item updated,200,"{
+  ""success"": true,
+  ""message"": ""Jumlah item berhasil diperbarui."",
+  ""data"": {
+    ""id"": ""019eacec-1cdf-7361-a94d-b4d3f6778779"",
+    ""quantity"": 3
+  }
+}",Pass
+TC-Cart-04,Cart,/api/buyer/cart,POST,Add to cart fails (Seller),Logged in as seller,[],"{""product_id"":""04e97987-7d10-45dd-937d-e8868ce7bc79"",""quantity"":2}",403,Forbidden,403,"{
+  ""success"": false,
+  ""message"": ""Forbidden. Access restricted to active buyer only.""
+}",Pass
+TC-Wishlist-01,Wishlist,/api/buyer/wishlist,POST,Add item to wishlist,Logged in as buyer,[],"{""product_id"":""04e97987-7d10-45dd-937d-e8868ce7bc79""}",201,Wishlist item created,201,"{
+  ""success"": true,
+  ""message"": ""Produk berhasil ditambahkan ke wishlist."",
+  ""data"": {
+    ""id"": ""019eacec-2d17-700e-9ed1-2f748f4043bc""
+  }
+}",Pass
+TC-Wishlist-02,Wishlist,/api/buyer/wishlist,GET,Get wishlist successfully,Logged in as buyer,[],[],200,Array of wishlist items,200,"{
+  ""success"": true,
+  ""message"": ""Wishlist berhasil diambil."",
+  ""data"": ""[1 items, total: 1]""
+}",Pass
+TC-Orders-01,Orders,/api/buyer/checkout/direct,POST,Direct checkout success,Sufficient balance & stock,[],"{""product_id"":""04e97987-7d10-45dd-937d-e8868ce7bc79"",""quantity"":1,""order_type"":""purchase"",""notes"":""QA_SESSION:0c3c3679-0f75-4e0f-a6a9-cc53cc4b58de""}",201,Order created,201,"{
+  ""message"": ""Order created successfully""
+}",Pass
+TC-Orders-02,Orders,/api/buyer/checkout/cart,POST,Cart checkout success,Cart item exists,[],"{""cart_item_ids"":[""019eacec-1cdf-7361-a94d-b4d3f6778779""],""order_type"":""purchase""}",201,Orders created,201,"{
+  ""message"": ""Orders created successfully""
+}",Pass
+TC-Orders-03,Orders,/api/buyer/orders,GET,Get orders list,Logged in as buyer,[],[],200,Array of orders,200,"{
+  ""data"": ""[2 items]""
+}",Pass
+TC-Orders-04,Orders,/api/buyer/orders/{id}/cancel,PATCH,Cancel order successfully,Order is processing,[],"{""reason"":""QA Testing Cancellation""}",200,Order cancelled,200,"{
+  ""message"": ""Order cancelled successfully""
+}",Pass
+TC-Reviews-01,Reviews,/api/buyer/orders/{id}/reviews,POST,Create review successfully,Order is completed,[],"{""rating"":5,""review_text"":""Great product QA testing""}",201,Review created,201,"{
+  ""message"": ""Review created successfully""
+}",Pass
+TC-Reviews-02,Reviews,/api/buyer/orders/{id}/reviews,POST,Create review fails (order not completed),Order cancelled or processing,[],"{""rating"":5,""review_text"":""Great product QA testing""}",404,Not Found or Error,404,"{
+  ""message"": ""No query results for model [App\\Models\\Order] 019eacec-3c5a-703f-aed4-736bb756cab1""
+}",Pass
