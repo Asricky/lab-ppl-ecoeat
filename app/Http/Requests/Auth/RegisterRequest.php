@@ -12,6 +12,15 @@ class RegisterRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('role')) {
+            $this->merge([
+                'role' => strtolower(trim((string) $this->input('role'))),
+            ]);
+        }
+    }
+
     /**
      * @return array<string, mixed>
      */

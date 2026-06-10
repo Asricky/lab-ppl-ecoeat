@@ -10,14 +10,16 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        User::updateOrCreate(
-            ['email' => 'admin'],
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@ecoeat.com'],
             [
-                'name' => 'Admin',
-                'password' => Hash::make('admin'),
+                'name' => 'Admin EcoEat',
+                'password' => Hash::make('password'),
                 'role' => 'admin',
                 'status' => 'approved',
             ]
         );
+
+        $this->command->info('Admin user ready: ' . $admin->email);
     }
 }

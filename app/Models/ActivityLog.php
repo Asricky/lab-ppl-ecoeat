@@ -6,20 +6,26 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class KycDocument extends Model
+class ActivityLog extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
-
     protected $fillable = [
         'user_id',
-        'document_type',
-        'file_url',
-        'status',
-        'document_number',
+        'action',
+        'description',
+        'properties',
+        'ip_address',
+        'user_agent',
     ];
 
+    protected $casts = [
+        'properties' => 'array',
+    ];
+
+    /**
+     * Get the user that performed the activity.
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

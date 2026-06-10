@@ -28,6 +28,7 @@ class User extends Authenticatable
         'status',
         'phone',
         'avatar_url',
+        'rejection_note',
     ];
 
     /**

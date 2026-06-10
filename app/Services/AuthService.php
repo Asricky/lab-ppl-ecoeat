@@ -7,6 +7,7 @@ use App\DTOs\Auth\LoginDTO;
 use App\Models\User;
 use App\Repositories\Interfaces\LksRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
+use App\Services\ActivityLogger;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -45,6 +46,8 @@ class AuthService
             ]);
         }
 
+        ActivityLogger::log('register', 'User registered new account', ['role' => $user->role], $user->id);
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
@@ -81,6 +84,8 @@ class AuthService
         if ($user->status === 'rejected') {
             throw new AuthorizationException('User account has been suspended by the administrator.');
         }
+
+        ActivityLogger::log('login', 'User logged in', [], $user->id);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

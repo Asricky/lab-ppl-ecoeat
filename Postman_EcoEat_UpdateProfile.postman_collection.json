@@ -1,0 +1,86 @@
+{
+  "info": {
+    "name": "EcoEat - Profile Update",
+    "_postman_id": "ecoeat-update-profile",
+    "description": "Collection to test authentication, get profile, and update profile (avatar upload) for EcoEat API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/login",
+          "host": [ "{{base_url}}" ],
+          "path": [ "api", "auth", "login" ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const json = pm.response.json();",
+              "if (json && json.data && json.data.token) {",
+              "  pm.environment.set('token', json.data.token);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "User - Get Profile",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/user/profile",
+          "host": [ "{{base_url}}" ],
+          "path": [ "api", "user", "profile" ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "User - Update Profile (form-data)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "name", "value": "Updated Name", "type": "text" },
+            { "key": "email", "value": "updated@example.com", "type": "text" },
+            { "key": "phone", "value": "+62123456789", "type": "text" },
+            { "key": "avatar", "type": "file", "src": "" }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/api/user/profile",
+          "host": [ "{{base_url}}" ],
+          "path": [ "api", "user", "profile" ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" },
+    { "key": "token", "value": "" }
+  ]
+}

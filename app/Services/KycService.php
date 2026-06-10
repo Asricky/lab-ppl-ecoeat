@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\KycDocument;
 use App\Models\User;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -59,20 +60,41 @@ class KycService
         return match ($role) {
             'buyer' => ['ktp'],
             'seller' => ['ktp', 'nib'],
-            'courier' => ['ktp', 'sim'],
+            'courier' => ['ktp', 'sim', 'stnk'],
+            'lks' => ['legal_permit'],
             default => [],
         };
     }
 
+    /**
+     * Upload a single KYC document to Cloudinary and save to DB.
+     */
+    public function uploadSingleDocument(User $user, string $documentType, UploadedFile $file, ?string $documentNumber = null): KycDocument
+    {
+        $fileUrl = $this->uploadToCloudinary($file, $user, $documentType);
+
+        return KycDocument::updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'document_type' => $documentType,
+            ],
+            [
+                'file_url' => $fileUrl,
+                'document_number' => $documentNumber,
+                'status' => 'pending',
+            ]
+        )->fresh();
+    }
+
     private function uploadToCloudinary(UploadedFile $file, User $user, string $documentType): string
     {
-        $response = cloudinary()->uploadApi()->upload($file->getRealPath(), [
+        $uploadedFile = Cloudinary::uploadApi()->upload($file->getRealPath(), [
             'folder' => 'ecoeat/kyc/'.$user->id,
             'public_id' => $documentType.'_'.Str::uuid()->toString(),
             'resource_type' => 'auto',
         ]);
 
-        $secureUrl = $response['secure_url'] ?? $response['url'] ?? null;
+        $secureUrl = $uploadedFile['secure_url'] ?? null;
 
         if (! is_string($secureUrl) || $secureUrl === '') {
             throw new RuntimeException('Cloudinary upload did not return a valid file URL.');
