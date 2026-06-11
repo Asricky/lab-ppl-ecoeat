@@ -118,10 +118,7 @@ export default function KurirProfilePage() {
               />
             </div>
 
-            <h2 className="text-xl font-extrabold text-emerald-950 mb-1">{user?.name || 'Alex Green'}</h2>
-            <span className="inline-block px-3 py-1 bg-[#F2F6F0] text-emerald-700 text-[10px] font-extrabold uppercase tracking-widest rounded-full mb-6">
-              Senior Courier
-            </span>
+            <h2 className="text-xl font-extrabold text-emerald-950 mb-6">{user?.name || 'Alex Green'}</h2>
 
             <button 
               onClick={handlePhotoClick}
