@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Download, Plus, Search, ChevronDown, Filter, Eye, Ban, Shield, Truck, ShoppingBag } from 'lucide-react';
+import { Download, Search, ChevronDown, Filter, Eye, Ban, Shield, Truck, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminUsersPage() {
@@ -77,10 +77,6 @@ export default function AdminUsersPage() {
           >
             {isExporting ? <Download size={18} className="animate-pulse" /> : <Download size={18} />}
             <span>{isExporting ? 'Exporting...' : 'Export Ledger'}</span>
-          </button>
-          <button onClick={() => alert('[ACTION: REGISTER ENTITY]\n\nOpening new user registration modal...')} className="flex items-center space-x-2 bg-[#1A5632] hover:bg-[#0F351F] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm">
-            <Plus size={18} />
-            <span>Register Entity</span>
           </button>
         </div>
       </div>

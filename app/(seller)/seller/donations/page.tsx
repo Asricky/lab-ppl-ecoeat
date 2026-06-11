@@ -13,6 +13,7 @@ import {
   Verified,
   Crosshair,
   X,
+  Upload,
 } from 'lucide-react';
 
 import { CourierLiveMap } from '@/components/donations/CourierLiveMap';
@@ -100,6 +101,8 @@ function DonationsPageInner() {
   const [donationCategory, setDonationCategory] = useState('');
   const [donationExpiry, setDonationExpiry] = useState('');
   const [donationExpiryDatetime, setDonationExpiryDatetime] = useState('');
+  const [donationManualImage, setDonationManualImage] = useState<string>('');
+  const [donationDescription, setDonationDescription] = useState<string>('');
   /** Produk katalog Donate yang dipilih dari daftar (untuk gambar + kurangi stok) */
   const [donationCatalogProductId, setDonationCatalogProductId] = useState<string | null>(null);
   const [selected, setSelected] = useState<LksPartner | null>(null);
@@ -151,6 +154,8 @@ function DonationsPageInner() {
     setDonationCategory('');
     setDonationExpiry('');
     setDonationExpiryDatetime('');
+    setDonationManualImage('');
+    setDonationDescription('');
   }, []);
 
   const donateRefCoords = useMemo((): [number, number] => {
@@ -212,6 +217,8 @@ function DonationsPageInner() {
     setDonationCategory('');
     setDonationExpiry('');
     setDonationExpiryDatetime('');
+    setDonationManualImage('');
+    setDonationDescription('');
     setSubmitting(false);
   }, []);
 
@@ -257,7 +264,8 @@ function DonationsPageInner() {
       );
     const donationProductImage =
       catalogP?.image ??
-      'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80';
+      (donationManualImage ||
+      'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80');
 
     addDonation({
       id,
@@ -440,6 +448,57 @@ function DonationsPageInner() {
                   className="w-full bg-[#F3F8F2] rounded-xl px-4 py-3 font-medium outline-none focus:ring-2 focus:ring-[#1A5632]"
                 />
               </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Deskripsi singkat (opsional)</label>
+                <textarea
+                  rows={3}
+                  value={donationDescription}
+                  onChange={(e) => setDonationDescription(e.target.value)}
+                  placeholder="Contoh: Kondisi masih baik, dikemas rapi, cocok untuk 10 orang"
+                  className="w-full bg-[#F3F8F2] rounded-xl px-4 py-3 font-medium outline-none focus:ring-2 focus:ring-[#1A5632] resize-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Foto Produk (opsional)</label>
+                <label className="relative border-2 border-dashed border-gray-200 rounded-2xl overflow-hidden cursor-pointer hover:border-[#1A5632]/50 transition-colors block min-h-[120px]">
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const url = URL.createObjectURL(file);
+                        setDonationManualImage(url);
+                      }
+                    }}
+                  />
+                  {donationManualImage ? (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={donationManualImage}
+                        alt="Preview"
+                        className="absolute inset-0 w-full h-full object-cover opacity-70"
+                      />
+                      <div className="relative z-10 flex flex-col items-center justify-center py-8 gap-2">
+                        <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+                          <Upload size={14} className="text-[#1A5632]" />
+                          <span className="text-xs font-bold text-gray-700">Ganti foto</span>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-8 gap-2">
+                      <div className="bg-[#E8F3EB] p-3 rounded-full text-[#1A5632]">
+                        <Upload size={20} />
+                      </div>
+                      <p className="text-sm font-bold text-gray-700">Upload foto produk</p>
+                      <p className="text-xs text-gray-400">PNG, JPG, WEBP hingga 10MB</p>
+                    </div>
+                  )}
+                </label>
+              </div>
               {overStock && (
                 <p className="text-xs text-red-600 font-medium">Porsi melebihi stok katalog ({catalogPicked?.stock}).</p>
               )}
@@ -556,6 +615,14 @@ function DonationsPageInner() {
                                     <CheckCircle2 size={14} className="shrink-0" />
                                     Mitra terverifikasi
                                   </p>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); setTxDetail(donation); }}
+                                    className="mt-3 flex items-center gap-1.5 bg-[#1A5632] hover:bg-[#144226] text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors shadow-sm w-fit"
+                                  >
+                                    <MapPin size={12} />
+                                    Track Donation
+                                  </button>
                                 </div>
                               </div>
                             </div>

@@ -3,7 +3,6 @@
 import React, { Suspense, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
-  Package,
   ListChecks,
   ShoppingCart,
   Leaf,
@@ -91,7 +90,7 @@ function DashboardContent() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <Link
           href="/seller/orders"
           className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-[#1A5632] hover:shadow-md transition-all group block"
@@ -136,27 +135,6 @@ function DashboardContent() {
             {metrics.activeProducts.toLocaleString('id-ID')}
           </h3>
           <p className="text-xs text-gray-400 mt-1">IDR catalogue · Active status</p>
-        </Link>
-
-        <Link
-          href="/seller/analytics"
-          className="bg-[#1A5632] rounded-2xl p-6 shadow-sm border border-[#144226] text-white relative overflow-hidden hover:shadow-md hover:scale-[1.02] transition-all group block"
-        >
-          <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform">
-            <Leaf size={120} />
-          </div>
-          <div className="relative z-10">
-            <div className="flex justify-between items-start mb-4">
-              <div className="bg-[#2A7A4A] p-2.5 rounded-lg text-white">
-                <Package size={20} />
-              </div>
-            </div>
-            <p className="text-sm text-[#A3D9B5] font-medium mb-1">Analytics</p>
-            <h3 className="text-2xl font-bold text-white">Impact trends</h3>
-            <p className="text-xs text-[#A3D9B5] mt-2 opacity-90">
-              Same period as Analytics for the selected range
-            </p>
-          </div>
         </Link>
       </div>
 
