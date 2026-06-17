@@ -12,7 +12,7 @@ export type DonationCategoryKey =
   | 'lembaga-sosial';
 
 export type DonationLocation = {
-  id: number;
+  id: string | number;
   name: string;
   /** Label kategori tampilan (ID) */
   category: string;
@@ -226,17 +226,17 @@ export type ResolvedLksDisplay = {
  * Gambar & info LKS untuk UI (ringkasan transaksi), dari nama penerima + katalog.
  */
 export function resolveLksMetaForRecipient(
-  recipientName: string,
+  recipientName?: string,
   storedImage?: string
 ): ResolvedLksDisplay {
-  const raw = recipientName.trim();
-  if (!raw) {
+  if (!recipientName || typeof recipientName !== 'string') {
     return {
       image: storedImage || DEFAULT_LKS_IMAGE,
       category: null,
       address: null,
     };
   }
+  const raw = recipientName.trim();
   const key = raw.toLowerCase();
   const canonical =
     RECIPIENT_NAME_ALIASES[key] ??

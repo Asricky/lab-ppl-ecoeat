@@ -24,9 +24,73 @@ export const INITIAL_PRODUCTS = [
   },
   {
     id: 'PRD-02',
+    name: 'Ayam Penyet',
+    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=100&h=100&q=80',
+    category: 'Prepared Meals',
+    type: 'Sell',
+    stock: 8,
+    price: 'Rp 15.000',
+    originalPrice: 'Rp 30.000',
+    discountPercent: 50,
+    expiry: '18/06/2026 21:00',
+    expiryDatetime: '2026-06-18T21:00',
+    status: 'Active',
+    description: 'Ayam penyet komplit dengan sambal dan lalapan. Berasal dari batch sisa penjualan.',
+    seller: 'Warung Bu Sri'
+  },
+  {
+    id: 'PRD-03',
+    name: 'Keripik Singkong Balado',
+    image: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=100&h=100&q=80',
+    category: 'Snack',
+    type: 'Sell',
+    stock: 15,
+    price: 'Rp 10.000',
+    originalPrice: 'Rp 18.000',
+    discountPercent: 44,
+    expiry: '25/06/2026 12:00',
+    expiryDatetime: '2026-06-25T12:00',
+    status: 'Active',
+    description: 'Keripik singkong renyah dengan bumbu balado pedas manis.',
+    seller: 'Toko Snack Oye'
+  },
+  {
+    id: 'PRD-04',
+    name: 'Es Kopi Susu Aren',
+    image: 'https://images.unsplash.com/photo-1495147466023-ff5a443385f5?auto=format&fit=crop&w=100&h=100&q=80',
+    category: 'Drink',
+    type: 'Sell',
+    stock: 20,
+    price: 'Rp 12.000',
+    originalPrice: 'Rp 22.000',
+    discountPercent: 45,
+    expiry: '18/06/2026 19:00',
+    expiryDatetime: '2026-06-18T19:00',
+    status: 'Active',
+    description: 'Es kopi susu dengan gula aren asli. Segar dinikmati di sore hari.',
+    seller: 'Kopi Senja'
+  },
+  {
+    id: 'PRD-05',
+    name: 'Croissant Butter',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=100&h=100&q=80',
+    category: 'Bakery',
+    type: 'Sell',
+    stock: 10,
+    price: 'Rp 14.000',
+    originalPrice: 'Rp 25.000',
+    discountPercent: 44,
+    expiry: '19/06/2026 10:00',
+    expiryDatetime: '2026-06-19T10:00',
+    status: 'Active',
+    description: 'Croissant mentega klasik yang renyah di luar dan lembut di dalam.',
+    seller: 'Bakehouse 19'
+  },
+  {
+    id: 'PRD-06',
     name: 'Roti Gandum (Sisa Hari Ini)',
     image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=100&h=100&q=80',
-    category: 'Bakery & Pastry',
+    category: 'Bakery',
     type: 'Donate',
     stock: 5,
     price: 'Free',
@@ -37,7 +101,7 @@ export const INITIAL_PRODUCTS = [
     seller: 'Toko Penyelamat Makanan'
   },
   {
-    id: 'PRD-03',
+    id: 'PRD-07',
     name: 'Sayur Sop Ayam',
     image: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=100&h=100&q=80',
     category: 'Prepared Meals',
@@ -53,7 +117,7 @@ export const INITIAL_PRODUCTS = [
     seller: 'Toko Penyelamat Makanan'
   },
   {
-    id: 'PRD-04',
+    id: 'PRD-08',
     name: 'Pisang Sunpride',
     image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=100&h=100&q=80',
     category: 'Fresh Produce',
@@ -84,12 +148,18 @@ export const INITIAL_ORDERS = [
 export const INITIAL_DONATIONS = [
   {
     id: 'DON-9021',
+    productName: 'Organic Heirloom Tomatoes',
     product: 'Organic Heirloom Tomatoes',
     amountKg: 7.2,
-    donor: 'Green Valley Kitchen',
+    donor: 'Toko Penyelamat Makanan',
     status: 'Completed',
     eta: 'Delivered',
-    dateReceived: '12/05/2026'
+    dateReceived: '12/05/2026',
+    recipient: 'Green Valley Kitchen',
+    recipientImage: 'https://images.unsplash.com/photo-1574314050516-e56593a1fa06?w=400&q=80',
+    weight: '24 porsi',
+    date: '12 Mei 2026',
+    image: 'https://images.unsplash.com/photo-1593113565694-c6f8716c0296?w=400&q=80'
   }
 ];
 
@@ -117,23 +187,23 @@ export interface GlobalState {
   donations: any[];
   tasks: any[];
   notifications: any[];
-  
+
   // Products
   addProduct: (product: any) => void;
   reduceProductStock: (productId: string, quantity: number) => void;
-  
+
   // Orders
   addOrder: (order: any) => void;
-  
+
   // Donations
   addDonation: (donation: any) => void;
   updateDonationStatus: (id: string, status: string) => void;
-  
+
   // Tasks (Courier)
   addTask: (task: any) => void;
   completeTask: (id: string, photoUrl: string, note: string) => void;
   failTask: (id: string, reason: string) => void;
-  
+
   // Notifications (LKS/General)
   addNotification: (notif: any) => void;
 }
@@ -148,16 +218,16 @@ export const useGlobalStore = create<GlobalState>()(
       notifications: [],
 
       // Product Actions
-      addProduct: (product) => 
+      addProduct: (product) =>
         set((state) => ({ products: [product, ...state.products] })),
-        
-      reduceProductStock: (productId, quantity) => 
+
+      reduceProductStock: (productId, quantity) =>
         set((state) => ({
           products: state.products.map(p => {
             if (p.id === productId) {
               const newStock = Math.max(0, p.stock - quantity);
-              return { 
-                ...p, 
+              return {
+                ...p,
                 stock: newStock,
                 status: newStock === 0 ? 'Sold Out' : p.status
               };
@@ -167,11 +237,11 @@ export const useGlobalStore = create<GlobalState>()(
         })),
 
       // Order Actions
-      addOrder: (order) => 
+      addOrder: (order) =>
         set((state) => ({ orders: [order, ...state.orders] })),
 
       // Donation Actions
-      addDonation: (donation) => 
+      addDonation: (donation) =>
         set((state) => ({ donations: [donation, ...state.donations] })),
       updateDonationStatus: (id, status) =>
         set((state) => ({
@@ -181,36 +251,36 @@ export const useGlobalStore = create<GlobalState>()(
         })),
 
       // Task Actions
-      addTask: (task) => 
+      addTask: (task) =>
         set((state) => ({ tasks: [task, ...state.tasks] })),
-        
+
       completeTask: (id, photoUrl, note) =>
         set((state) => ({
-          tasks: state.tasks.map(t => 
-            t.id === id 
-              ? { 
-                  ...t, 
-                  status: 'completed', 
-                  proofUploaded: true, 
-                  photoProofUrl: photoUrl, 
-                  handoverNote: note,
-                  completedAt: new Date().toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short', year: 'numeric' })
-                } 
+          tasks: state.tasks.map(t =>
+            t.id === id
+              ? {
+                ...t,
+                status: 'completed',
+                proofUploaded: true,
+                photoProofUrl: photoUrl,
+                handoverNote: note,
+                completedAt: new Date().toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short', year: 'numeric' })
+              }
               : t
           )
         })),
-        
+
       failTask: (id, reason) =>
         set((state) => ({
-          tasks: state.tasks.map(t => 
-            t.id === id 
-              ? { 
-                  ...t, 
-                  status: 'failed', 
-                  proofUploaded: false, 
-                  handoverNote: reason,
-                  completedAt: new Date().toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short', year: 'numeric' })
-                } 
+          tasks: state.tasks.map(t =>
+            t.id === id
+              ? {
+                ...t,
+                status: 'failed',
+                proofUploaded: false,
+                handoverNote: reason,
+                completedAt: new Date().toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short', year: 'numeric' })
+              }
               : t
           )
         })),
@@ -221,7 +291,10 @@ export const useGlobalStore = create<GlobalState>()(
     }),
     {
       name: 'ecoeat-global-store', // key in localStorage
-      version: 1,
+      version: 2,
+      migrate: (persistedState: any, version: number) => {
+        return persistedState;
+      }
     }
   )
 );

@@ -208,11 +208,11 @@ export default function MitraMapSection() {
             Peta Distribusi{" "}
             <span className="text-[#0F5A2A]">Mitra EcoEat</span>
           </h2>
-          <p className="text-[#66735F] font-semibold text-sm max-w-xl mx-auto leading-relaxed">
+          <div className="text-[#66735F] font-semibold text-sm max-w-xl mx-auto leading-relaxed">
             Menyelamatkan makanan surplus lezat dan layak konsumsi di seluruh
             wilayah Indonesia. Temukan titik aktif mitra kami yang terus
             bertambah!
-          </p>
+          </div>
         </div>
 
         {/* Interactive Dashboard Layout */}
@@ -419,9 +419,9 @@ export default function MitraMapSection() {
                   Jaringan Pengantaran & Distribusi Mandiri
                 </span>
               </div>
-              <p className="text-[11px] font-bold text-[#6B7D4F]">
+              <div className="text-[11px] font-bold text-[#6B7D4F]">
                 EcoEat Nasional © 2026. Menyelamatkan Pangan Nusantara.
-              </p>
+              </div>
             </div>
           </div>
 
@@ -441,9 +441,9 @@ export default function MitraMapSection() {
                 </h3>
               </div>
 
-              <p className="text-sm text-[#66735F] leading-relaxed font-medium">
+              <div className="text-sm text-[#66735F] leading-relaxed font-medium">
                 {selectedRegion.description}
-              </p>
+              </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-[#F5FCED] rounded-2xl p-4">
@@ -459,7 +459,7 @@ export default function MitraMapSection() {
                     Makanan Selamat
                   </span>
                   <span className="text-2xl font-black text-[#0F5A2A] mt-1 block">
-                    {selectedRegion.mealsSaved.toLocaleString()} Porsi
+                    {selectedRegion.mealsSaved.toLocaleString("id-ID")} Porsi
                   </span>
                 </div>
               </div>
@@ -496,9 +496,9 @@ export default function MitraMapSection() {
             </div>
 
             <div className="mt-8 pt-6 border-t border-[#EEF8E7]">
-              <p className="text-[11px] text-[#6B7D4F] text-center font-bold mb-3">
+              <div className="text-[11px] text-[#6B7D4F] text-center font-bold mb-3">
                 Kota Anda belum terdaftar? Jadilah pelopor gerakan kami!
-              </p>
+              </div>
               <a
                 href="/register"
                 className="w-full bg-[#0F5A2A] hover:bg-[#2F8A49] text-white py-3.5 rounded-full font-bold transition-all text-center text-sm block shadow-sm hover:scale-[1.02] active:scale-95"

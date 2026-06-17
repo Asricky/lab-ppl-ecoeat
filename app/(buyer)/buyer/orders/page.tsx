@@ -5,14 +5,13 @@ import { useState, useEffect } from "react";
 import { AlertCircle, Leaf, Star, Truck, CheckCircle2, X, Info } from "lucide-react";
 import { useReviewStore } from "@/store/reviewStore";
 import { useAuthStore } from "@/store/authStore";
-import RefundRequestButton from "@/components/buyer/RefundRequestButton";
 import { formatDisplayLineTotal, useBuyerOrdersStore } from "@/store/buyerOrdersStore";
 
 export default function OrderHistoryPage() {
   const [activeTab, setActiveTab] = useState<
-    "Active Orders" | "Completed" | "Cancelled" | "Refunded"
+    "Active Orders" | "Completed"
   >("Active Orders");
-  const tabs = ["Active Orders", "Completed", "Cancelled", "Refunded"] as const;
+  const tabs = ["Active Orders", "Completed"] as const;
 
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [reviewProduct, setReviewProduct] = useState({ id: "", name: "" });
@@ -89,7 +88,7 @@ export default function OrderHistoryPage() {
         </div>
       </div>
 
-      <div className="flex space-x-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="flex space-x-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
         {tabs.map((tab) => (
           <button
             key={tab}
@@ -149,100 +148,6 @@ export default function OrderHistoryPage() {
               );
             })}
 
-          {activeTab === "Refunded" && (
-            <div className="bg-[#eef3e8] border border-[#d4dec4] rounded-2xl p-4 flex items-start space-x-3 mb-4 shadow-sm">
-              <div className="w-5 h-5 rounded-full border-2 border-green-700 flex items-center justify-center text-green-700 text-[10px] font-bold mt-0.5 shrink-0">
-                i
-              </div>
-              <p className="text-sm text-gray-700 font-medium leading-relaxed">
-                Refund akan diproses otomatis jika gagal kirim atau ajukan secara manual untuk pesanan eligible.
-              </p>
-            </div>
-          )}
-
-          {activeTab === "Refunded" &&
-            filtered.map((order) => {
-              const first = order.lines[0];
-              if (!first) return null;
-              const total = formatDisplayLineTotal(order);
-              if (order.refundEligible) {
-                return (
-                  <div
-                    key={order.id}
-                    className="bg-white rounded-3xl p-6 border border-[#eef3e8] shadow-sm flex flex-col sm:flex-row gap-6 items-center sm:items-start mb-6"
-                  >
-                    <div className="w-full sm:w-40 h-40 rounded-2xl overflow-hidden bg-[#f4f7ed] shrink-0 border border-[#e1e8d5]">
-                      <img src={first.image} alt="" className="w-full h-full object-cover" />
-                    </div>
-                    <div className="flex-1 w-full flex flex-col h-full min-w-0">
-                      <div className="flex justify-between items-start mb-3 gap-4 flex-wrap">
-                        <span className="bg-red-50 text-red-700 text-[10px] font-bold px-3 py-1.5 rounded-full border border-red-200 flex items-center shadow-sm">
-                          <AlertCircle className="w-3 h-3 mr-1 shrink-0" /> ITEM NOT DELIVERED
-                        </span>
-                        <span className="font-extrabold text-gray-900 text-xl">{formatRp(total)}</span>
-                      </div>
-                      <h3 className="font-extrabold text-gray-900 text-2xl mb-1">{first.name}</h3>
-                      <p className="text-xs text-gray-500 font-medium mb-4">
-                        Order #{order.id} • {order.orderedAtLabel}
-                      </p>
-                      <div className="flex flex-col sm:flex-row gap-3 w-full mt-auto flex-wrap">
-                        <RefundRequestButton
-                          orderId={order.id}
-                          refundAmountDisplay={order.refundAmountDisplay ?? total}
-                          className="flex-1 bg-[#388e3c] hover:bg-[#2e7d32] text-white font-bold px-6 py-3 rounded-xl transition-colors text-sm shadow-md"
-                        />
-                        <Link
-                          href={`/buyer/orders/${order.id}`}
-                          className="flex-1 text-center sm:min-w-[140px] bg-[#eef3e8] text-green-800 font-bold px-6 py-3 rounded-xl text-sm border border-[#d4dec4] hover:bg-[#e1e8d5]"
-                        >
-                          Order Details
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-              return (
-                <div
-                  key={order.id}
-                  className="bg-[#f4f7ed] rounded-3xl p-6 border border-[#d4dec4] shadow-sm flex flex-col sm:flex-row gap-6 items-center sm:items-start relative mb-6"
-                >
-                  <div className="flex-1 w-full min-w-0">
-                    <div className="flex justify-between items-start mb-4 flex-wrap gap-2">
-                      <span className="bg-[#e1e8d5] text-green-800 text-[10px] font-bold px-3 py-1.5 rounded-full border border-[#c3d1b0] flex items-center shadow-sm">
-                        <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                          <path d="M20 6L9 17l-5-5" />
-                        </svg>
-                        REFUND COMPLETED
-                      </span>
-                      <span className="text-green-700 font-extrabold text-lg">
-                        +
-                        {formatRp(
-                          order.refundAmountDisplay != null ? order.refundAmountDisplay : total,
-                        )}
-                      </span>
-                    </div>
-                    <div className="w-full h-40 rounded-2xl overflow-hidden bg-gray-100 mb-4 border border-[#e1e8d5]">
-                      <img src={first.image} alt="" className="w-full h-full object-cover" />
-                    </div>
-                    <h3 className="font-extrabold text-gray-900 text-xl mb-1">{first.name}</h3>
-                    <p className="text-xs text-gray-500 font-medium mb-4">
-                      Order #{order.id} • {order.orderedAtLabel}
-                    </p>
-                    <p className="text-xs text-gray-500 italic font-medium pt-4 border-t border-[#d4dec4]">
-                      Dana dikembalikan ke EcoPay Anda
-                    </p>
-                    <Link
-                      href={`/buyer/orders/${order.id}`}
-                      className="mt-4 inline-flex w-full justify-center rounded-xl bg-white border-2 border-[#388e3c] text-green-800 font-bold py-2.5 text-sm hover:bg-green-50 transition-colors"
-                    >
-                      View Detail
-                    </Link>
-                  </div>
-                </div>
-              );
-            })}
-
           {activeTab === "Completed" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {filtered.map((order) => {
@@ -293,49 +198,7 @@ export default function OrderHistoryPage() {
             </div>
           )}
 
-          {activeTab === "Cancelled" &&
-            filtered.map((order) => {
-              const first = order.lines[0];
-              if (!first) return null;
-              const total = formatDisplayLineTotal(order);
-              return (
-                <div
-                  key={order.id}
-                  className="bg-[#f4f7ed] rounded-3xl p-6 border border-[#d4dec4] shadow-sm flex flex-col sm:flex-row gap-6 items-center sm:items-start relative"
-                >
-                  <div className="w-full sm:w-32 h-32 rounded-2xl overflow-hidden bg-gray-200 shrink-0 grayscale">
-                    <img src={first.image} alt="" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 w-full min-w-0">
-                    <div className="flex items-center space-x-3 mb-3 flex-wrap gap-2">
-                      <span className="bg-[#e1e8d5] text-gray-600 text-[10px] font-bold px-3 py-1.5 rounded-full border border-[#c3d1b0] shadow-sm uppercase">
-                        {order.statusLabel}
-                      </span>
-                      <span className="text-[10px] text-gray-500 font-extrabold uppercase">{order.orderedAtLabel}</span>
-                    </div>
-                    <h3 className="font-extrabold text-gray-900 text-xl mb-1">{first.name}</h3>
-                    <p className="font-extrabold text-gray-500 mb-4">{formatRp(total)}</p>
-                    <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-                      <Link
-                        href={`/buyer/orders/${order.id}`}
-                        className="inline-block bg-white text-green-800 font-bold px-5 py-2.5 rounded-xl text-sm border border-[#d4dec4] hover:bg-[#eef3e8]"
-                      >
-                        View Detail
-                      </Link>
-                      {order.refundEligible && (
-                        <RefundRequestButton
-                          orderId={order.id}
-                          refundAmountDisplay={order.refundAmountDisplay ?? total}
-                          className="bg-[#388e3c] hover:bg-[#2e7d32] text-white font-bold px-6 py-3 rounded-xl text-sm shadow-md"
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
-          {filtered.length === 0 && activeTab !== "Refunded" && (
+          {filtered.length === 0 && (
             <p className="text-gray-500 font-medium py-12 text-center">Tidak ada pesanan di tab ini.</p>
           )}
         </div>

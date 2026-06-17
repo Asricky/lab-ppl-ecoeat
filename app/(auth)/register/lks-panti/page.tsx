@@ -5,7 +5,7 @@ import { Upload, ShieldCheck, CheckCircle2, AlertCircle, X, Info } from "lucide-
 import { FormEvent, useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import { authHandler } from "@/lib/auth-handler";
+import { registerLks } from "@/lib/lks-registration";
 
 export default function RegisterLksPage() {
   const router = useRouter();
@@ -111,7 +111,7 @@ export default function RegisterLksPage() {
 
     setIsLoading(true);
     try {
-      const { user, token } = await authHandler.register(formData, "lks-panti");
+      const { user, token } = await registerLks(formData, file);
       setUser(user, token);
       showToast("Registration successful!", "success");
       setTimeout(() => {
