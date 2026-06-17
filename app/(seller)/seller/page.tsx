@@ -70,7 +70,7 @@ function DashboardContent() {
           <p className="text-sm text-gray-500 mt-1">
             EcoPay Balance: Rp {(user?.ecoPayBalance ?? 0).toLocaleString('id-ID')}
           </p>
-          <p className="text-sm text-gray-400 mt-0.5">{dateByTime[timeRange]}</p>
+          <p className="text-sm text-gray-400 mt-0.5" suppressHydrationWarning>{dateByTime[timeRange]}</p>
         </div>
 
         <div className="relative z-20">

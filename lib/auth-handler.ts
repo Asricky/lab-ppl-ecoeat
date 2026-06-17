@@ -28,6 +28,13 @@ const MOCK_USERS = [
     full_name: "Panti Asuhan Mulia",
     role: "lks",
     balance: 0
+  },
+  {
+    email: "admin@ecoeat.com",
+    password: "password",
+    full_name: "Admin EcoEat",
+    role: "admin",
+    balance: 0
   }
 ];
 
@@ -35,6 +42,7 @@ const MOCK_USERS = [
 export const mapBackendRoleToFrontend = (role: string): Role => {
   if (role === 'courier') return 'kurir';
   if (role === 'lks') return 'lks-panti';
+  if (role === 'admin') return 'admin';
   return role as Role;
 };
 
@@ -42,6 +50,7 @@ export const mapBackendRoleToFrontend = (role: string): Role => {
 export const mapFrontendRoleToBackend = (role: Role): string => {
   if (role === 'kurir') return 'courier';
   if (role === 'lks-panti') return 'lks';
+  if (role === 'admin') return 'admin';
   return role || 'buyer';
 };
 

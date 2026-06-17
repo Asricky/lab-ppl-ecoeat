@@ -174,7 +174,7 @@ export default function ProductDetailPage() {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h4 className="font-extrabold text-gray-900 text-base">{rev.userName}</h4>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-0.5" suppressHydrationWarning>
                     {new Date(rev.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                   </p>
                 </div>

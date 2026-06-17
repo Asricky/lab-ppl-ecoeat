@@ -70,6 +70,27 @@ export default function RegisterSellerPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
+    if (!formData.name.trim()) {
+      showToast("Full Name is required", "error");
+      return;
+    }
+    if (!formData.email.includes("@")) {
+      showToast("Invalid email format", "error");
+      return;
+    }
+    if (!formData.businessName.trim()) {
+      showToast("Business Name is required", "error");
+      return;
+    }
+    if (formData.password.length < 8) {
+      showToast("Password must be at least 8 characters", "error");
+      return;
+    }
+    if (!file) {
+      showToast("Please upload your NIB / Operating License", "error");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const { user, token } = await registerSeller(formData, file);
