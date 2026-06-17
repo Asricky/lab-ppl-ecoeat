@@ -11,23 +11,15 @@ const getInitialState = () => {
       const parsed = JSON.parse(stored);
       const user = parsed.state?.user;
       if (user) {
-        const isDemo = ['buyer@ecoeat.com', 'seller@ecoeat.com', 'courier@ecoeat.com', 'lks@ecoeat.com', 'admin@ecoeat.com'].includes(user.email);
-        if (!isDemo) {
-          return { balance: Number(user.ecoPayBalance ?? 0), transactions: [] };
-        }
+        // Always use the persisted ecoPayBalance from authStore for all users
+        return { balance: Number(user.ecoPayBalance ?? 0), transactions: [] };
       }
     }
   } catch (e) {
     console.error(e);
   }
 
-  // Fallback default mock
-  return {
-    balance: 50000,
-    transactions: [
-      { id: 'TRX-9921', type: 'topup', amount: 25000, method: 'Top-up', date: new Date().toISOString() },
-    ]
-  };
+  return { balance: 0, transactions: [] };
 };
 
 const initial = getInitialState();
@@ -61,12 +53,10 @@ if (typeof window !== 'undefined') {
   useAuthStore.subscribe((state) => {
     const user = state.user;
     if (user) {
-      const isDemo = ['buyer@ecoeat.com', 'seller@ecoeat.com', 'courier@ecoeat.com', 'lks@ecoeat.com', 'admin@ecoeat.com'].includes(user.email);
-      if (!isDemo) {
-        useEcoPayStore.setState({
-          balance: Number(user.ecoPayBalance ?? 0),
-        });
-      }
+      // Always sync ecoPayBalance from authStore for all users
+      useEcoPayStore.setState({
+        balance: Number(user.ecoPayBalance ?? 0),
+      });
     } else {
       useEcoPayStore.setState({ balance: 0, transactions: [] });
     }

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTaskStore } from '@/store/taskStore';
 import { useEcoPayStore } from '@/store/ecoPayStore';
+import { useAuthStore } from '@/store/authStore';
 import { Wallet, Info, ArrowRightLeft, Building2, Smartphone, CheckCircle2, AlertCircle, Clock, X } from 'lucide-react';
 
 export default function KurirEarningsPage() {
@@ -10,6 +11,8 @@ export default function KurirEarningsPage() {
   const [withdrawMethod, setWithdrawMethod] = useState<'bank' | 'ewallet' | null>(null);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawSuccess, setWithdrawSuccess] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [accountNumber, setAccountNumber] = useState('');
 
   const [notification, setNotification] = useState<{
     message: string;
@@ -20,6 +23,14 @@ export default function KurirEarningsPage() {
     setNotification({ message, type });
   };
 
+  const { transactions, deductBalance } = useEcoPayStore();
+  const { user, withdrawFunds } = useAuthStore();
+  const { tasks, fetchTasks } = useTaskStore();
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+
   useEffect(() => {
     if (notification) {
       const timer = setTimeout(() => {
@@ -29,17 +40,16 @@ export default function KurirEarningsPage() {
     }
   }, [notification]);
 
-  const { balance, deductBalance } = useEcoPayStore();
-
-  const { tasks } = useTaskStore();
-
-  // Real calculations
-  const creditedBalance = balance;
+  // Use the global persisted ecoPayBalance
+  const creditedBalance = user?.ecoPayBalance || 0;
+  
   const pendingTasks = tasks.filter((task) => task.status === 'completed' && !task.proofUploaded);
-  const pendingBalance = pendingTasks.reduce((sum, task) => sum + task.reward, 0);
+  const pendingBalance = pendingTasks.reduce((sum, task) => sum + (Number(task.reward) || 0), 0);
 
-  // Today's Earnings (Simplified logic: assuming all 'completed' in mock data are today)
-  const earnedToday = creditedBalance; 
+  // Today's Earnings
+  const creditedTasks = tasks.filter((task) => task.status === 'completed' && task.proofUploaded);
+  const totalEarned = creditedTasks.reduce((sum, task) => sum + (Number(task.reward) || 0), 0);
+  const earnedToday = totalEarned; 
 
   const recentTasks = [...tasks].sort((a, b) => b.id.localeCompare(a.id)).slice(0, 5);
 
@@ -49,20 +59,33 @@ export default function KurirEarningsPage() {
       showToast("Lengkapi nominal dan metode penarikan!", "error");
       return;
     }
-    if (parseFloat(withdrawAmount) > balance) {
+    if (parseFloat(withdrawAmount) > creditedBalance) {
       showToast("Saldo tidak mencukupi!", "error");
       return;
     }
     
+    setIsModalOpen(true);
+  };
+
+  const handleModalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!accountNumber) {
+      showToast("Lengkapi nomor akun/rekening!", "error");
+      return;
+    }
+    
+    setIsModalOpen(false);
     setIsWithdrawing(true);
     setTimeout(() => {
       setIsWithdrawing(false);
-      deductBalance(parseFloat(withdrawAmount), withdrawMethod === 'bank' ? 'Bank Transfer' : 'E-Wallet Transfer');
+      withdrawFunds(parseFloat(withdrawAmount)); // Deduct from authStore
+      deductBalance(parseFloat(withdrawAmount), withdrawMethod === 'bank' ? 'Bank Transfer' : 'E-Wallet Transfer'); // Record in history
       showToast("Penarikan berhasil diinisiasi!", "success");
       setWithdrawSuccess(true);
       setTimeout(() => setWithdrawSuccess(false), 3000);
       setWithdrawAmount('');
       setWithdrawMethod(null);
+      setAccountNumber('');
     }, 1500);
   };
 
@@ -233,6 +256,62 @@ export default function KurirEarningsPage() {
             >
               <X size={16} />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Withdrawal Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-emerald-950 text-white">
+              <h3 className="font-extrabold text-lg">Konfirmasi Penarikan</h3>
+              <button onClick={() => setIsModalOpen(false)} className="p-1 hover:bg-white/20 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleModalSubmit} className="p-6 space-y-6">
+              <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+                <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-widest mb-1">TOTAL PENARIKAN</p>
+                <p className="text-2xl font-extrabold text-emerald-950">Rp {parseFloat(withdrawAmount || '0').toLocaleString('id-ID')}</p>
+                <p className="text-xs font-semibold text-emerald-700 mt-1">
+                  Metode: {withdrawMethod === 'bank' ? 'Bank Transfer (BCA)' : 'E-Wallet (GoPay)'}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-2">
+                  Masukkan Nomor {withdrawMethod === 'bank' ? 'Rekening' : 'GoPay'}
+                </label>
+                <input 
+                  type="text"
+                  value={accountNumber}
+                  onChange={(e) => setAccountNumber(e.target.value)}
+                  placeholder={withdrawMethod === 'bank' ? "Contoh: 1234567890" : "Contoh: 081234567890"}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold text-emerald-950 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                  autoFocus
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button 
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 font-bold py-3.5 rounded-xl border-2 border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+                >
+                  Batal
+                </button>
+                <button 
+                  type="submit"
+                  disabled={!accountNumber}
+                  className={`flex-1 font-extrabold py-3.5 rounded-xl transition-colors shadow-sm ${!accountNumber ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-emerald-900 text-white hover:bg-emerald-950'}`}
+                >
+                  Submit
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

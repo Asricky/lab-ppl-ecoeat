@@ -1,13 +1,17 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTaskStore } from '@/store/taskStore';
 import { Route, PackageCheck, Target, ArrowUpDown } from 'lucide-react';
 
 export default function KurirHistoryPage() {
   const [filter, setFilter] = useState<'today' | 'week' | 'all'>('all');
   
-  const { tasks, searchQuery } = useTaskStore();
+  const { tasks, searchQuery, fetchTasks } = useTaskStore();
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
   
   // Real calculation from completed tasks
   const doneTasks = tasks.filter((task) => task.status === 'completed');

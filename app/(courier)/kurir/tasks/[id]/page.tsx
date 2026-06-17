@@ -10,8 +10,12 @@ import { useTaskStore } from '@/store/taskStore';
 export default function CourierTaskDetail() {
   const params = useParams();
   const [task, setTask] = useState<CourierTask | null>(null);
-  const { tasks } = useTaskStore();
+  const { tasks, fetchTasks } = useTaskStore();
   
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+
   useEffect(() => {
     const resolvedId = Array.isArray(params.id) ? params.id[0] : params.id;
     if (resolvedId) {

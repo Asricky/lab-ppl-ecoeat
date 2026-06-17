@@ -3,9 +3,11 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, CheckSquare, Map, DollarSign, Settings, LogOut, HelpCircle, Leaf, Power, X, Clock, User } from 'lucide-react';
+import { LogOut, HelpCircle, Power, X, Clock, User, LayoutDashboard, CheckSquare, Map, DollarSign, Settings, Leaf } from 'lucide-react';
 import Image from 'next/image';
 import { useCourier } from './CourierLayout';
+import { useAuthStore } from '@/store/authStore';
+import { useRouter } from 'next/navigation';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -15,6 +17,13 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const { isOnline, setIsOnline } = useCourier();
   const pathname = usePathname();
+  const router = useRouter();
+  const { logout } = useAuthStore();
+
+  const handleLogout = () => {
+    logout();
+    router.push('/');
+  };
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/kurir/home' },
@@ -106,7 +115,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 1 Issue <X size={10} className="opacity-70" />
               </span>
             </button>
-            <button className="flex items-center gap-3 px-4 py-2.5 w-full text-left text-ecoeat-muted font-medium hover:bg-white/40 hover:text-ecoeat-text rounded-xl transition-all">
+            <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-2.5 w-full text-left text-ecoeat-muted font-medium hover:bg-white/40 hover:text-ecoeat-text rounded-xl transition-all">
               <LogOut size={20} />
               <span>Log Out</span>
             </button>

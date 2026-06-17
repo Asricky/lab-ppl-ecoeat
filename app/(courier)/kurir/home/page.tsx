@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import TaskCard from '@/components/TaskCard';
 import { useTaskStore } from '@/store/taskStore';
 import { useEcoPayStore } from '@/store/ecoPayStore';
@@ -11,9 +11,13 @@ export default function KurirHomePage() {
   const [sortBy, setSortBy] = useState<'nearest' | 'furthest'>('nearest');
   const [isSortOpen, setIsSortOpen] = useState(false);
 
-  const { tasks, searchQuery } = useTaskStore();
+  const { tasks, searchQuery, fetchTasks } = useTaskStore();
   const { balance } = useEcoPayStore();
   const ecopayBalance = balance;
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
 
   // Calculate Today's Goal
   const completedCount = tasks.filter((t) => t.status === 'completed' && t.proofUploaded).length;

@@ -4,11 +4,6 @@ import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import ProductCard from "@/components/buyer/ProductCard";
-import { useGlobalStore } from "@/store/globalStore";
-import { useEcoPayStore } from "@/store/ecoPayStore";
-import { useBuyerOrdersStore } from "@/store/buyerOrdersStore";
-import Link from "next/link";
-import { Clock, MapPin, Wallet, Leaf, ArrowRight, Truck, Package } from "lucide-react";
 
 function getDynamicImage(name: string): string {
   const lowerName = name.toLowerCase();
@@ -40,6 +35,7 @@ type ProductTile = {
   category: Exclude<CategoryTab, "All Surplus">;
 };
 
+import { useGlobalStore } from "@/store/globalStore";
 
 function mapToProductTile(p: any): ProductTile {
   const parseRp = (str: string) => {
@@ -72,11 +68,6 @@ function BuyerDashboardContent() {
   const { products: globalProducts } = useGlobalStore();
   const products = useMemo(() => globalProducts.filter(p => p.type === 'Sell' && p.stock > 0).map(mapToProductTile), [globalProducts]);
   
-  const balance = useEcoPayStore((s) => s.balance);
-  const orders = useBuyerOrdersStore((s) => s.orders);
-  const activeOrders = useMemo(() => orders.filter(o => o.tab === 'Active Orders'), [orders]);
-  const latestOrder = activeOrders[0];
-  
   const [activeCategory, setActiveCategory] = useState<CategoryTab>("All Surplus");
 
   const searchParams = useSearchParams();
@@ -99,98 +90,14 @@ function BuyerDashboardContent() {
         <p className="text-gray-500 text-lg mt-1 font-medium">Find surplus food near you and reduce waste.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        {/* Active Order Card */}
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e1e8d5] flex flex-col relative overflow-hidden group hover:border-[#388e3c]/30 transition-colors">
-          <div className="flex justify-between items-start mb-4">
-            <div className="bg-[#eef3e8] p-3 rounded-2xl text-green-700">
-              {latestOrder?.deliveryMethod === 'pickup' ? <Package className="w-6 h-6" /> : <Truck className="w-6 h-6" />}
-            </div>
-            {latestOrder && (
-              <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
-                {latestOrder.statusLabel}
-              </span>
-            )}
-          </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-1">Pesanan Aktif</h3>
-          {latestOrder ? (
-            <>
-              <p className="text-gray-500 font-medium text-sm mb-4 line-clamp-1">{latestOrder.vendorName} • {latestOrder.lines.length} items</p>
-              <div className="mt-auto bg-[#f4f7ed] rounded-2xl p-4 flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Estimasi Tiba</p>
-                  <p className="font-bold text-gray-900 text-sm flex items-center">
-                    <Clock className="w-3.5 h-3.5 mr-1.5 text-green-700" />
-                    {latestOrder.estimatedArrivalLabel || "Menunggu konfirmasi"}
-                  </p>
-                </div>
-                <Link href={`/buyer/tracking/${latestOrder.id}`} className="w-8 h-8 rounded-full bg-green-700 text-white flex items-center justify-center hover:bg-green-800 transition-colors shadow-sm">
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="text-gray-500 font-medium text-sm mb-4">Belum ada pesanan aktif saat ini.</p>
-              <div className="mt-auto pt-4 border-t border-gray-100">
-                <Link href="/buyer/orders" className="text-sm font-bold text-green-700 hover:text-green-800 flex items-center">
-                  Lihat Riwayat Pesanan <ArrowRight className="w-4 h-4 ml-1" />
-                </Link>
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* EcoPay Balance Card */}
-        <div className="bg-[#388e3c] rounded-3xl p-6 text-white relative overflow-hidden shadow-sm border border-[#2e7d32] flex flex-col">
-          <div className="absolute -bottom-16 -right-16 w-40 h-40 bg-green-500 rounded-full opacity-40 blur-2xl pointer-events-none" />
-          <div className="relative z-10 flex flex-col h-full">
-            <div className="flex justify-between items-start mb-4">
-              <div className="bg-white/20 p-3 rounded-2xl text-white backdrop-blur-sm">
-                <Wallet className="w-6 h-6" />
-              </div>
-              <span className="bg-white/20 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider backdrop-blur-sm">
-                ECOPAY
-              </span>
-            </div>
-            <h3 className="text-xl font-medium text-green-50 mb-1">Saldo Tersedia</h3>
-            <p className="text-3xl font-extrabold mb-4" suppressHydrationWarning>
-              Rp{balance.toLocaleString('id-ID')}
-            </p>
-            <div className="mt-auto flex gap-2">
-              <Link href="/buyer/profile?tab=topup" className="flex-1 bg-white text-green-800 text-center font-bold py-3 rounded-xl hover:bg-green-50 transition-colors shadow-sm text-sm">
-                Top Up
-              </Link>
-              <Link href="/buyer/profile?tab=ecopay" className="w-12 bg-green-800/50 text-white flex items-center justify-center rounded-xl hover:bg-green-800 transition-colors shadow-sm backdrop-blur-sm border border-white/10">
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Eco Impact Card */}
-        <div className="bg-[#eef3e8] rounded-3xl p-6 relative overflow-hidden shadow-sm border border-[#d4dec4] flex flex-col">
-          <div className="flex justify-between items-start mb-4">
-            <div className="bg-white p-3 rounded-2xl text-green-700 shadow-sm">
-              <Leaf className="w-6 h-6" />
-            </div>
-            <span className="bg-green-100 text-green-800 border border-green-200 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
-              IMPACT
-            </span>
-          </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-1">Pahlawan Makanan!</h3>
-          <p className="text-gray-600 font-medium text-sm leading-relaxed mb-4">
-            Pilihan Anda mencegah <span className="font-bold text-green-800">3.2kg CO2</span> minggu ini.
+      <div className="bg-[#388e3c] rounded-3xl p-8 md:p-10 text-white mb-10 relative overflow-hidden shadow-lg border border-[#2e7d32]">
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-green-500 rounded-full opacity-40 blur-3xl pointer-events-none" />
+        <div className="relative z-10">
+          <span className="bg-white/20 px-4 py-1.5 rounded-full text-sm font-bold tracking-wider mb-6 inline-block">ECO IMPACT</span>
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-4">You saved 5 meals this week 🌱</h2>
+          <p className="text-green-50 max-w-2xl text-lg font-medium leading-relaxed">
+            Your choices prevented 3.2kg of CO2 emissions. You&apos;re a hero of the digital ecosystem!
           </p>
-          <div className="mt-auto flex items-center justify-between bg-white rounded-2xl p-4 shadow-sm border border-[#e1e8d5]">
-            <div className="flex items-center">
-              <span className="text-2xl mr-2 font-extrabold text-green-700">5</span>
-              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-tight">Makanan<br/>Diselamatkan</span>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center">
-              <span className="text-sm">🌱</span>
-            </div>
-          </div>
         </div>
       </div>
 

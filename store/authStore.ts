@@ -20,6 +20,7 @@ interface AuthState {
   setUser: (user: User | null, token: string | null) => void;
   setSelectedRole: (role: Role) => void;
   updateUser: (updates: Partial<User>) => void;
+  withdrawFunds: (amount: number) => void;
   logout: () => void;
 }
 
@@ -39,6 +40,9 @@ export const useAuthStore = create<AuthState>()(
       },
       setSelectedRole: (role) => set({ selectedRole: role }),
       updateUser: (updates) => set((state) => ({ user: state.user ? { ...state.user, ...updates } : null })),
+      withdrawFunds: (amount) => set((state) => ({
+        user: state.user ? { ...state.user, ecoPayBalance: state.user.ecoPayBalance - amount } : null
+      })),
       logout: () => {
         delete axios.defaults.headers.common['Authorization'];
         set({ user: null, token: null });

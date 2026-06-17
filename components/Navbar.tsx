@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Menu, Bell, Search } from 'lucide-react';
 import NotificationDropdown from './NotificationDropdown';
 import { dummyOrders, dummyNotifications } from '@/lib/data';
+import { useAuthStore } from '@/store/authStore';
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -13,6 +14,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   
   const hasUnreadNotif = dummyNotifications.some(n => !n.isRead);
+  const { user } = useAuthStore();
 
   return (
     <nav className="bg-ecoeat-bg px-6 py-4 flex items-center justify-between sticky top-0 z-20">
@@ -56,8 +58,8 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
         {/* User Profile */}
         <div className="flex items-center gap-3 pl-6 border-l border-ecoeat-border">
           <div className="hidden sm:flex flex-col items-end">
-            <span className="font-bold text-sm text-ecoeat-text leading-tight">Alex Green</span>
-            <span className="text-xs text-ecoeat-muted">Senior Courier</span>
+            <span className="font-bold text-sm text-ecoeat-text leading-tight">{user?.name || 'Guest'}</span>
+            <span className="text-xs text-ecoeat-muted capitalize">{user?.role || 'User'}</span>
           </div>
           <div className="h-10 w-10 rounded-full bg-gray-300 overflow-hidden border-2 border-white shadow-sm">
             {/* Avatar placeholder */}

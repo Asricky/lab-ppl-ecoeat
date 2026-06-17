@@ -20,7 +20,7 @@ const MapContainer = dynamic(() => import('@/components/MapContainer'), {
 export default function CourierTrackingDetail() {
   const params = useParams();
   const router = useRouter();
-  const { tasks, completeTask, failTask } = useTaskStore();
+  const { tasks, completeTask, failTask, fetchTasks } = useTaskStore();
   const [task, setTask] = useState<CourierTask | null>(null);
   const [isValidationOpen, setIsValidationOpen] = useState(false);
   const [isFailModalOpen, setIsFailModalOpen] = useState(false);
@@ -33,6 +33,10 @@ export default function CourierTrackingDetail() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+
   useEffect(() => {
     const resolvedId = Array.isArray(params.id) ? params.id[0] : params.id;
     if (resolvedId) {
@@ -168,7 +172,7 @@ export default function CourierTrackingDetail() {
                 <textarea 
                   value={handoverNote}
                   onChange={(e) => setHandoverNote(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all min-h-[80px]"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-emerald-950 font-medium placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all min-h-[80px]"
                   placeholder="Contoh: Diterima langsung oleh satpam..."
                 ></textarea>
               </div>

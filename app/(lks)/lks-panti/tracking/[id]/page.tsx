@@ -20,10 +20,14 @@ const MapContainer = dynamic(() => import('@/components/MapContainer'), {
 export default function LksTrackingDetail() {
   const params = useParams();
   const { tasks } = useTaskStore();
-  const { donations } = useDonationStore();
+  const { donations, fetchDonations } = useDonationStore();
   const [donationData, setDonationData] = useState<any>(null);
   const [courierStatus, setCourierStatus] = useState<any>(null);
   
+  useEffect(() => {
+    fetchDonations();
+  }, [fetchDonations]);
+
   useEffect(() => {
     const resolvedId = Array.isArray(params.id) ? params.id[0] : params.id;
     if (resolvedId) {
@@ -33,7 +37,7 @@ export default function LksTrackingDetail() {
       const foundCourierTask = tasks.find(t => t.id === resolvedId);
       if (foundCourierTask) setCourierStatus(foundCourierTask);
     }
-  }, [params, tasks]);
+  }, [params, tasks, donations]);
 
   if (!donationData) {
     return (

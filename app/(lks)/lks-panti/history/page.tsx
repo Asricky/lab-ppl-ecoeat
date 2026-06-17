@@ -1,9 +1,14 @@
 "use client";
 
 import { useDonationStore } from '@/store/donationStore';
+import { useEffect } from 'react';
 
 export default function LksHistoryPage() {
-  const { donations, searchQuery } = useDonationStore();
+  const { donations, searchQuery, fetchDonations } = useDonationStore();
+
+  useEffect(() => {
+    fetchDonations();
+  }, [fetchDonations]);
   
   const historyDonations = donations.filter(row => {
     if (!searchQuery) return true;
