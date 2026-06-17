@@ -5,19 +5,7 @@ import { Filter, X } from "lucide-react";
 import FilterBar, { ExploreFilters } from "@/components/buyer/FilterBar";
 import ProductCard from "@/components/buyer/ProductCard";
 
-function getDynamicImage(name: string): string {
-  const lowerName = name.toLowerCase();
-  if (lowerName.includes('nasi') || lowerName.includes('ayam')) {
-    return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60';
-  }
-  if (lowerName.includes('roti') || lowerName.includes('kue')) {
-    return 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=60';
-  }
-  if (lowerName.includes('martabak') || lowerName.includes('snack')) {
-    return 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=500&auto=format&fit=crop&q=60';
-  }
-  return 'https://images.unsplash.com/photo-1495147466023-ff5a443385f5?w=500&auto=format&fit=crop&q=60';
-}
+// getDynamicImage removed as we use image from store
 
 import { useGlobalStore } from "@/store/globalStore";
 
@@ -48,7 +36,7 @@ function mapToProductTile(p: any) {
 }
 
 const INITIAL_FILTERS: ExploreFilters = {
-  category: "Bakery",
+  category: "",
   minPriceIdr: 0,
   maxPriceIdr: 500_000,
   maxDistance: 10,
@@ -169,7 +157,7 @@ export default function ExplorePage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={{ ...product, image: getDynamicImage(product.name) }} />
+            <ProductCard key={product.id} product={product} />
           ))}
           <div className="sm:col-span-2 bg-[#1b5e20] rounded-3xl p-8 text-white flex flex-col justify-between shadow-lg relative overflow-hidden border border-[#144517]">
             <div className="relative z-10">

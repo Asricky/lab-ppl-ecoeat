@@ -10,19 +10,7 @@ import { useBuyerOrdersStore } from "@/store/buyerOrdersStore";
 import Link from "next/link";
 import { Clock, MapPin, Wallet, Leaf, ArrowRight, Truck, Package } from "lucide-react";
 
-function getDynamicImage(name: string): string {
-  const lowerName = name.toLowerCase();
-  if (lowerName.includes('nasi') || lowerName.includes('ayam')) {
-    return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60';
-  }
-  if (lowerName.includes('roti') || lowerName.includes('kue')) {
-    return 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=60';
-  }
-  if (lowerName.includes('martabak') || lowerName.includes('snack')) {
-    return 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=500&auto=format&fit=crop&q=60';
-  }
-  return 'https://images.unsplash.com/photo-1495147466023-ff5a443385f5?w=500&auto=format&fit=crop&q=60';
-}
+// getDynamicImage removed as we use image from store
 
 const CATEGORY_TABS = ["All Surplus", "Meals", "Snacks", "Drinks", "Bakery"] as const;
 type CategoryTab = (typeof CATEGORY_TABS)[number];
@@ -230,7 +218,7 @@ function BuyerDashboardContent() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={{ ...product, image: getDynamicImage(product.name) }} />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}
