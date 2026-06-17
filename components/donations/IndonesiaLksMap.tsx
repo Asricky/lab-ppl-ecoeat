@@ -35,7 +35,7 @@ type Props = {
   referencePoint: [number, number] | null;
   /** km; 0 = tampil peta nasional tanpa lingkaran */
   radiusKm: number;
-  distancesById: Record<number, number>;
+  distancesById: Record<string | number, number>;
 };
 
 /**

@@ -65,7 +65,7 @@ export function DonationLocationExplorer() {
   }, [refCoords, categoryFilter, radiusKm, searchQuery]);
 
   const distancesById = useMemo(() => {
-    const m: Record<number, number> = {};
+    const m: Record<string | number, number> = {};
     for (const { loc, dist } of DONATION_LOCATIONS.map((loc) => ({
       loc,
       dist: distanceKm(refCoords, loc.coords),

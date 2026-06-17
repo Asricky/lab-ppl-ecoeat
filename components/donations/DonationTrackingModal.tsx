@@ -41,6 +41,22 @@ export type DonationTrackingRow = {
   /** LKS coords — injected from donationLocations catalog */
   lksCoords?: [number, number];
   lksAddress?: string;
+
+  // Real DB fields
+  deliveryId?: string;
+  deliveryStatus?: string;
+  distanceKm?: number;
+  estimatedArrival?: string;
+  courierName?: string;
+  courierAvatar?: string;
+  courierPhone?: string;
+  trackingLogs?: Array<{
+    status: string;
+    notes: string;
+    time: string;
+    latitude: number | null;
+    longitude: number | null;
+  }>;
 };
 
 type Props = {
@@ -70,11 +86,24 @@ export function DonationTrackingModal({ donation, onClose }: Props) {
   const lksCoords: [number, number] = donation.lksCoords ?? [-6.2, 106.8167];
   const start = sellerStart(lksCoords);
 
-  const [courier, setCourier] = useState<[number, number]>(start);
+  // Find the latest coordinate from logs
+  const latestLogWithCoords = [...(donation.trackingLogs || [])]
+    .reverse()
+    .find(log => log.latitude !== null && log.longitude !== null);
+  
+  const initialCourierCoords: [number, number] = latestLogWithCoords 
+    ? [Number(latestLogWithCoords.latitude), Number(latestLogWithCoords.longitude)]
+    : start;
+
+  const [courier, setCourier] = useState<[number, number]>(initialCourierCoords);
   const [progress, setProgress] = useState(0);
 
   /* Simulate real-time courier movement */
   useEffect(() => {
+    if (latestLogWithCoords) {
+      setCourier([Number(latestLogWithCoords.latitude), Number(latestLogWithCoords.longitude)]);
+      return;
+    }
     let t = 0;
     const id = setInterval(() => {
       t = (t + 0.015) % 1;
@@ -85,25 +114,52 @@ export function DonationTrackingModal({ donation, onClose }: Props) {
       ]);
     }, 1000);
     return () => clearInterval(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [donation.id]);
+  }, [donation.id, start, lksCoords, latestLogWithCoords]);
 
   const mapCenter: [number, number] = [
     (courier[0] + lksCoords[0]) / 2,
     (courier[1] + lksCoords[1]) / 2,
   ];
 
-  const courierName = COURIER_NAMES[seededIndex(donation.id, COURIER_NAMES.length)];
-  const courierAvatar = COURIER_AVATARS[seededIndex(donation.id, COURIER_AVATARS.length)];
+  const courierName = donation.courierName || COURIER_NAMES[seededIndex(donation.id, COURIER_NAMES.length)];
+  const courierAvatar = donation.courierAvatar || COURIER_AVATARS[seededIndex(donation.id, COURIER_AVATARS.length)];
 
   const pct = Math.round(progress * 100);
   const isDelivered = donation.status.toLowerCase() === 'delivered' || donation.status.toLowerCase() === 'completed';
 
+  const status = (donation.deliveryStatus || 'available_for_courier').toLowerCase();
+  const logs = donation.trackingLogs || [];
+  const assignedTime = logs.find(l => l.status.toLowerCase() === 'assigned' || l.status.toLowerCase() === 'available_for_courier')?.time || '10:30 AM';
+  const pickedUpTime = logs.find(l => l.status.toLowerCase() === 'picked_up')?.time || (['picked_up', 'in_transit', 'delivered'].includes(status) ? '10:45 AM' : null);
+  const inTransitTime = logs.find(l => l.status.toLowerCase() === 'in_transit')?.time || null;
+  const deliveredTime = logs.find(l => l.status.toLowerCase() === 'delivered' || l.status.toLowerCase() === 'completed')?.time || (isDelivered ? donation.date : 'EST. 11:15 AM');
+
   const timeline = [
-    { label: 'Assigned',   sub: 'Courier matched',          time: '10:30 AM', done: true },
-    { label: 'Picked up',  sub: 'Seller location',           time: '10:45 AM', done: true },
-    { label: 'In Transit', sub: 'Moving towards destination', time: null,       current: !isDelivered },
-    { label: 'Delivered',  sub: 'Hand-off verification',      time: isDelivered ? donation.date : 'EST. 11:15 AM', done: isDelivered },
+    { 
+      label: 'Assigned',   
+      sub: 'Courier matched',          
+      time: assignedTime, 
+      done: ['assigned', 'picked_up', 'in_transit', 'delivered'].includes(status) 
+    },
+    { 
+      label: 'Picked up',  
+      sub: 'Seller location',           
+      time: pickedUpTime, 
+      done: ['picked_up', 'in_transit', 'delivered'].includes(status) 
+    },
+    { 
+      label: 'In Transit', 
+      sub: 'Moving towards destination', 
+      time: inTransitTime,       
+      current: status === 'in_transit', 
+      done: ['in_transit', 'delivered'].includes(status) 
+    },
+    { 
+      label: 'Delivered',  
+      sub: 'Hand-off verification',      
+      time: deliveredTime, 
+      done: status === 'delivered' 
+    },
   ];
 
   const co2Saved = (parseFloat(donation.weight) * 0.05).toFixed(1);
