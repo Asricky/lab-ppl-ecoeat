@@ -84,12 +84,18 @@ export const INITIAL_ORDERS = [
 export const INITIAL_DONATIONS = [
   {
     id: 'DON-9021',
+    productName: 'Organic Heirloom Tomatoes',
     product: 'Organic Heirloom Tomatoes',
     amountKg: 7.2,
-    donor: 'Green Valley Kitchen',
+    donor: 'Toko Penyelamat Makanan',
     status: 'Completed',
     eta: 'Delivered',
-    dateReceived: '12/05/2026'
+    dateReceived: '12/05/2026',
+    recipient: 'Green Valley Kitchen',
+    recipientImage: 'https://images.unsplash.com/photo-1574314050516-e56593a1fa06?w=400&q=80',
+    weight: '24 porsi',
+    date: '12 Mei 2026',
+    image: 'https://images.unsplash.com/photo-1593113565694-c6f8716c0296?w=400&q=80'
   }
 ];
 

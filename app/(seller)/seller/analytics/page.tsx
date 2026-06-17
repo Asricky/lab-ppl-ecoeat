@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   Leaf,
@@ -16,10 +16,8 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 
-import { useProductStore } from '@/store/productStore';
+import { useAuthStore } from '@/store/authStore';
 import {
-  buildDonationChartSeries,
-  getSellerMetrics,
   maxChartDonations,
   type SellerTimeRange,
 } from '@/lib/sellerMetrics';
@@ -27,19 +25,38 @@ import {
 export default function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState<SellerTimeRange>('This Month');
   const [showReportModal, setShowReportModal] = useState(false);
-  const { products } = useProductStore();
+  
+  const { user } = useAuthStore();
+  const [loading, setLoading] = useState(true);
+  const [metrics, setMetrics] = useState({ totalOrders: 0, totalDonationPortions: 0, activeProducts: 0 });
+  const [chartSeries, setChartSeries] = useState<Array<{ label: string; donations: number }>>([]);
+  const [topProducts, setTopProducts] = useState<any[]>([]);
+  const [sellerProfile, setSellerProfile] = useState({ businessName: "Toko Penyelamat Makanan", avatarUrl: "https://i.pravatar.cc/150?u=seller" });
 
-  const metrics = useMemo(
-    () => getSellerMetrics(products, timeRange),
-    [products, timeRange]
-  );
+  useEffect(() => {
+    if (!user?.id) return;
+    const sellerId = user.id;
+    async function fetchAnalytics() {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/seller/analytics?sellerId=${sellerId}&timeRange=${timeRange}`);
+        const data = await res.json();
+        if (data.metrics) setMetrics(data.metrics);
+        if (data.chartSeries) setChartSeries(data.chartSeries);
+        if (data.topProducts) setTopProducts(data.topProducts);
+        if (data.sellerProfile) setSellerProfile(data.sellerProfile);
+      } catch (err) {
+        console.error("Gagal memuat analitik:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchAnalytics();
+  }, [user?.id, timeRange]);
 
-  const chartSeries = useMemo(
-    () => buildDonationChartSeries(products, timeRange),
-    [products, timeRange]
-  );
-
-  const maxDon = maxChartDonations(chartSeries);
+  const maxDon = useMemo(() => {
+    return maxChartDonations(chartSeries);
+  }, [chartSeries]);
 
   const handleExportCSV = () => {
     const headers = ['Time,Total donations (portions)'];
@@ -55,16 +72,6 @@ export default function AnalyticsPage() {
     window.URL.revokeObjectURL(url);
   };
 
-  const topProducts = useMemo(() => {
-    return [...products]
-      .filter((p: { type?: string }) => p.type === 'Sell')
-      .sort((a, b) => b.stock - a.stock)
-      .slice(0, 4)
-      .map((p) => ({
-        ...p,
-        salesEstimate: Math.max(1, p.stock + 12),
-      }));
-  }, [products]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -336,13 +343,13 @@ export default function AnalyticsPage() {
                   <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-sm">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
-                      alt="Seller"
+                      src={sellerProfile.avatarUrl}
+                      alt={sellerProfile.businessName}
                       className="w-full h-full object-cover"
                     />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900">Seller</h3>
+                    <h3 className="text-lg font-bold text-gray-900">{sellerProfile.businessName}</h3>
                     <p className="text-sm font-medium text-gray-500">EcoEat partner</p>
                   </div>
                 </div>
@@ -421,6 +428,26 @@ export default function AnalyticsPage() {
                 </button>
               </div>
             </div>
+            <style dangerouslySetInnerHTML={{ __html: `
+              @media print {
+                body * {
+                  visibility: hidden;
+                }
+                #pdf-report-content, #pdf-report-content * {
+                  visibility: visible;
+                }
+                #pdf-report-content {
+                  position: absolute;
+                  left: 0;
+                  top: 0;
+                  width: 100%;
+                  border: none !important;
+                  box-shadow: none !important;
+                  padding: 0 !important;
+                  margin: 0 !important;
+                }
+              }
+            `}} />
           </div>
         </div>
       )}

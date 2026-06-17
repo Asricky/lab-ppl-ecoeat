@@ -3,34 +3,78 @@
 import React, { useState, useEffect } from 'react';
 import { Wallet, ArrowUpRight, ArrowDownRight, RefreshCcw, ShieldCheck, Download, History, ChevronRight, ArrowLeft, CheckCircle2, X } from 'lucide-react';
 import Link from 'next/link';
+import { useAuthStore } from '@/store/authStore';
 
 export default function WalletPage() {
   const [modalAction, setModalAction] = useState<string | null>(null);
   const [availableBalance, setAvailableBalance] = useState(0);
   const [escrowBalance, setEscrowBalance] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const { user, updateUser } = useAuthStore();
+  const [transactions, setTransactions] = useState<any[]>([]);
+
+  // Form states for withdrawal
+  const [withdrawAmount, setWithdrawAmount] = useState('500000');
+  const [bankName, setBankName] = useState('Bank BCA (**** 8921)');
+  const [withdrawLoading, setWithdrawLoading] = useState(false);
+  const [withdrawError, setWithdrawError] = useState<string | null>(null);
+
+  const fetchWallet = async () => {
+    if (!user?.id) return;
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/seller/wallet?sellerId=${user.id}`);
+      const data = await response.json();
+      if (data.balance !== undefined) {
+        setAvailableBalance(data.balance);
+        setEscrowBalance(data.escrowBalance || 0);
+        setTransactions(data.transactions || []);
+        // Sync balance to store for topbar
+        updateUser({ ecoPayBalance: data.balance });
+      }
+    } catch (err) {
+      console.error("Gagal memuat wallet:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchWallet = async () => {
-      setIsLoading(true);
-      
-      // Simulating network delay instead of fetching from non-existent local server
-      setTimeout(() => {
-        setAvailableBalance(1250000);
-        setEscrowBalance(850000);
-        setIsLoading(false);
-      }, 500);
-    };
     fetchWallet();
-  }, []);
+  }, [user?.id]);
 
-  const transactions = [
-    { id: 'TRX-9921', type: 'Sale', amount: '+Rp 25.000', status: 'Completed', date: 'Today, 14:30', desc: 'Order #ORD-001' },
-    { id: 'TRX-9920', type: 'Refund', amount: '-Rp 60.000', status: 'Completed', date: 'Today, 10:15', desc: 'Order #ORD-9110' },
-    { id: 'TRX-9919', type: 'Fee', amount: '-Rp 1.500', status: 'Completed', date: 'Yesterday, 16:45', desc: 'Platform Fee (ORD-001)' },
-    { id: 'TRX-9918', type: 'Withdrawal', amount: '-Rp 500.000', status: 'Processing', date: 'Yesterday, 09:00', desc: 'Transfer to Bank BCA' },
-    { id: 'TRX-9917', type: 'Escrow Release', amount: '+Rp 45.000', status: 'Completed', date: 'Oct 24, 18:20', desc: 'Order #ORD-005' },
-  ];
+  const handleWithdraw = async () => {
+    if (!user?.id) return;
+    setWithdrawLoading(true);
+    setWithdrawError(null);
+    try {
+      const response = await fetch('/api/seller/wallet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sellerId: user.id,
+          amount: parseFloat(withdrawAmount),
+          bankName: bankName,
+          accountName: user.name || 'Seller',
+          accountNumber: '8921',
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Gagal memproses penarikan.');
+      }
+
+      await fetchWallet();
+      setModalAction("Success");
+    } catch (err) {
+      setWithdrawError(err instanceof Error ? err.message : 'Gagal memproses penarikan.');
+    } finally {
+      setWithdrawLoading(false);
+    }
+  };
+
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -182,20 +226,39 @@ export default function WalletPage() {
                   <p className="text-xs font-bold text-gray-500 uppercase">Available to withdraw</p>
                   <p className="text-3xl font-extrabold text-[#1A5632]">{isLoading ? '...' : `Rp ${availableBalance.toLocaleString('id-ID')}`}</p>
                 </div>
+                {withdrawError && (
+                  <div className="bg-red-50 text-red-700 text-xs font-semibold p-3.5 rounded-xl mb-4 leading-relaxed">
+                    {withdrawError}
+                  </div>
+                )}
                 <div className="space-y-4 mb-6">
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Amount</label>
-                    <input type="text" defaultValue="Rp 500.000" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-lg font-bold text-gray-900 focus:ring-2 focus:ring-[#1A5632] outline-none" />
+                    <input
+                      type="number"
+                      value={withdrawAmount}
+                      onChange={(e) => setWithdrawAmount(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-lg font-bold text-gray-900 focus:ring-2 focus:ring-[#1A5632] outline-none"
+                    />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Destination Bank</label>
-                    <select className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium text-gray-900 focus:ring-2 focus:ring-[#1A5632] outline-none appearance-none">
-                      <option>Bank BCA (**** 8921)</option>
+                    <select
+                      value={bankName}
+                      onChange={(e) => setBankName(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium text-gray-900 focus:ring-2 focus:ring-[#1A5632] outline-none appearance-none"
+                    >
+                      <option value="Bank BCA (**** 8921)">Bank BCA (**** 8921)</option>
                     </select>
                   </div>
                 </div>
-                <button onClick={() => setModalAction("Success")} className="w-full bg-[#1A5632] hover:bg-[#0F351F] text-white px-4 py-3.5 rounded-xl font-bold transition-colors shadow-sm">
-                  Confirm Withdrawal
+                <button
+                  type="button"
+                  disabled={withdrawLoading || isLoading || availableBalance < parseFloat(withdrawAmount)}
+                  onClick={handleWithdraw}
+                  className="w-full bg-[#1A5632] hover:bg-[#0F351F] text-white px-4 py-3.5 rounded-xl font-bold transition-colors shadow-sm disabled:opacity-40"
+                >
+                  {withdrawLoading ? "Processing..." : "Confirm Withdrawal"}
                 </button>
               </div>
             )}

@@ -14,7 +14,10 @@ import {
   Crosshair,
   X,
   Upload,
+  AlertCircle,
+  Info,
 } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 
 import { CourierLiveMap } from '@/components/donations/CourierLiveMap';
 import { DonationLocationExplorer } from '@/components/donations/DonationLocationExplorer';
@@ -39,6 +42,16 @@ type DonationRow = {
   date: string;
   status: string;
   image: string;
+  recipientStorage?: string;
+  recipientCategory?: string;
+  deliveryId?: string;
+  deliveryStatus?: string;
+  distanceKm?: number;
+  estimatedArrival?: string;
+  courierName?: string;
+  courierAvatar?: string;
+  courierPhone?: string;
+  trackingLogs?: any[];
 };
 
 type DonationTab = 'add-donation' | 'lokasi-donasi' | 'transaction-summary' | 'donate';
@@ -101,12 +114,70 @@ function DonationsPageInner() {
   const [donationExpiryDatetime, setDonationExpiryDatetime] = useState('');
   const [donationManualImage, setDonationManualImage] = useState<string>('');
   const [donationDescription, setDonationDescription] = useState<string>('');
+
+  const [submittingProduct, setSubmittingProduct] = useState(false);
+  const [donationImageFile, setDonationImageFile] = useState<File | null>(null);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'info';
+  } | null>(null);
+
+  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setNotification({ message, type });
+  }, []);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
+  const { user } = useAuthStore();
+
   /** Produk katalog Donate yang dipilih dari daftar (untuk gambar + kurangi stok) */
   const [donationCatalogProductId, setDonationCatalogProductId] = useState<string | null>(null);
   const [selected, setSelected] = useState<LksPartner | null>(null);
   const [donateStep, setDonateStep] = useState<DonateStep>('select-product');
   const [submitting, setSubmitting] = useState(false);
   const [donateDone, setDonateDone] = useState(false);
+
+  const [dbLksProfiles, setDbLksProfiles] = useState<any[]>([]);
+  const [dbDonations, setDbDonations] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchLksProfiles() {
+      try {
+        const response = await fetch('/api/seller/lks');
+        const data = await response.json();
+        if (data.lksProfiles) {
+          setDbLksProfiles(data.lksProfiles);
+        }
+      } catch (err) {
+        console.error("Gagal mengambil data LKS dari DB:", err);
+      }
+    }
+    fetchLksProfiles();
+  }, []);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const sellerId = user.id;
+    async function fetchDonations() {
+      try {
+        const response = await fetch(`/api/donations?sellerId=${sellerId}`);
+        const data = await response.json();
+        if (data.donations) {
+          setDbDonations(data.donations);
+        }
+      } catch (err) {
+        console.error("Gagal mengambil daftar transaksi donasi:", err);
+      }
+    }
+    fetchDonations();
+  }, [user, activeTab]);
 
   const [donateRefPresetId, setDonateRefPresetId] = useState('jakarta');
   const [donateGpsCoords, setDonateGpsCoords] = useState<[number, number] | null>(null);
@@ -130,6 +201,50 @@ function DonationsPageInner() {
       donationCategory.trim() &&
       donationExpiry.trim()
   );
+
+  const handleSubmitDonationProduct = useCallback(async () => {
+    if (!productReady) return;
+    if (!user) {
+      showToast("Anda harus login terlebih dahulu", "error");
+      return;
+    }
+
+    setSubmittingProduct(true);
+
+    try {
+      const { addDonationProduct } = await import("@/lib/donation-product");
+      const result = await addDonationProduct(
+        {
+          title: productName,
+          portionQuantity: Math.floor(qtyNum),
+          category: donationCategory,
+          expiryText: donationExpiry,
+          description: donationDescription,
+        },
+        donationImageFile,
+        user.id
+      );
+
+      if (result.product) {
+        useGlobalStore.getState().addProduct(result.product);
+        showToast("Produk donasi berhasil ditambahkan!", "success");
+        // Clear manual fields
+        setProductName('');
+        setQuantity('');
+        setDonationCategory('');
+        setDonationExpiry('');
+        setDonationManualImage('');
+        setDonationImageFile(null);
+        setDonationDescription('');
+      }
+    } catch (error) {
+      console.error(error);
+      const msg = error instanceof Error ? error.message : "Gagal menambahkan produk donasi";
+      showToast(msg, "error");
+    } finally {
+      setSubmittingProduct(false);
+    }
+  }, [productReady, user, productName, qtyNum, donationCategory, donationExpiry, donationDescription, donationImageFile, showToast]);
 
   const availableDonationProducts = useMemo(() => {
     return (products as CatalogProduct[]).filter(
@@ -162,12 +277,38 @@ function DonationsPageInner() {
     return p?.coords ?? [-6.1944, 106.8229];
   }, [donateUseGps, donateGpsCoords, donateRefPresetId]);
 
+  const dbLocations = useMemo(() => {
+    return dbLksProfiles.map((item, idx) => {
+      // distribute coordinates slightly so distances are distinct and realistic
+      // reference coordinate (Jakarta Pusat): [-6.1944, 106.8229]
+      const latOffset = (idx * 0.015) % 0.1;
+      const lonOffset = (idx * 0.02) % 0.1;
+      const lat = -6.1944 + latOffset;
+      const lon = 106.8229 + lonOffset;
+
+      return {
+        id: item.id, // UUID string
+        name: item.foundation_name,
+        category: item.lks_category || 'Mitra LKS',
+        categoryKey: 'lembaga-sosial' as const,
+        distanceStr: '—',
+        address: `Penyimpanan: ${item.storage_type || 'Dry Storage'}`,
+        description: `Lembaga Kesejahteraan Sosial verified di database.`,
+        image: DONATION_LOCATIONS[idx % DONATION_LOCATIONS.length]?.image || 'https://images.unsplash.com/photo-1593113565694-c6f8716c0296?w=400&q=80',
+        coords: [lat, lon] as [number, number],
+        phone: '',
+        forWizard: true,
+        dataSource: 'Supabase Database',
+      };
+    });
+  }, [dbLksProfiles]);
+
   const donateLocationsWithDistance = useMemo(() => {
-    return DONATION_LOCATIONS.map((loc) => ({
+    return dbLocations.map((loc) => ({
       loc,
       distKm: distanceKm(donateRefCoords, loc.coords),
     })).sort((a, b) => a.distKm - b.distKm);
-  }, [donateRefCoords]);
+  }, [dbLocations, donateRefCoords]);
 
   const selectedDistanceKm = useMemo(() => {
     if (!selected) return null;
@@ -217,6 +358,7 @@ function DonationsPageInner() {
     setDonationExpiryDatetime('');
     setDonationManualImage('');
     setDonationDescription('');
+    setDonationImageFile(null);
     setSubmitting(false);
   }, []);
 
@@ -227,32 +369,11 @@ function DonationsPageInner() {
 
   const handleConfirmDonation = async () => {
     if (!selected || !productReady) return;
-    setSubmitting(true);
-    const id = `DON-${Math.floor(Math.random() * 90000) + 10000}`;
-    const body = {
-      table: 'donations',
-      id,
-      lksId: selected.id,
-      lksName: selected.name,
-      productName: productName.trim(),
-      category: donationCategory.trim(),
-      expiry: donationExpiry.trim(),
-      quantity: qtyNum,
-      unit,
-      weightLabel,
-      status: 'Scheduled',
-      createdAt: new Date().toISOString(),
-    };
-
-    try {
-      await fetch('/api/donations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-    } catch {
-      /* offline */
+    if (!user) {
+      showToast("Anda harus login terlebih dahulu", "error");
+      return;
     }
+    setSubmitting(true);
 
     const catalogP =
       donationCatalogProductId &&
@@ -260,65 +381,107 @@ function DonationsPageInner() {
         (x: CatalogProduct) =>
           x.id === donationCatalogProductId && x.name.trim() === productName.trim()
       );
-    const donationProductImage =
-      catalogP?.image ??
-      (donationManualImage ||
-      'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80');
+    const productId = catalogP ? catalogP.id : crypto.randomUUID();
 
-    import('@/store/globalStore').then(({ useGlobalStore }) => {
-      // 1. Sync Donation (Shared by Seller & LKS Panti)
-      useGlobalStore.getState().addDonation({
-        id,
-        productName: productName.trim(),
-        product: productName.trim(), // for LKS compatibility
-        category: donationCategory.trim(),
-        expiry: donationExpiry.trim(),
-        weight: weightLabel,
-        amountKg: Math.max(1, qtyNum * 0.3), // for LKS compatibility
-        recipient: selected.name,
-        recipientImage: selected.image,
-        donor: 'Toko Penyelamat Makanan',
-        date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
-        dateReceived: new Date().toLocaleDateString('id-ID'),
-        status: 'Scheduled',
-        eta: '15-30 min',
-        image: donationProductImage,
-        courierName: 'Menunggu Kurir'
+    const body = {
+      lksId: selected.id,
+      productName: productName.trim(),
+      productId: productId,
+      category: donationCategory.trim(),
+      expiry: donationExpiry.trim(),
+      quantity: qtyNum,
+      weightLabel,
+      sellerId: user.id,
+    };
+
+    try {
+      const response = await fetch('/api/donations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       });
 
-      // 2. Sync to Courier Tasks
-      useGlobalStore.getState().addTask({
-        id: `TASK-${Math.floor(1000 + Math.random() * 9000)}`,
-        type: 'donation',
-        status: 'assigned',
-        pickup: 'Toko Penyelamat Makanan',
-        destination: selected.name,
-        reward: 12000,
-        distance: selectedDistanceKm ? `${selectedDistanceKm.toFixed(1)} km` : '1.5 km',
-        eta: '15-30 min',
-        proofUploaded: false
-      });
+      const resData = await response.json();
 
-      // 3. Sync Notification to LKS Panti
-      useGlobalStore.getState().addNotification({
-        lksId: selected.id,
-        lksName: selected.name,
-        productName: productName.trim(),
-        quantity: qtyNum,
-        unit: 'portion',
-        weightLabel,
-        donationId: id,
-        timestamp: Date.now()
-      });
-
-      // Reduce product stock if catalog
-      if (catalogP && catalogP.type === 'Donate') {
-        useGlobalStore.getState().reduceProductStock(catalogP.id, qtyNum);
+      if (!response.ok) {
+        throw new Error(resData.error || "Gagal memproses donasi.");
       }
-    });
 
-    setSubmitting(false);
-    setDonateDone(true);
+      const donationId = resData.orderId || `DON-${Math.floor(Math.random() * 90000) + 10000}`;
+      const donationProductImage =
+        catalogP?.image ??
+        (donationManualImage ||
+        'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80');
+
+      import('@/store/globalStore').then(({ useGlobalStore }) => {
+        // 1. Sync Donation (Shared by Seller & LKS Panti)
+        useGlobalStore.getState().addDonation({
+          id: donationId,
+          productName: productName.trim(),
+          product: productName.trim(), // for LKS compatibility
+          category: donationCategory.trim(),
+          expiry: donationExpiry.trim(),
+          weight: weightLabel,
+          amountKg: Math.max(1, qtyNum * 0.3), // for LKS compatibility
+          recipient: selected.name,
+          recipientImage: selected.image,
+          donor: 'Toko Penyelamat Makanan',
+          date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+          dateReceived: new Date().toLocaleDateString('id-ID'),
+          status: 'Scheduled',
+          eta: '15-30 min',
+          image: donationProductImage,
+          courierName: 'Menunggu Kurir'
+        });
+
+        // 2. Sync to Courier Tasks
+        useGlobalStore.getState().addTask({
+          id: `TASK-${Math.floor(1000 + Math.random() * 9000)}`,
+          type: 'donation',
+          status: 'assigned',
+          pickup: 'Toko Penyelamat Makanan',
+          destination: selected.name,
+          reward: 12000,
+          distance: selectedDistanceKm ? `${selectedDistanceKm.toFixed(1)} km` : '1.5 km',
+          eta: '15-30 min',
+          proofUploaded: false
+        });
+
+        // 3. Sync Notification to LKS Panti
+        useGlobalStore.getState().addNotification({
+          lksId: selected.id,
+          lksName: selected.name,
+          productName: productName.trim(),
+          quantity: qtyNum,
+          unit: 'portion',
+          weightLabel,
+          donationId,
+          timestamp: Date.now()
+        });
+
+        // Reduce product stock if catalog
+        if (catalogP && catalogP.type === 'Donate') {
+          useGlobalStore.getState().reduceProductStock(catalogP.id, qtyNum);
+        }
+      });
+
+      // Refetch history
+      const refetchResponse = await fetch(`/api/donations?sellerId=${user.id}`);
+      const refetchData = await refetchResponse.json();
+      if (refetchData.donations) {
+        setDbDonations(refetchData.donations);
+      }
+
+      setDonateDone(true);
+      showToast("Donasi berhasil dikirim ke database!", "success");
+
+    } catch (error) {
+      console.error(error);
+      const msg = error instanceof Error ? error.message : "Gagal memproses donasi. Koneksi terputus.";
+      showToast(msg, "error");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -483,6 +646,7 @@ function DonationsPageInner() {
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
+                        setDonationImageFile(file);
                         const url = URL.createObjectURL(file);
                         setDonationManualImage(url);
                       }
@@ -517,6 +681,15 @@ function DonationsPageInner() {
               {overStock && (
                 <p className="text-xs text-red-600 font-medium">Porsi melebihi stok katalog ({catalogPicked?.stock}).</p>
               )}
+              
+              <button
+                type="button"
+                disabled={submittingProduct || !productReady}
+                onClick={handleSubmitDonationProduct}
+                className="w-full bg-[#1A5632] hover:bg-[#144226] text-white font-bold py-3.5 px-4 rounded-xl transition-colors shadow-sm flex justify-center items-center disabled:opacity-40 mt-2 cursor-pointer"
+              >
+                {submittingProduct ? "Menambahkan..." : "Tambahkan Produk Donasi"}
+              </button>
             </div>
             <button
               type="button"
@@ -550,20 +723,21 @@ function DonationsPageInner() {
           >
             <h2 className="text-xl font-bold text-gray-900 mb-4">Transaction summary</h2>
             <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-4 sm:p-5">
-              {donations.length === 0 ? (
+              {dbDonations.length === 0 ? (
                 <p className="text-gray-500 text-sm font-medium py-12 text-center bg-white rounded-xl border border-gray-100">
                   Belum ada transaksi.
                 </p>
               ) : (
                 <ul className="space-y-4 list-none p-0 m-0">
-                  {donations.map((donation: DonationRow) => {
-                    const lks = resolveLksMetaForRecipient(
-                      donation.recipient,
-                      donation.recipientImage
-                    );
+                  {dbDonations.map((donation: any) => {
+                    const lks = {
+                      category: donation.recipientCategory,
+                      address: donation.recipientStorage ? `Penyimpanan: ${donation.recipientStorage}` : 'Alamat terdaftar mitra LKS',
+                      image: donation.recipientImage || 'https://images.unsplash.com/photo-1574314050516-e56593a1fa06?w=400&q=80'
+                    };
                     return (
                       <li key={donation.id}>
-                        <button type="button" onClick={() => setTxDetail(donation)} className="w-full text-left">
+                        <div onClick={() => setTxDetail(donation)} className="w-full text-left cursor-pointer">
                           <article className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden hover:border-[#1A5632]/25 transition-colors">
                             <div className="grid md:grid-cols-5 md:divide-x divide-gray-100">
                               <div className="md:col-span-2 p-5 flex gap-4 items-start">
@@ -642,7 +816,7 @@ function DonationsPageInner() {
                               </div>
                             </div>
                           </article>
-                        </button>
+                        </div>
                       </li>
                     );
                   })}
@@ -653,8 +827,8 @@ function DonationsPageInner() {
               <DonationTrackingModal
                 donation={{
                   ...txDetail,
-                  lksCoords: DONATION_LOCATIONS.find((l) => l.name === txDetail.recipient)?.coords,
-                  lksAddress: DONATION_LOCATIONS.find((l) => l.name === txDetail.recipient)?.address,
+                  lksCoords: DONATION_LOCATIONS.find((l) => l.name === txDetail.recipient)?.coords || [-6.2, 106.8167],
+                  lksAddress: txDetail.recipientStorage ? `Penyimpanan: ${txDetail.recipientStorage}` : 'Alamat terdaftar mitra LKS',
                 }}
                 onClose={() => setTxDetail(null)}
               />
@@ -1080,6 +1254,29 @@ function DonationsPageInner() {
           </section>
         )}
       </div>
+      
+      {/* Premium Toast Notification */}
+      {notification && (
+        <div className="fixed bottom-5 right-5 z-[9999] animate-in fade-in slide-in-from-bottom-5 duration-300">
+          <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl border backdrop-blur-md ${notification.type === 'success'
+              ? 'bg-[#EAF3E1]/95 border-[#1A5632]/20 text-[#1A5632]'
+              : notification.type === 'error'
+                ? 'bg-red-50/95 border-red-200 text-red-950'
+                : 'bg-blue-50/95 border-blue-200 text-blue-950'
+            }`}>
+            {notification.type === 'success' && <CheckCircle2 className="w-5 h-5 text-green-700 shrink-0" />}
+            {notification.type === 'error' && <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />}
+            {notification.type === 'info' && <Info className="w-5 h-5 text-blue-600 shrink-0" />}
+            <p className="text-sm font-bold">{notification.message}</p>
+            <button
+              onClick={() => setNotification(null)}
+              className="text-gray-400 hover:text-gray-600 transition-colors ml-2"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
