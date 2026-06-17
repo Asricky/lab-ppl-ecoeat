@@ -50,10 +50,32 @@ export default function ProductCard({ product }: { product: any }) {
     router.push('/buyer/checkout');
   };
 
+  const getImageUrl = () => {
+    if (product.image && product.image.trim() !== '') return product.image;
+    
+    const nameLower = (product.name || '').toLowerCase();
+    if (nameLower.includes('roti') || nameLower.includes('bakery') || nameLower.includes('pastry') || nameLower.includes('bread') || nameLower.includes('cookie')) {
+      return "https://images.unsplash.com/photo-1585478259715-876acc5be8eb?w=500&auto=format&fit=crop&q=60";
+    }
+    if (nameLower.includes('nasi') || nameLower.includes('rice') || nameLower.includes('bowl') || nameLower.includes('meal')) {
+      return "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=500&auto=format&fit=crop&q=60";
+    }
+    if (nameLower.includes('minum') || nameLower.includes('drink') || nameLower.includes('juice') || nameLower.includes('brew') || nameLower.includes('coffee')) {
+      return "https://images.unsplash.com/photo-1622597467836-f38240662c8c?w=500&auto=format&fit=crop&q=60";
+    }
+    // Fallback resmi EcoEat
+    return "/images/garden-bg.png";
+  };
+
   return (
     <Link href={`/buyer/product/${product.id}`} className="block bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-[#eef3e8] relative group flex flex-col h-full">
       <div className="relative h-48 w-full bg-[#f4f7ed] flex-shrink-0">
-        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+        <img 
+          src={getImageUrl()} 
+          alt={product.name} 
+          className="w-full h-full object-cover" 
+          onError={(e) => { e.currentTarget.src = "/images/garden-bg.png" }} 
+        />
         <div className="absolute top-4 left-4 bg-[#dc2626] text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
           -{product.discountPercentage}%
         </div>

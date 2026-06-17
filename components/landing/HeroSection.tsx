@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, ShieldCheck, HeartHandshake, Leaf, Sparkles } from "lucide-react";
 
 export default function HeroSection() {
@@ -92,14 +93,22 @@ export default function HeroSection() {
               {/* Product Picture Mock */}
               <div className="my-6 bg-[#EEF8E7] w-full h-[180px] rounded-2xl flex flex-col items-center justify-center relative overflow-hidden group">
                 {/* Floating Discount Tag */}
-                <div className="absolute top-3 right-3 bg-[#F4B942] text-[#142017] font-black text-xs px-3 py-1.5 rounded-full shadow-sm">
+                <div className="absolute top-3 right-3 bg-[#F4B942] text-[#142017] font-black text-xs px-3 py-1.5 rounded-full shadow-sm z-10">
                   Diskon 60%
                 </div>
-                {/* Leaf Background Art */}
-                <Leaf size={120} className="text-[#0F5A2A]/5 absolute transform -rotate-12" />
-                <div className="z-10 text-center px-4">
-                  <h4 className="font-extrabold text-lg text-[#142017]">Nasi Goreng Spesial Hijau</h4>
-                  <p className="text-xs font-semibold text-[#66735F] mt-1">Sisa 3 porsi dari Dapur Ibu</p>
+                
+                <Image 
+                  src="/images/nasi_goreng_hijau.png" 
+                  alt="Nasi Goreng Spesial Hijau" 
+                  fill 
+                  className="object-cover group-hover:scale-105 transition-transform duration-500" 
+                  priority
+                />
+                
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none"></div>
+                <div className="absolute bottom-3 left-3 text-left w-full pr-4 pointer-events-none">
+                  <h4 className="font-extrabold text-lg text-white drop-shadow-md leading-tight">Nasi Goreng Spesial Hijau</h4>
+                  <p className="text-xs font-medium text-white/90 mt-0.5 drop-shadow-md">Sisa 3 porsi dari Dapur Ibu</p>
                 </div>
               </div>
 

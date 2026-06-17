@@ -16,6 +16,7 @@ import {
   HelpCircle,
   Leaf,
 } from 'lucide-react';
+import AuthGuard from '@/components/layout/AuthGuard';
 
 export default function AdminLayout({
   children,
@@ -37,10 +38,11 @@ export default function AdminLayout({
     pathname === href || (href !== '/admin' && pathname.startsWith(`${href}/`));
 
   return (
-    <div className="flex h-screen bg-[#F4F8EC]">
-      <aside className="w-64 bg-[#F4F8EC] flex flex-col justify-between border-r border-[#E2EAD8]">
-        <div>
-          <div className="p-6 flex flex-col items-center justify-center">
+    <AuthGuard expectedRole="admin">
+      <div className="flex h-screen bg-[#F4F8EC]">
+        <aside className="w-64 bg-[#F4F8EC] flex flex-col justify-between border-r border-[#E2EAD8]">
+          <div>
+            <div className="p-6 flex flex-col items-center justify-center">
             <div className="flex flex-col items-center justify-center space-y-2">
               <Image
                 src="/logo-ecoeat.png"
@@ -133,5 +135,6 @@ export default function AdminLayout({
         <div className="flex-1 overflow-auto p-8">{children}</div>
       </main>
     </div>
+    </AuthGuard>
   );
 }

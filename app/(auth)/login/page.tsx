@@ -42,7 +42,13 @@ export default function LoginPage() {
       showToast("Login berhasil!", "success");
       // Add a tiny delay to let the toast show up
       setTimeout(() => {
-        router.push(`/${user.role}`);
+        const backendRole = (user?.role || 'buyer').toLowerCase();
+        if (backendRole === 'buyer') router.push('/buyer');
+        else if (backendRole === 'seller') router.push('/seller');
+        else if (backendRole === 'courier' || backendRole === 'kurir') router.push('/kurir');
+        else if (backendRole === 'lks' || backendRole === 'lks-panti') router.push('/lks-panti');
+        else if (backendRole === 'admin') router.push('/admin');
+        else router.push(`/${user.role}`);
       }, 800);
     } catch (error) {
       console.error("Login failed", error);

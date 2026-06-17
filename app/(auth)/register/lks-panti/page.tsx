@@ -117,9 +117,13 @@ export default function RegisterLksPage() {
       setTimeout(() => {
         router.push(`/${user.role}`);
       }, 1000);
-    } catch (error) {
-      console.error("Registration failed", error);
-      showToast("Registration failed. Please try again.", "error");
+    } catch (error: any) {
+      const msg = error?.message || "";
+      if (msg.includes("Silakan periksa kotak masuk email Anda")) {
+        showToast("Akun Anda berhasil dibuat! Silakan periksa kotak masuk email Anda untuk melakukan konfirmasi sebelum masuk.", "success");
+      } else {
+        showToast(msg || "Registration failed. Please try again.", "error");
+      }
     } finally {
       setIsLoading(false);
     }

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { useEcoPayStore } from './ecoPayStore';
+import { useAuthStore } from './authStore';
 
 /** Display unit scales to IDR via × 10_000 (same as formatRp elsewhere) */
 export function displayToIdr(display: number) {
@@ -35,6 +36,7 @@ export interface BuyerOrder {
   /** refundable until user completes request */
   refundEligible?: boolean;
   refundAmountDisplay?: number;
+  deliveryMethod?: 'delivery' | 'pickup';
 }
 
 export function formatDisplayLineTotal(order: BuyerOrder): number {
@@ -196,12 +198,34 @@ interface BuyerOrdersState {
   refundCompletedIds: string[];
   completeRefund: (orderId: string, amountIdr: number) => void;
   getOrder: (orderId: string) => BuyerOrder | undefined;
+  addOrder: (order: BuyerOrder) => void;
 }
 
+const getInitialOrders = (): BuyerOrder[] => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = localStorage.getItem('auth-storage');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      const user = parsed.state?.user;
+      if (user) {
+        const isDemo = ['buyer@ecoeat.com', 'seller@ecoeat.com', 'courier@ecoeat.com', 'lks@ecoeat.com', 'admin@ecoeat.com'].includes(user.email);
+        if (!isDemo) {
+          return [];
+        }
+      }
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return INITIAL;
+};
+
 export const useBuyerOrdersStore = create<BuyerOrdersState>((set, get) => ({
-  orders: INITIAL,
+  orders: getInitialOrders(),
   refundCompletedIds: [],
   getOrder: (orderId) => get().orders.find((o) => o.id === orderId),
+  addOrder: (order) => set((s) => ({ orders: [order, ...s.orders] })),
   completeRefund: (orderId, amountIdr) => {
     const s = get();
     if (s.refundCompletedIds.includes(orderId)) return;
@@ -223,3 +247,17 @@ export const useBuyerOrdersStore = create<BuyerOrdersState>((set, get) => ({
     });
   },
 }));
+
+if (typeof window !== 'undefined') {
+  useAuthStore.subscribe((state) => {
+    const user = state.user;
+    if (!user) {
+      useBuyerOrdersStore.setState({ orders: [] });
+    } else {
+      const isDemo = ['buyer@ecoeat.com', 'seller@ecoeat.com', 'courier@ecoeat.com', 'lks@ecoeat.com', 'admin@ecoeat.com'].includes(user.email);
+      if (!isDemo) {
+        useBuyerOrdersStore.setState({ orders: [] });
+      }
+    }
+  });
+}

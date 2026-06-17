@@ -5,6 +5,20 @@ import { useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import ProductCard from "@/components/buyer/ProductCard";
 
+function getDynamicImage(name: string): string {
+  const lowerName = name.toLowerCase();
+  if (lowerName.includes('nasi') || lowerName.includes('ayam')) {
+    return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60';
+  }
+  if (lowerName.includes('roti') || lowerName.includes('kue')) {
+    return 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=60';
+  }
+  if (lowerName.includes('martabak') || lowerName.includes('snack')) {
+    return 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=500&auto=format&fit=crop&q=60';
+  }
+  return 'https://images.unsplash.com/photo-1495147466023-ff5a443385f5?w=500&auto=format&fit=crop&q=60';
+}
+
 const CATEGORY_TABS = ["All Surplus", "Meals", "Snacks", "Drinks", "Bakery"] as const;
 type CategoryTab = (typeof CATEGORY_TABS)[number];
 
@@ -21,122 +35,39 @@ type ProductTile = {
   category: Exclude<CategoryTab, "All Surplus">;
 };
 
-const products: ProductTile[] = [
-  {
-    id: "1",
-    name: "Mediterranean Bowl",
-    price: 14,
-    discountPrice: 7,
-    discountPercentage: 50,
-    vendor: "Green Garden Deli",
-    distance: 0.4,
-    expiresIn: "3 HOURS",
-    image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    category: "Meals",
-  },
-  {
-    id: "2",
-    name: "Artisan Sourdough",
-    price: 8.5,
-    discountPrice: 2.55,
-    discountPercentage: 70,
-    vendor: "Hearth & Grain",
-    distance: 1.2,
-    expiresIn: "1 HOUR",
-    image: "https://images.unsplash.com/photo-1585478259715-876acc5be8eb?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    category: "Bakery",
-  },
-  {
-    id: "3",
-    name: "Pastry Surprise Box",
-    price: 12,
-    discountPrice: 7.2,
-    discountPercentage: 40,
-    vendor: "Sweet Haven",
-    distance: 0.8,
-    expiresIn: "6 HOURS",
-    image: "https://images.unsplash.com/photo-1495147466023-ff5a443385f5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    category: "Bakery",
-  },
-  {
-    id: "4",
-    name: "Green Vitality Juice",
-    price: 9,
-    discountPrice: 3.6,
-    discountPercentage: 60,
-    vendor: "Pure Press",
-    distance: 2.5,
-    expiresIn: "2 HOURS",
-    image: "https://images.unsplash.com/photo-1622597467836-f38240662c8c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    category: "Drinks",
-  },
-  {
-    id: "5",
-    name: "Crunch Granola Cup",
-    price: 6,
-    discountPrice: 3,
-    discountPercentage: 50,
-    vendor: "Hearth & Grain",
-    distance: 1,
-    expiresIn: "4 HOURS",
-    image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500&auto=format&fit=crop&q=60",
-    category: "Snacks",
-  },
-  {
-    id: "6",
-    name: "Cold Brew Duo",
-    price: 11,
-    discountPrice: 5.5,
-    discountPercentage: 50,
-    vendor: "Ocean Fresh Café",
-    distance: 2.1,
-    expiresIn: "5 HOURS",
-    image: "https://images.unsplash.com/photo-1541167760496-bcad86446031?w=500&auto=format&fit=crop&q=60",
-    category: "Drinks",
-  },
-  {
-    id: "7",
-    name: "Savory Rice Bowl",
-    price: 13,
-    discountPrice: 6.5,
-    discountPercentage: 50,
-    vendor: "Community Kitchen",
-    distance: 0.6,
-    expiresIn: "2 HOURS",
-    image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=500&auto=format&fit=crop&q=60",
-    category: "Meals",
-  },
-  {
-    id: "8",
-    name: "Mini Cookie Mix",
-    price: 7,
-    discountPrice: 2.8,
-    discountPercentage: 60,
-    vendor: "Sweet Haven",
-    distance: 1.8,
-    expiresIn: "7 HOURS",
-    image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500&auto=format&fit=crop&q=60",
-    category: "Snacks",
-  },
-];
+import { useGlobalStore } from "@/store/globalStore";
 
-function DashboardFallback() {
-  return (
-    <div className="max-w-7xl mx-auto pb-12 animate-pulse space-y-8">
-      <div className="h-28 bg-[#eef3e8] rounded-2xl" />
-      <div className="h-44 bg-green-900/30 rounded-3xl" />
-      <div className="h-14 bg-[#eef3e8] rounded-full max-w-xl" />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-64 bg-[#eef3e8] rounded-3xl border border-[#d4dec4]" />
-        ))}
-      </div>
-    </div>
-  );
+function mapToProductTile(p: any): ProductTile {
+  const parseRp = (str: string) => {
+    if (!str) return 0;
+    const num = parseInt(str.replace(/[^0-9]/g, ''), 10);
+    return isNaN(num) ? 0 : num / 1000;
+  };
+
+  let cat = "Meals";
+  if (p.category?.includes("Bakery")) cat = "Bakery";
+  else if (p.category?.includes("Snack")) cat = "Snacks";
+  else if (p.category?.includes("Drink") || p.category?.includes("Produce")) cat = "Drinks";
+
+  return {
+    id: p.id,
+    name: p.name,
+    price: parseRp(p.originalPrice) || 15,
+    discountPrice: parseRp(p.price) || 10,
+    discountPercentage: p.discountPercent || 20,
+    vendor: p.seller || "EcoEat Vendor",
+    distance: 1.2,
+    expiresIn: p.expiry || "1 HOUR",
+    image: p.image,
+    category: cat as any,
+  };
 }
 
 function BuyerDashboardContent() {
   const user = useAuthStore((s) => s.user);
+  const { products: globalProducts } = useGlobalStore();
+  const products = useMemo(() => globalProducts.filter(p => p.type === 'Sell' && p.stock > 0).map(mapToProductTile), [globalProducts]);
+  
   const [activeCategory, setActiveCategory] = useState<CategoryTab>("All Surplus");
 
   const searchParams = useSearchParams();
@@ -148,7 +79,7 @@ function BuyerDashboardContent() {
       const matchesQuery = !query || p.name.toLowerCase().includes(query) || p.vendor.toLowerCase().includes(query);
       return matchesCategory && matchesQuery;
     });
-  }, [activeCategory, query]);
+  }, [activeCategory, query, products]);
 
   return (
     <div className="max-w-7xl mx-auto pb-12">
@@ -206,7 +137,7 @@ function BuyerDashboardContent() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.id} product={{ ...product, image: getDynamicImage(product.name) }} />
           ))}
         </div>
       )}
@@ -224,6 +155,14 @@ function BuyerDashboardContent() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function DashboardFallback() {
+  return (
+    <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-800"></div>
     </div>
   );
 }

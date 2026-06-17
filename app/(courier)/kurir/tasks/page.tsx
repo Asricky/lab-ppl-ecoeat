@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { courierTasks } from '@/lib/dashboardData';
+import { useGlobalStore } from '@/store/globalStore';
 
 const statusLabel: Record<string, string> = {
   assigned: 'Assigned',
@@ -16,6 +16,8 @@ const statusClass: Record<string, string> = {
 };
 
 export default function KurirTasksPage() {
+  const courierTasks = useGlobalStore(s => s.tasks);
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>

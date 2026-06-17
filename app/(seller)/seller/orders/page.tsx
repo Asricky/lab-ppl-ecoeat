@@ -16,16 +16,21 @@ import {
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-import { SELLER_ORDERS as ORDERS } from '@/lib/sellerMetrics';
-
-const DONATIONS = [
-  { id: 'DON-001', productName: 'Roti Gandum (Hampir Expired)', quantity: 5, price: 'Donate', status: 'Completed', refundStatus: '-' },
-  { id: 'DON-002', productName: 'Nasi Kotak Sisa Event', quantity: 10, price: 'Donate', status: 'Active', refundStatus: '-' }
-];
+import { useGlobalStore } from '@/store/globalStore';
 
 export default function OrdersPage() {
   const [activeTab, setActiveTab] = useState('Orders');
   const router = useRouter();
+
+  const ORDERS = useGlobalStore((s) => s.orders);
+  const DONATIONS = useGlobalStore((s) => s.donations).map(d => ({
+    id: d.id,
+    productName: d.product,
+    quantity: d.amountKg + ' kg',
+    price: 'Donate',
+    status: d.status,
+    refundStatus: '-'
+  }));
 
   const displayedData = activeTab === 'Orders' ? ORDERS : DONATIONS;
 

@@ -1,4 +1,4 @@
-# AI.md — Panduan AI & Coding untuk EcoEat
+# Agents.md — Panduan AI & Coding untuk EcoEat
 
 > Dokumen ini wajib dibaca sebelum melakukan coding, refactor, atau generate komponen menggunakan AI. Tujuannya menjaga konsistensi arsitektur, desain, dan kualitas implementasi EcoEat.
 

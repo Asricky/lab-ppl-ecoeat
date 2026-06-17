@@ -5,6 +5,9 @@ import { CheckCircle2, Building, Clock, Leaf, ArrowLeft, Phone } from 'lucide-re
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useProductStore } from '@/store/productStore';
+import { useTaskStore } from '@/store/taskStore';
+import { useDonationStore } from '@/store/donationStore';
+import { useLksInboxStore } from '@/store/lksInboxStore';
 
 const organizations = [
   {
@@ -50,8 +53,9 @@ function ConfirmationContent() {
   const { addDonation } = useProductStore();
 
   const handleConfirm = () => {
+    const newDonationId = `DON-${Math.floor(Math.random() * 10000)}`;
     addDonation({
-      id: `DON-${Math.floor(Math.random() * 10000)}`,
+      id: newDonationId,
       productName: 'ROTI GANDUM (SISA)',
       weight: '5 porsi',
       recipient: selectedOrg.name,
@@ -60,6 +64,37 @@ function ConfirmationContent() {
       status: 'Scheduled',
       image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=80"
     });
+    
+    // Sync to Courier
+    useTaskStore.getState().addTask({
+      id: `TASK-${Math.floor(1000 + Math.random() * 9000)}`,
+      type: 'donation',
+      status: 'assigned',
+      pickup: 'Seller Location',
+      destination: selectedOrg.name,
+      reward: 20000,
+      distance: selectedOrg.distance,
+      eta: 'Tomorrow, 10:00 AM',
+      proofUploaded: false
+    });
+
+    // Sync to LKS Inbox
+    useLksInboxStore.getState().addDonationAlert({
+      title: 'Incoming Donation',
+      message: `Seller donated 5 porsi Roti Gandum`,
+      type: 'donation'
+    });
+
+    // Sync to LKS Dashboard
+    useDonationStore.getState().addIncomingDonation({
+      id: newDonationId,
+      donor: 'Green Garden Deli',
+      product: 'Roti Gandum',
+      amountKg: 5,
+      status: 'Assigned',
+      eta: 'Tomorrow, 10:00 AM'
+    });
+    
     setIsConfirmed(true);
   };
 
