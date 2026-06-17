@@ -1,0 +1,412 @@
+"use client";
+
+import React, { useState } from 'react';
+import {
+  Plus,
+  Package,
+  Eye,
+  Pencil,
+  Trash2,
+  Clock,
+  X,
+  ArrowLeft,
+} from 'lucide-react';
+import Link from 'next/link';
+
+import { useProductStore } from '@/store/productStore';
+
+type SellerProduct = {
+  id: string;
+  name: string;
+  image: string;
+  type: string;
+  stock: number;
+  price: string;
+  expiry: string;
+  expiryDatetime?: string;
+  status: string;
+  description?: string;
+};
+
+/** Meals saved in portions: donation records (portion counts) + Donate-product stock. */
+function mealsSavedPortions(
+  donations: { weight: string }[],
+  allProducts: SellerProduct[]
+) {
+  const fromCatalog = allProducts
+    .filter((p) => p.type === 'Donate')
+    .reduce((s, p) => s + p.stock, 0);
+  const fromHistory = donations.reduce((sum, d) => {
+    const low = String(d.weight).toLowerCase();
+    if (low.includes('kg')) return sum;
+    const n = parseFloat(low.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
+    return sum + n;
+  }, 0);
+  return fromCatalog + fromHistory;
+}
+
+export default function ProductsPage() {
+  const { products, deleteProduct, updateProduct, donations } = useProductStore();
+  
+  // Modal states
+  const [modalType, setModalType] = useState<'view' | 'edit' | 'delete' | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<SellerProduct | null>(null);
+
+  // Edit form state
+  const [editForm, setEditForm] = useState({
+    name: '',
+    stock: 0,
+    price: '',
+    expiry: '',
+    expiryDatetime: '',
+    status: '',
+    description: '',
+  });
+
+  const sellProducts = products.filter((p: SellerProduct) => p.type === 'Sell');
+  const activeSellCount = sellProducts.filter((p: SellerProduct) => p.status === 'Active').length;
+  const mealsPortions = mealsSavedPortions(donations, products);
+
+  const openModal = (type: 'view' | 'edit' | 'delete', product: SellerProduct) => {
+    setSelectedProduct(product);
+    setModalType(type);
+    if (type === 'edit') {
+      setEditForm({
+        name: product.name,
+        stock: product.stock,
+        price: product.price,
+        expiry: product.expiry || '',
+        expiryDatetime: product.expiryDatetime || '',
+        status: product.status,
+        description: product.description || '',
+      });
+    }
+  };
+
+  const closeModal = () => {
+    setModalType(null);
+    setSelectedProduct(null);
+  };
+
+  const handleDelete = () => {
+    if (!selectedProduct) return;
+    deleteProduct(selectedProduct.id);
+    closeModal();
+  };
+
+  const handleEditSave = () => {
+    if (!selectedProduct) return;
+    updateProduct(selectedProduct.id, { ...editForm, type: 'Sell' });
+    closeModal();
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+      {/* Back Button */}
+      <div className="mb-4">
+        <button onClick={() => window.history.back()} className="flex items-center space-x-2 text-gray-500 hover:text-[#1A5632] transition-colors font-bold text-sm bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100 w-fit">
+          <ArrowLeft size={16} />
+          <span>Back</span>
+        </button>
+      </div>
+
+      {/* Header & Tabs */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Products</h1>
+          <p className="text-sm text-gray-500 mb-4">
+            Commercial catalogue in IDR (Rp). Donations to partners are managed under{' '}
+            <Link href="/seller/donations" className="font-bold text-[#1A5632] hover:underline">
+              Donations
+            </Link>
+            .
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <div className="bg-[#E8F3EB] border border-[#D1E8D7] rounded-xl px-4 py-2">
+              <p className="text-[10px] font-bold text-[#1A5632] uppercase tracking-wider">Active products</p>
+              <p className="text-xl font-black text-gray-900">{activeSellCount}</p>
+            </div>
+            <div className="bg-white border border-gray-100 rounded-xl px-4 py-2 shadow-sm">
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Meals saved (portions)</p>
+              <p className="text-xl font-black text-gray-900">{mealsPortions.toLocaleString('id-ID')}</p>
+              <p className="text-[10px] text-gray-400">Donations + surplus portions</p>
+            </div>
+          </div>
+        </div>
+        <Link href="/seller/products/create" className="block">
+          <button
+            type="button"
+            className="flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm w-full md:w-auto"
+          >
+            <Plus size={20} />
+            <span>Add Product</span>
+          </button>
+        </Link>
+      </div>
+
+      {/* Product Table */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-gray-900">Product inventory</h2>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-50/80 text-gray-500 text-sm border-b border-gray-100">
+                <th className="px-6 py-4 font-medium">Product</th>
+                <th className="px-6 py-4 font-medium">Stock</th>
+                <th className="px-6 py-4 font-medium">Expiry</th>
+                <th className="px-6 py-4 font-medium">Status</th>
+                <th className="px-6 py-4 font-medium text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm">
+              {sellProducts.map((product: SellerProduct) => (
+                <tr key={product.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-200">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{product.name}</p>
+                        <p className="text-xs text-gray-500">{product.id}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="font-medium text-gray-700">{product.stock} units</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className={`flex items-center space-x-1.5 ${product.status === 'Expiring Soon' ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
+                      <Clock size={14} className={product.status === 'Expiring Soon' ? 'text-red-500' : 'text-gray-400'} />
+                      <span>{product.expiry}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                      product.status === 'Expiring Soon' 
+                        ? 'bg-rose-100 text-rose-700' 
+                        : product.status === 'Sold Out'
+                        ? 'bg-gray-100 text-gray-600'
+                        : 'bg-emerald-100 text-emerald-700'
+                    }`}>
+                      {product.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex items-center justify-end space-x-2">
+                      <button onClick={() => openModal('view', product)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View details">
+                        <Eye size={18} />
+                      </button>
+                      <button onClick={() => openModal('edit', product)} className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Edit product">
+                        <Pencil size={18} />
+                      </button>
+                      <button onClick={() => openModal('delete', product)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete product">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          
+          {sellProducts.length === 0 && (
+            <div className="px-6 py-12 text-center">
+              <Package size={40} className="mx-auto text-gray-300 mb-3" />
+              <h3 className="text-lg font-medium text-gray-900">No products found</h3>
+              <p className="text-gray-500 mt-1">Try changing the tab filter or add a new product.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Modals */}
+      {modalType && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden relative animate-in fade-in zoom-in duration-200">
+            {modalType === 'view' && (
+              <button onClick={closeModal} className="absolute top-4 left-4 z-10 flex items-center space-x-2 bg-white/80 backdrop-blur-sm text-gray-700 hover:text-[#1A5632] transition-colors font-bold text-xs px-3 py-1.5 rounded-xl shadow-sm border border-gray-100/50">
+                <ArrowLeft size={14} />
+                <span>Back</span>
+              </button>
+            )}
+            <button onClick={closeModal} className="absolute top-4 right-4 z-10 text-gray-400 hover:text-gray-600 bg-white/80 backdrop-blur-sm rounded-full p-1.5 shadow-sm border border-gray-100/50">
+              <X size={16} />
+            </button>
+
+            {modalType === 'view' && selectedProduct && (
+              <div className="bg-[#F4F8EC] min-h-[400px] flex flex-col pt-12 p-6">
+                {/* Product image */}
+                <div className="w-full h-48 rounded-2xl overflow-hidden mb-6 bg-gray-100 shadow-sm">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={selectedProduct.image}
+                    alt={selectedProduct.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&h=300&q=80';
+                    }}
+                  />
+                </div>
+
+                <div className="mb-6">
+                  <h2 className="text-2xl font-extrabold text-gray-900 leading-tight mb-2">{selectedProduct.name}</h2>
+                  <div className="flex items-end space-x-3">
+                    <span className="text-2xl font-extrabold text-[#1A5632]">{selectedProduct.price}</span>
+                    <span className="text-xs font-bold text-gray-500 mb-1">per unit</span>
+                  </div>
+                </div>
+
+                <div className="bg-[#FDF9ED] rounded-2xl p-5 mb-6 shadow-sm border border-[#F2E8DF]">
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center space-x-2 text-red-700 font-bold text-sm">
+                      <Clock size={18} />
+                      <span>Expires: {selectedProduct.expiry}</span>
+                    </div>
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                      selectedProduct.status === 'Expiring Soon'
+                        ? 'bg-rose-100 text-rose-700'
+                        : selectedProduct.status === 'Sold Out'
+                        ? 'bg-gray-100 text-gray-600'
+                        : 'bg-emerald-100 text-emerald-700'
+                    }`}>{selectedProduct.status}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm font-medium text-gray-600">
+                    <span>Stock remaining</span>
+                    <span className="font-extrabold text-gray-900">{selectedProduct.stock} units</span>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl p-5 shadow-sm mb-2">
+                  <h4 className="flex items-center space-x-2 font-bold text-gray-900 mb-3 text-sm">
+                    <Package size={16} className="text-gray-500" />
+                    <span>Handling &amp; Storage</span>
+                  </h4>
+                  <p className="text-sm font-medium text-gray-600 leading-relaxed">
+                    {selectedProduct.description || 'Store at room temperature. Best used within 2 days of purchase.'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {modalType === 'edit' && selectedProduct && (
+              <div className="p-6 overflow-y-auto max-h-[90vh]">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Edit Product</h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Name</label>
+                    <input
+                      type="text"
+                      value={editForm.name}
+                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      className="w-full bg-[#F3F8F2] border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5632] outline-none transition-colors text-gray-900 font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Description & Storage Details</label>
+                    <textarea 
+                      rows={3}
+                      value={editForm.description} 
+                      onChange={e => setEditForm({...editForm, description: e.target.value})}
+                      className="w-full bg-[#F3F8F2] border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5632] outline-none transition-colors text-gray-900 font-medium resize-none" 
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Stock</label>
+                      <input 
+                        type="number" 
+                        value={editForm.stock} 
+                        onChange={e => setEditForm({...editForm, stock: parseInt(e.target.value) || 0})}
+                        className="w-full bg-[#F3F8F2] border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5632] outline-none transition-colors text-gray-900 font-medium" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Price</label>
+                      <input 
+                        type="text" 
+                        value={editForm.price} 
+                        onChange={e => setEditForm({...editForm, price: e.target.value})}
+                        className="w-full bg-[#F3F8F2] border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5632] outline-none transition-colors text-gray-900 font-medium" 
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                      Expiry (Tanggal &amp; Jam)
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={editForm.expiryDatetime}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        if (raw) {
+                          const d = new Date(raw);
+                          const day = String(d.getDate()).padStart(2, '0');
+                          const month = String(d.getMonth() + 1).padStart(2, '0');
+                          const year = d.getFullYear();
+                          const hours = String(d.getHours()).padStart(2, '0');
+                          const mins = String(d.getMinutes()).padStart(2, '0');
+                          setEditForm({
+                            ...editForm,
+                            expiryDatetime: raw,
+                            expiry: `${day}/${month}/${year} ${hours}:${mins}`,
+                          });
+                        } else {
+                          setEditForm({ ...editForm, expiryDatetime: '', expiry: '' });
+                        }
+                      }}
+                      className="w-full bg-[#F3F8F2] border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5632] outline-none transition-colors text-gray-900 font-medium"
+                    />
+                    {editForm.expiry && (
+                      <p className="text-xs text-[#1A5632] font-medium mt-1 flex items-center gap-1">
+                        <Clock size={12} />
+                        {editForm.expiry}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status</label>
+                    <select 
+                      value={editForm.status}
+                      onChange={e => setEditForm({...editForm, status: e.target.value})}
+                      className="w-full bg-[#F3F8F2] border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1A5632] outline-none transition-colors text-gray-900 font-medium"
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Expiring Soon">Expiring Soon</option>
+                      <option value="Sold Out">Sold Out</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="mt-8 flex gap-3">
+                  <button onClick={closeModal} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-bold transition-colors">Cancel</button>
+                  <button onClick={handleEditSave} className="flex-1 bg-[#1A5632] hover:bg-[#0F351F] text-white py-3 rounded-xl font-bold transition-colors">Save Changes</button>
+                </div>
+              </div>
+            )}
+
+            {modalType === 'delete' && selectedProduct && (
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Trash2 size={32} />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Delete Product?</h2>
+                <p className="text-gray-500 font-medium mb-8">
+                  Are you sure you want to delete <span className="font-bold text-gray-700">{selectedProduct.name}</span>? This action cannot be undone.
+                </p>
+                <div className="flex gap-3">
+                  <button onClick={closeModal} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-bold transition-colors">Cancel</button>
+                  <button onClick={handleDelete} className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold transition-colors">Delete</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

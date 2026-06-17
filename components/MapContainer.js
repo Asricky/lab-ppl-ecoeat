@@ -21,8 +21,12 @@ const Popup = dynamic(
   () => import('react-leaflet').then((mod) => mod.Popup),
   { ssr: false }
 );
+const Polyline = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Polyline),
+  { ssr: false }
+);
 
-export default function MapContainer({ locations }) {
+export default function MapContainer({ locations, showRoute = false }) {
   const [L, setL] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -49,6 +53,20 @@ export default function MapContainer({ locations }) {
   const defaultCenter = [-6.200000, 106.816666]; // Jakarta
 
   const getCustomIcon = (type) => {
+    if (type === 'courier') {
+      return L.divIcon({
+        className: 'custom-div-icon',
+        html: `
+          <div style="background-color: #1A5632; width: 36px; height: 36px; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; position: relative;">
+            <div style="position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 2px solid #1A5632; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+            <div style="width: 12px; height: 12px; background-color: white; border-radius: 50%; z-index: 2;"></div>
+          </div>
+          <style>@keyframes ping { 75%, 100% { transform: scale(1.5); opacity: 0; } }</style>
+        `,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+      });
+    }
     const isSeller = type === 'seller';
     const color = isSeller ? '#f59e0b' : '#16a34a'; // Amber for seller, Green for LKS
     return L.divIcon({
@@ -85,40 +103,47 @@ export default function MapContainer({ locations }) {
                 }}>
                   {loc.type === 'seller' ? 'Penjual' : 'Lembaga (LKS)'}
                 </div>
-                <button className="w-full text-xs bg-gray-900 text-white py-1.5 rounded-md mt-1 hover:bg-gray-800 transition-colors">
-                  Lihat Detail
-                </button>
               </div>
             </Popup>
           </Marker>
         ))}
+        {showRoute && locations && locations.length > 1 && (
+          <Polyline 
+            positions={locations.map(loc => [loc.lat, loc.lng])}
+            pathOptions={{ color: '#16a34a', weight: 4, dashArray: '10, 10', opacity: 0.8 }}
+          />
+        )}
       </Map>
       
       {/* Floating UI over map */}
-      <div className="absolute top-5 left-1/2 transform -translate-x-1/2 z-[400]">
-        <button 
-          onClick={handleSearch}
-          className="bg-white/95 backdrop-blur-md px-6 py-2.5 rounded-full shadow-lg text-sm font-semibold text-gray-700 hover:text-green-600 hover:shadow-xl hover:scale-105 transition-all border border-gray-100 flex items-center group-hover:translate-y-1"
-        >
-          {isSearching ? (
-            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-          ) : (
-            <span className="w-2.5 h-2.5 rounded-full bg-green-500 mr-2.5 animate-pulse"></span>
-          )}
-          {isSearching ? 'Mencari...' : 'Search in this area'}
-        </button>
-      </div>
+      {!showRoute && (
+        <>
+          <div className="absolute top-5 left-1/2 transform -translate-x-1/2 z-[400]">
+            <button 
+              onClick={handleSearch}
+              className="bg-white/95 backdrop-blur-md px-6 py-2.5 rounded-full shadow-lg text-sm font-semibold text-gray-700 hover:text-green-600 hover:shadow-xl hover:scale-105 transition-all border border-gray-100 flex items-center group-hover:translate-y-1"
+            >
+              {isSearching ? (
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              ) : (
+                <span className="w-2.5 h-2.5 rounded-full bg-green-500 mr-2.5 animate-pulse"></span>
+              )}
+              {isSearching ? 'Mencari...' : 'Search in this area'}
+            </button>
+          </div>
 
-      <div className="absolute bottom-5 right-5 z-[400] bg-white/95 backdrop-blur-md p-3 rounded-xl shadow-lg border border-gray-100 text-xs font-medium space-y-2">
-        <div className="flex items-center">
-          <div className="w-3 h-3 rounded-full bg-amber-500 mr-2 border border-white shadow-sm"></div>
-          <span className="text-gray-600">Seller Surplus</span>
-        </div>
-        <div className="flex items-center">
-          <div className="w-3 h-3 rounded-full bg-green-600 mr-2 border border-white shadow-sm"></div>
-          <span className="text-gray-600">Lembaga LKS</span>
-        </div>
-      </div>
+          <div className="absolute bottom-5 right-5 z-[400] bg-white/95 backdrop-blur-md p-3 rounded-xl shadow-lg border border-gray-100 text-xs font-medium space-y-2">
+            <div className="flex items-center">
+              <div className="w-3 h-3 rounded-full bg-amber-500 mr-2 border border-white shadow-sm"></div>
+              <span className="text-gray-600">Seller Surplus</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-3 h-3 rounded-full bg-green-600 mr-2 border border-white shadow-sm"></div>
+              <span className="text-gray-600">Lembaga LKS</span>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
