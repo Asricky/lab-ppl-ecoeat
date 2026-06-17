@@ -39,6 +39,12 @@ export default function OrderHistoryPage() {
   const addReview = useReviewStore((s) => s.addReview);
   const user = useAuthStore((s) => s.user);
   const orders = useBuyerOrdersStore((s) => s.orders);
+  const completeOrder = useBuyerOrdersStore((s) => s.completeOrder);
+
+  const handleOrderReceived = (orderId: string) => {
+    completeOrder(orderId);
+    showToast("Pesanan berhasil diselesaikan! Terima kasih telah berbelanja di EcoEat 🌱", "success");
+  };
 
   const openReviewModal = (id: string, name: string) => {
     setReviewProduct({ id, name });
@@ -141,6 +147,14 @@ export default function OrderHistoryPage() {
                         >
                           Track Order
                         </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleOrderReceived(order.id)}
+                          className="bg-[#1b5e20] hover:bg-[#144517] text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm shadow-md flex items-center gap-2"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          Order Received
+                        </button>
                       </div>
                     </div>
                   </div>
