@@ -5,7 +5,7 @@ import { Leaf, CheckCircle2, AlertCircle, X, Info } from "lucide-react";
 import { FormEvent, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import { registerBuyer } from "@/lib/buyer-registration";
+import { authHandler } from "@/lib/auth-handler";
 
 export default function RegisterBuyerPage() {
   const router = useRouter();
@@ -63,7 +63,7 @@ export default function RegisterBuyerPage() {
 
     setIsLoading(true);
     try {
-      const { user, token } = await registerBuyer(formData);
+      const { user, token } = await authHandler.register(formData, "buyer");
       setUser(user, token);
       showToast("Registration successful!", "success");
       setTimeout(() => {

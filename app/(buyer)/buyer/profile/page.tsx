@@ -231,7 +231,7 @@ function ProfileContent() {
                               <span className="text-[10px] font-bold uppercase tracking-wide text-green-900/70 bg-green-50 border border-green-100 px-2 py-0.5 rounded-lg">{typeBadge}</span>
                             </div>
                             <p className="font-bold text-gray-900 truncate">{t.method}</p>
-                            <p className="text-xs text-gray-500" suppressHydrationWarning>{new Date(t.date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                            <p className="text-xs text-gray-500">{new Date(t.date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                           </div>
                           <span className={`font-extrabold tabular-nums shrink-0 ${amountClass}`}>
                             {prefix}{formatRp(t.amount)}

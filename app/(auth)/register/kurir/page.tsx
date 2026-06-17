@@ -5,7 +5,7 @@ import { Upload, Info, User, Truck, MapPin, FileCheck, CheckCircle2, AlertCircle
 import { FormEvent, useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import { registerCourier } from "@/lib/courier-registration";
+import { authHandler } from "@/lib/auth-handler";
 
 export default function RegisterCourierPage() {
   const router = useRouter();
@@ -113,7 +113,7 @@ export default function RegisterCourierPage() {
 
     setIsLoading(true);
     try {
-      const { user, token } = await registerCourier(formData, simFile, stnkFile);
+      const { user, token } = await authHandler.register(formData, 'kurir');
       setUser(user, token);
       showToast("Registration successful!", "success");
       setTimeout(() => {

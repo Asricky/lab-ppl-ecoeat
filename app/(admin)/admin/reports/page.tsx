@@ -10,18 +10,195 @@ export default function AdminReportsPage() {
 
   const ranges = ['Last 7 Days', 'Last 30 Days', 'This Month', 'Last Month', 'Q3 2023', 'YTD'];
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     setIsGenerating(true);
-    setTimeout(() => {
-      const pdfContent = "data:application/pdf;base64,JVBERi0xLjQKJcOkw7zDtsOfCjIgMCBvYmoKPDwvTGVuZ3RoIDMgMCBSL0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nDPQM1Qo5ypUMFAwALJMLU31jBQsTAz1DBSKkhPz4hNLUvX8/B1AgiU5iXkKJYkFiaZgXimXAhAHAOlVDwQKZW5kc3RyZWFtCmVuZG9iagoKMyAwIG9iago0MgplbmRvYmoKCjUgMCBvYmoKPDw+PgplbmRvYmoKCjQgMCBvYmoKPDwvVHlwZS9QYWdlcy9Db3VudCAxL0tpZHNbIDEgMCBSIF0+PgplbmRvYmoKCjYgMCBvYmoKPDwvVHlwZS9DYXRhbG9nL1BhZ2VzIDQgMCBSPj4KZW5kb2JqCgoxIDAgb2JqCjw8L1R5cGUvUGFnZS9SZXNvdXJjZXMgNSAwIFIvTWVkaWFCb3hbIDAgMCA1OTUgODQyIF0vQ29udGVudHMgMiAwIFIvUGFyZW50IDQgMCBSPj4KZW5kb2JqCgp4cmVmCjAgNwowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAyMjUgMDAwMDAgbiAKMDAwMDAwMDE4MiAwMDAwMCBuIAowMDAwMDAwMDE4IDAwMDAwIG4gCjAwMDAwMDAxMjUgMDAwMDAgbiAKMDAwMDAwMDAxOCAwMDAwMCBuIAowMDAwMDAwMTc1IDAwMDAwIG4gCnRyYWlsZXIKPDwvU2l6ZSA3L1Jvb3QgNiAwIFI+PgpzdGFydHhyZWYKMzI2CiUlRU9GCg==";
-      const link = document.createElement("a");
-      link.setAttribute("href", pdfContent);
-      link.setAttribute("download", `EcoEat_Report_${selectedRange.replace(/ /g, '_')}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+      
+      // Header Banner (Dark Green #1A5632)
+      doc.setFillColor(26, 86, 50);
+      doc.rect(0, 0, 210, 40, 'F');
+      
+      // Header Title & Logo Text
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(22);
+      doc.text('EcoEat', 20, 25);
+      
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text('DELIVERY & SURPLUS FOOD PLATFORM', 20, 32);
+      
+      // Header Right (Title)
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('MONTHLY PERFORMANCE REVIEW', 120, 24);
+      
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Period: ${selectedRange}`, 120, 30);
+      doc.text(`Generated: ${new Date().toLocaleDateString('id-ID')}`, 120, 36);
+
+      // Metadata Block
+      doc.setTextColor(80, 80, 80);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.text('Document Metadata', 20, 52);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.text(`Author: Marcus Chen (System Manager)`, 20, 60);
+      doc.text(`System Status: Active / Operational`, 20, 66);
+      doc.text(`Database Sync: Real-time Live`, 20, 72);
+
+      // Separator Line
+      doc.setDrawColor(220, 220, 220);
+      doc.line(20, 78, 190, 78);
+
+      // Card-like stats boxes
+      // Card 1: Total Transactions
+      doc.setFillColor(248, 250, 246);
+      doc.setDrawColor(220, 235, 210);
+      doc.rect(20, 85, 52, 35, 'FD');
+      doc.setTextColor(100, 100, 100);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.text('TOTAL TRANSACTIONS', 25, 93);
+      doc.setTextColor(26, 86, 50);
+      doc.setFontSize(16);
+      doc.text('12,450', 25, 104);
+      doc.setTextColor(46, 117, 89);
+      doc.setFontSize(8);
+      doc.text('+12.5% vs Last 30d', 25, 113);
+
+      // Card 2: Gross Volume
+      doc.setFillColor(248, 250, 246);
+      doc.setDrawColor(220, 235, 210);
+      doc.rect(79, 85, 52, 35, 'FD');
+      doc.setTextColor(100, 100, 100);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.text('GROSS VOLUME', 84, 93);
+      doc.setTextColor(26, 86, 50);
+      doc.setFontSize(14);
+      doc.text('Rp 45.200.000', 84, 104);
+      doc.setTextColor(46, 117, 89);
+      doc.setFontSize(8);
+      doc.text('+8.2% vs Last 30d', 84, 113);
+
+      // Card 3: Active Nodes
+      doc.setFillColor(248, 250, 246);
+      doc.setDrawColor(220, 235, 210);
+      doc.rect(138, 85, 52, 35, 'FD');
+      doc.setTextColor(100, 100, 100);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.text('ACTIVE NODES', 143, 93);
+      doc.setTextColor(26, 86, 50);
+      doc.setFontSize(16);
+      doc.text('1,482', 143, 104);
+      doc.setTextColor(46, 117, 89);
+      doc.setFontSize(8);
+      doc.text('+4.1% vs Last 30d', 143, 113);
+
+      // Analysis Section
+      doc.setTextColor(26, 86, 50);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('1. Platform Activity Analysis', 20, 136);
+
+      doc.setTextColor(60, 60, 60);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9.5);
+      const text1 = `EcoEat has registered strong growth across all metrics in this period (${selectedRange}). Total transactions completed stood at 12,450, representing a substantial +12.5% increase. The expansion of our merchant network has led to more frequent surplus listings, creating an active environment for buyers seeking affordable high-quality options.`;
+      const splitText1 = doc.splitTextToSize(text1, 170);
+      doc.text(splitText1, 20, 143);
+
+      // Impact Section
+      doc.setTextColor(26, 86, 50);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('2. Environmental & Social Impact', 20, 168);
+
+      doc.setTextColor(60, 60, 60);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9.5);
+      const text2 = `Our sustainable routing algorithms and courier initiatives saved 4,200 kg of edible food items from disposal. This has resulted in a carbon offset of approximately 8,400 kg of CO2 equivalent emissions. Social outreach has also been strengthened, with 45 active LKS partners participating, feeding roughly 3,200 local beneficiaries.`;
+      const splitText2 = doc.splitTextToSize(text2, 170);
+      doc.text(splitText2, 20, 175);
+
+      // Fiscal Section
+      doc.setTextColor(26, 86, 50);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('3. Fiscal Breakdown & Revenue Sharing', 20, 202);
+
+      // Draw table background headers
+      doc.setFillColor(234, 243, 225);
+      doc.rect(20, 209, 170, 7, 'F');
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(26, 86, 50);
+      doc.text('Revenue Category', 25, 214);
+      doc.text('Allocation Model', 95, 214);
+      doc.text('Total Contribution', 150, 214);
+
+      // Draw lines and content
+      doc.setDrawColor(220, 220, 220);
+      doc.line(20, 216, 190, 216);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(60, 60, 60);
+      doc.text('Seller Admin Fee', 25, 222);
+      doc.text('5% from seller profit', 95, 222);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Rp 32.100.000', 150, 222);
+
+      doc.line(20, 225, 190, 225);
+
+      doc.setFont('helvetica', 'normal');
+      doc.text('Buyer Transaction Fee', 25, 231);
+      doc.text('Rp 10.000 per checkout', 95, 231);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Rp 13.100.000', 150, 231);
+
+      doc.line(20, 234, 190, 234);
+
+      // Total row
+      doc.setFillColor(245, 245, 245);
+      doc.rect(20, 236, 170, 8, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.text('Total Revenue', 25, 242);
+      doc.text('-', 95, 242);
+      doc.setTextColor(26, 86, 50);
+      doc.text('Rp 45.200.000', 150, 242);
+
+      // Document Sign-off / Signature Area
+      doc.setTextColor(100, 100, 100);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('Approved by:', 20, 258);
+      doc.setFont('helvetica', 'italic');
+      doc.text('Marcus Chen (System Manager)', 45, 258);
+
+      // Footer
+      doc.setDrawColor(220, 220, 220);
+      doc.line(20, 268, 190, 268);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(140, 140, 140);
+      doc.text('EcoEat Admin Console - Confidential Performance Document. All metrics audited.', 20, 274);
+      doc.text('Page 1 of 1', 175, 274);
+
+      doc.save(`EcoEat_Report_${selectedRange.replace(/ /g, '_')}.pdf`);
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+    } finally {
       setIsGenerating(false);
-    }, 2000);
+    }
   };
 
   return (

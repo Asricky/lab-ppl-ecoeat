@@ -56,62 +56,27 @@ export const mapFrontendRoleToBackend = (role: Role): string => {
 
 export const authHandler = {
   login: async (email: string, password: string): Promise<{ user: User, token: string }> => {
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 600));
 
-      const result = await response.json();
+    const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
 
-      if (response.ok && result.user) {
-        const user: User = {
-          id: result.user.id,
-          name: result.user.name,
-          email: result.user.email,
-          role: mapBackendRoleToFrontend(result.user.role),
-          ecoPayBalance: result.user.ecoPayBalance,
-          avatar: undefined,
-        };
-        return { user, token: result.token };
-      }
-
-      // If database login failed, check mock fallback
-      const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
-      if (foundUser) {
-        const token = "mock-jwt-token-" + Date.now();
-        const user: User = {
-          id: "mock-uuid-" + Date.now(),
-          name: foundUser.full_name,
-          email: foundUser.email,
-          role: mapBackendRoleToFrontend(foundUser.role),
-          ecoPayBalance: foundUser.balance,
-          avatar: undefined,
-        };
-        return { user, token };
-      }
-
-      throw new Error(result?.message || "Email atau password salah!");
-    } catch (dbError: any) {
-      // If network fails entirely or something throws, try mock fallback as absolute last resort
-      const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
-      if (foundUser) {
-        const token = "mock-jwt-token-" + Date.now();
-        const user: User = {
-          id: "mock-uuid-" + Date.now(),
-          name: foundUser.full_name,
-          email: foundUser.email,
-          role: mapBackendRoleToFrontend(foundUser.role),
-          ecoPayBalance: foundUser.balance,
-          avatar: undefined,
-        };
-        return { user, token };
-      }
-      throw new Error(dbError?.message || "Email atau password salah!");
+    if (!foundUser) {
+      throw new Error("Email atau password salah!");
     }
+
+    const token = "mock-jwt-token-" + Date.now();
+
+    const user: User = {
+      id: "mock-uuid-" + Date.now(),
+      name: foundUser.full_name,
+      email: foundUser.email,
+      role: mapBackendRoleToFrontend(foundUser.role),
+      ecoPayBalance: foundUser.balance,
+      avatar: undefined,
+    };
+
+    return { user, token };
   },
 
   register: async (data: any, role: Role): Promise<{ user: User, token: string }> => {

@@ -19,16 +19,21 @@ export default function AdminTransactionsPage() {
   const handleExport = () => {
     setIsExporting(true);
     setTimeout(() => {
-      // Create fake CSV content
-      const csvContent = "data:text/csv;charset=utf-8,ID,User,Type,Date,Amount,Status\n" 
-        + transactions.map(e => `${e.id},${e.user},${e.type},${e.date},${e.amount},${e.status}`).join("\n");
-      const encodedUri = encodeURI(csvContent);
+      // Create CSV content from filtered transactions
+      const headers = "ID,User,Type,Date,Amount,Status\n";
+      const rows = filteredTx.map(e => `${e.id},${e.user},${e.type},${e.date},"${e.amount}",${e.status}`).join("\n");
+      const csvContent = headers + rows;
+      
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      
       const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
+      link.setAttribute("href", url);
       link.setAttribute("download", "transactions_ledger.csv");
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
       setIsExporting(false);
     }, 1500); // Simulate network delay
   };
@@ -57,7 +62,7 @@ export default function AdminTransactionsPage() {
           className={`flex items-center space-x-2 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm ${isExporting ? 'bg-[#0F351F] opacity-75 cursor-not-allowed' : 'bg-[#1A5632] hover:bg-[#0F351F]'}`}
         >
           {isExporting ? <RefreshCw size={18} className="animate-spin" /> : <Download size={18} />}
-          <span>{isExporting ? 'Exporting...' : 'Export CSV'}</span>
+          <span>{isExporting ? 'Exporting...' : 'Export Excel'}</span>
         </button>
       </div>
 

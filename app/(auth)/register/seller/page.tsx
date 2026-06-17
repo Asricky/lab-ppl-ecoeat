@@ -5,7 +5,7 @@ import { Upload, ShieldCheck, CheckCircle2, AlertCircle, X, Info } from "lucide-
 import { FormEvent, useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import { registerSeller, validateSellerLegalDocument } from "@/lib/seller-registration";
+import { authHandler } from "@/lib/auth-handler";
 
 export default function RegisterSellerPage() {
   const router = useRouter();
@@ -43,12 +43,11 @@ export default function RegisterSellerPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      try {
-        validateSellerLegalDocument(selectedFile);
-        setFile(selectedFile);
-      } catch (error: any) {
-        showToast(error?.message || "Invalid file", "error");
+      if (selectedFile.size > 5 * 1024 * 1024) {
+        showToast("File size must be less than 5MB", "error");
         setFile(null);
+      } else {
+        setFile(selectedFile);
       }
     }
   };
@@ -57,12 +56,11 @@ export default function RegisterSellerPage() {
     e.preventDefault();
     const droppedFile = e.dataTransfer.files?.[0];
     if (droppedFile) {
-      try {
-        validateSellerLegalDocument(droppedFile);
-        setFile(droppedFile);
-      } catch (error: any) {
-        showToast(error?.message || "Invalid file", "error");
+      if (droppedFile.size > 5 * 1024 * 1024) {
+        showToast("File size must be less than 5MB", "error");
         setFile(null);
+      } else {
+        setFile(droppedFile);
       }
     }
   };
@@ -93,7 +91,7 @@ export default function RegisterSellerPage() {
 
     setIsLoading(true);
     try {
-      const { user, token } = await registerSeller(formData, file);
+      const { user, token } = await authHandler.register(formData, "seller");
       setUser(user, token);
       showToast("Registration successful!", "success");
       setTimeout(() => {
@@ -200,7 +198,6 @@ export default function RegisterSellerPage() {
                 type="file" 
                 ref={fileInputRef} 
                 className="hidden" 
-                aria-label="NIB / Operating License"
                 accept=".pdf,.jpg,.jpeg,.png"
                 onChange={handleFileChange}
               />

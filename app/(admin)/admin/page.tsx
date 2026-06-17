@@ -32,14 +32,259 @@ export default function AdminDashboardPage() {
     setPreviewModal(null);
   };
 
-  const handleDownloadPdf = (fileName: string) => {
-    const pdfContent = "data:application/pdf;base64,JVBERi0xLjQKJcOkw7zDtsOfCjIgMCBvYmoKPDwvTGVuZ3RoIDMgMCBSL0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nDPQM1Qo5ypUMFAwALJMLU31jBQsTAz1DBSKkhPz4hNLUvX8/B1AgiU5iXkKJYkFiaZgXimXAhAHAOlVDwQKZW5kc3RyZWFtCmVuZG9iagoKMyAwIG9iago0MgplbmRvYmoKCjUgMCBvYmoKPDw+PgplbmRvYmoKCjQgMCBvYmoKPDwvVHlwZS9QYWdlcy9Db3VudCAxL0tpZHNbIDEgMCBSIF0+PgplbmRvYmoKCjYgMCBvYmoKPDwvVHlwZS9DYXRhbG9nL1BhZ2VzIDQgMCBSPj4KZW5kb2JqCgoxIDAgb2JqCjw8L1R5cGUvUGFnZS9SZXNvdXJjZXMgNSAwIFIvTWVkaWFCb3hbIDAgMCA1OTUgODQyIF0vQ29udGVudHMgMiAwIFIvUGFyZW50IDQgMCBSPj4KZW5kb2JqCgp4cmVmCjAgNwowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAyMjUgMDAwMDAgbiAKMDAwMDAwMDE4MiAwMDAwMCBuIAowMDAwMDAwMDE4IDAwMDAwIG4gCjAwMDAwMDAxMjUgMDAwMDAgbiAKMDAwMDAwMDAxOCAwMDAwMCBuIAowMDAwMDAwMTc1IDAwMDAwIG4gCnRyYWlsZXIKPDwvU2l6ZSA3L1Jvb3QgNiAwIFI+PgpzdGFydHhyZWYKMzI2CiUlRU9GCg==";
-    const link = document.createElement("a");
-    link.setAttribute("href", pdfContent);
-    link.setAttribute("download", fileName);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadPdf = async (fileName: string) => {
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+
+      if (fileName === 'EcoEat_Revenue_Report.pdf') {
+        // --- REVENUE REPORT GENERATION ---
+        // Header Banner (Dark Green #1A5632)
+        doc.setFillColor(26, 86, 50);
+        doc.rect(0, 0, 210, 40, 'F');
+        
+        // Header Title & Logo Text
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(22);
+        doc.text('EcoEat', 20, 25);
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text('DELIVERY & SURPLUS FOOD PLATFORM', 20, 32);
+        
+        // Header Right (Title)
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14);
+        doc.text('PLATFORM REVENUE REPORT', 120, 24);
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Period: Year-to-Date (YTD)`, 120, 30);
+        doc.text(`Generated: ${new Date().toLocaleDateString('id-ID')}`, 120, 36);
+
+        // Metadata
+        doc.setTextColor(80, 80, 80);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.text('Financial Metadata', 20, 52);
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text(`Reporting Entity: EcoEat Finance Dept`, 20, 60);
+        doc.text(`Currency: Indonesian Rupiah (IDR)`, 20, 66);
+        doc.text(`Audit Status: Internal Reconciliation`, 20, 72);
+
+        // Separator
+        doc.setDrawColor(220, 220, 220);
+        doc.line(20, 78, 190, 78);
+
+        // Financial summary cards
+        doc.setFillColor(248, 250, 246);
+        doc.setDrawColor(220, 235, 210);
+        doc.rect(20, 85, 170, 30, 'FD');
+        
+        doc.setTextColor(100, 100, 100);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.text('TOTAL PLATFORM REVENUE YTD', 25, 93);
+        
+        doc.setTextColor(26, 86, 50);
+        doc.setFontSize(20);
+        doc.text('Rp 45.200.000', 25, 106);
+
+        // Revenue Streams Table
+        doc.setTextColor(26, 86, 50);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('1. Revenue Streams Breakdown', 20, 130);
+
+        doc.setFillColor(234, 243, 225);
+        doc.rect(20, 137, 170, 7, 'F');
+        
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(26, 86, 50);
+        doc.text('Revenue Stream', 25, 142);
+        doc.text('Model / Rate', 90, 142);
+        doc.text('Contribution (IDR)', 150, 142);
+
+        doc.setDrawColor(220, 220, 220);
+        doc.line(20, 144, 190, 144);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(60, 60, 60);
+        doc.text('Seller Admin Fee', 25, 150);
+        doc.text('5% of seller profit per product', 90, 150);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Rp 32.100.000', 150, 150);
+
+        doc.line(20, 153, 190, 153);
+
+        doc.setFont('helvetica', 'normal');
+        doc.text('Buyer Transaction Fee', 25, 159);
+        doc.text('Rp 10.000 flat per buyer checkout', 90, 159);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Rp 13.100.000', 150, 159);
+
+        doc.line(20, 162, 190, 162);
+
+        // Total
+        doc.setFillColor(245, 245, 245);
+        doc.rect(20, 164, 170, 8, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.text('Total Consolidated Revenue', 25, 170);
+        doc.text('-', 90, 170);
+        doc.setTextColor(26, 86, 50);
+        doc.text('Rp 45.200.000', 150, 170);
+
+        // Analysis text
+        doc.setTextColor(26, 86, 50);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('2. Financial Narrative', 20, 190);
+
+        doc.setTextColor(60, 60, 60);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9.5);
+        const text = "EcoEat's primary monetization channels continue to perform robustly. The Seller Admin Fee remains the dominant contributor, accounting for approximately 71% of total revenue. This is driven by high-volume food surplus sales from our cooperative partners. Meanwhile, the Buyer Transaction Fee contributes 29%, showing steady growth in consumer checkouts.";
+        const splitText = doc.splitTextToSize(text, 170);
+        doc.text(splitText, 20, 197);
+
+        // Footer
+        doc.setDrawColor(220, 220, 220);
+        doc.line(20, 268, 190, 268);
+        doc.setFontSize(7.5);
+        doc.setTextColor(140, 140, 140);
+        doc.text('EcoEat Finance Console - Confidential Performance Document.', 20, 274);
+        doc.text('Page 1 of 1', 175, 274);
+      } else {
+        // --- MERCHANT/LKS DOCUMENT CERTIFICATE GENERATION ---
+        // Find document info in state to make it look real
+        const allItems = [...sellerItems, ...lksItems];
+        const matchedItem = allItems.find(i => i.doc === fileName);
+        const partnerName = matchedItem ? matchedItem.name : 'Ecosystem Partner';
+        const partnerStatus = matchedItem ? matchedItem.status : 'PENDING';
+        
+        doc.setFillColor(34, 49, 63);
+        doc.rect(0, 0, 210, 45, 'F');
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(20);
+        doc.text('EcoEat Document System', 20, 24);
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text('PARTNER VERIFICATION REPOSITORY', 20, 31);
+        
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'italic');
+        doc.text('Verified Archive & Audit Log', 20, 38);
+
+        // Title Box
+        doc.setTextColor(40, 40, 40);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14);
+        doc.text('SUBMITTED CREDENTIAL DETAILS', 20, 65);
+
+        // Draw info card
+        doc.setFillColor(248, 249, 250);
+        doc.setDrawColor(220, 224, 230);
+        doc.rect(20, 72, 170, 75, 'FD');
+
+        doc.setFontSize(9.5);
+        doc.setTextColor(100, 100, 100);
+        
+        doc.text('Partner / Organization:', 25, 82);
+        doc.setTextColor(26, 86, 50);
+        doc.setFont('helvetica', 'bold');
+        doc.text(partnerName, 80, 82);
+
+        doc.setTextColor(100, 100, 100);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Document Filename:', 25, 92);
+        doc.setTextColor(40, 40, 40);
+        doc.setFont('helvetica', 'bold');
+        doc.text(fileName, 80, 92);
+
+        doc.setTextColor(100, 100, 100);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Verification Status:', 25, 102);
+        
+        if (partnerStatus === 'APPROVED') {
+          doc.setTextColor(40, 167, 69);
+        } else if (partnerStatus === 'REJECTED') {
+          doc.setTextColor(220, 53, 69);
+        } else {
+          doc.setTextColor(108, 117, 125);
+        }
+        doc.setFont('helvetica', 'bold');
+        doc.text(partnerStatus, 80, 102);
+
+        doc.setTextColor(100, 100, 100);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Timestamp:', 25, 112);
+        doc.setTextColor(40, 40, 40);
+        doc.text(new Date().toLocaleString('id-ID'), 80, 112);
+
+        doc.setTextColor(100, 100, 100);
+        doc.text('Security Hash Checksum:', 25, 122);
+        doc.setFont('courier', 'normal');
+        doc.setFontSize(8.5);
+        doc.text('SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 80, 122);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9.5);
+        doc.setTextColor(100, 100, 100);
+        doc.text('System Integrity:', 25, 132);
+        doc.setTextColor(40, 167, 69);
+        doc.setFont('helvetica', 'bold');
+        doc.text('SIGNED & SECURED BY ECOEAT CLOUD VAULT', 80, 132);
+
+        // Details Section
+        doc.setTextColor(40, 40, 40);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('Audit & Compliance Statement', 20, 165);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9.5);
+        doc.setTextColor(80, 80, 80);
+        const auditText = `This document confirms that the partner, ${partnerName}, has uploaded credentials to support their registration. Our compliance department has logged this submission. In accordance with Indonesian digital trade regulations, this record represents a formal verification archive.`;
+        const splitAudit = doc.splitTextToSize(auditText, 170);
+        doc.text(splitAudit, 20, 172);
+
+        // Decorative seal
+        doc.setDrawColor(200, 200, 200);
+        doc.setFillColor(250, 250, 250);
+        doc.rect(130, 200, 45, 45, 'F');
+        doc.setTextColor(150, 150, 150);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.text('ECOEAT SECURITY SEAL', 133, 208);
+        doc.setLineWidth(0.5);
+        doc.line(133, 211, 172, 211);
+        doc.setFont('courier', 'normal');
+        doc.setFontSize(6.5);
+        doc.text('status: ' + partnerStatus, 133, 218);
+        doc.text('user: Marcus Chen', 133, 224);
+        doc.text('date: ' + new Date().toLocaleDateString('id-ID'), 133, 230);
+        
+        // Footer
+        doc.setDrawColor(220, 220, 220);
+        doc.line(20, 268, 190, 268);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(140, 140, 140);
+        doc.text('EcoEat Identity Console - Secure Document Vault.', 20, 274);
+        doc.text('Page 1 of 1', 175, 274);
+      }
+
+      doc.save(fileName);
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+    }
   };
 
   return (
