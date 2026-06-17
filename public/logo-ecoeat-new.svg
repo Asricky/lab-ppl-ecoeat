@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 768" fill="none">
+  <!-- Leaf + Spoon Icon -->
+  <g transform="translate(512, 200)">
+    <!-- Outer ring -->
+    <path d="M 0,-120 A 120,120 0 0,1 103.92,-60 L 86.6,-50 A 100,100 0 0,0 0,-100 A 100,100 0 0,0 -86.6,-50 L -103.92,-60 A 120,120 0 0,1 0,-120 Z" fill="#2A824A" stroke="#1A5632" stroke-width="3"/>
+    
+    <!-- Spoon handle (bottom) -->
+    <path d="M -8,20 L -8,80 Q -8,95 0,95 Q 8,95 8,80 L 8,20 Z" fill="#4CAF50"/>
+    
+    <!-- Leaf shape -->
+    <path d="M 0,-80 Q -25,-60 -30,-30 Q -32,-10 -25,5 Q -15,15 0,20 Q 15,15 25,5 Q 32,-10 30,-30 Q 25,-60 0,-80 Z" fill="#66BB6A"/>
+    
+    <!-- Leaf veins -->
+    <path d="M 0,-70 L -15,-40 M 0,-70 L 15,-40 M 0,-50 L -20,-20 M 0,-50 L 20,-20 M 0,-30 L -18,0 M 0,-30 L 18,0" stroke="#2A824A" stroke-width="2.5" fill="none"/>
+    
+    <!-- Spoon bowl -->
+    <ellipse cx="0" cy="15" rx="18" ry="12" fill="#4CAF50"/>
+  </g>
+  
+  <!-- ECOEAT Text -->
+  <text x="512" y="480" font-family="Arial Black, sans-serif" font-size="140" font-weight="900" fill="#2A824A" text-anchor="middle" letter-spacing="8">ECOEAT</text>
+  
+  <!-- Subtitle -->
+  <text x="512" y="560" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#4CAF50" text-anchor="middle" letter-spacing="4">DELIVERY &amp; SURPLUS FOOD</text>
+</svg>
