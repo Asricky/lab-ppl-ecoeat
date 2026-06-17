@@ -322,7 +322,7 @@ export default function AnalyticsPage() {
                       priority
                       className="h-10 w-auto mb-2 inline-block"
                     />
-                    <p className="text-xs font-medium text-gray-400">
+                    <p className="text-xs font-medium text-gray-400" suppressHydrationWarning>
                       {new Date().toLocaleDateString('en-GB', {
                         year: 'numeric',
                         month: 'long',
