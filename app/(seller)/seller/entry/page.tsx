@@ -4,10 +4,15 @@ import React, { useState } from 'react';
 import { ShoppingCart, HeartHandshake, CheckCircle2, Leaf, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/authStore';
 
 /** Seller intake: sell vs donate entry (canonical path `/seller/entry`). */
 export default function SellOrDonateDecision() {
   const [choice, setChoice] = useState<'sell' | 'donate'>('sell');
+  const [profileOpen, setProfileOpen] = useState(false);
+  const { user, logout } = useAuthStore();
+  const router = useRouter();
 
   const continueHref =
     choice === 'sell' ? '/seller/products/create' : '/seller/donations?tab=donate';
@@ -74,18 +79,37 @@ export default function SellOrDonateDecision() {
               />
             </svg>
           </button>
-          <button
-            type="button"
-            onClick={() => alert('Opening User Profile menu...')}
-            className="w-8 h-8 rounded-full bg-blue-100 overflow-hidden flex-shrink-0 border-2 border-white shadow-sm hover:ring-2 hover:ring-[#1A5632] transition-all"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
-              alt="User"
-              className="w-full h-full object-cover"
-            />
-          </button>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setProfileOpen(!profileOpen)}
+              className="w-8 h-8 rounded-full bg-blue-100 overflow-hidden flex-shrink-0 border-2 border-white shadow-sm hover:ring-2 hover:ring-[#1A5632] transition-all"
+            >
+              <img
+                src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
+                alt="User"
+                className="w-full h-full object-cover"
+              />
+            </button>
+            {profileOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-50">
+                <div className="px-4 py-2 border-b border-gray-100">
+                  <p className="text-sm font-bold text-gray-900 truncate">{user?.name || 'User'}</p>
+                  <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+                    router.push('/login');
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 

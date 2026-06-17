@@ -1,12 +1,16 @@
 "use client";
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PackageCheck, Route, HeartPulse, Store, Clock, CheckCircle2 } from 'lucide-react';
-import { useDonationStore } from '@/store/donationStore';
+import { useGlobalStore } from '@/store/globalStore';
 
 export default function LksHomePage() {
   const router = useRouter();
-  const { donations, acceptDonation, searchQuery } = useDonationStore();
+  const { donations, updateDonationStatus } = useGlobalStore();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const acceptDonation = (id: string) => updateDonationStatus(id, 'Accepted');
 
   const filteredDonations = donations.filter(row => {
     if (!searchQuery) return true;

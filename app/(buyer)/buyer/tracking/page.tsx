@@ -1,15 +1,36 @@
 "use client";
 import dynamic from 'next/dynamic';
 import { Clock, MessageSquare, CheckCircle2, Circle, Phone, QrCode } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useBuyerOrdersStore } from '@/store/buyerOrdersStore';
 
 const TrackingMap = dynamic(() => import('@/components/buyer/TrackingMap'), { ssr: false });
 
 export default function TrackingPage() {
+  const orders = useBuyerOrdersStore((s) => s.orders);
+  
+  // Find the first active order
+  const activeOrders = orders.filter((o) => o.tab === 'Active Orders');
+  const latestOrder = activeOrders[0];
+
   // Toggle between delivery and pickup for demonstration
   const [method, setMethod] = useState<'delivery' | 'pickup'>('delivery');
   const [showChat, setShowChat] = useState(false);
-  
+
+  useEffect(() => {
+    if (latestOrder && latestOrder.deliveryMethod) {
+      setMethod(latestOrder.deliveryMethod);
+    }
+  }, [latestOrder]);
+
+  const orderId = latestOrder ? latestOrder.id : 'OP-28491-X';
+  const orderTitle = latestOrder && latestOrder.lines.length > 0 
+    ? latestOrder.lines.map(l => l.name).join(', ') 
+    : 'Artisan Sourdough Bundle';
+  const statusLabel = latestOrder ? latestOrder.statusLabel : 'On Delivery';
+  const isPreparing = statusLabel === 'Preparing';
+  const isTransitOrReady = statusLabel === 'On Delivery' || statusLabel === 'Out for Delivery' || statusLabel === 'Ready for Pickup';
+
   return (
     <div className="max-w-[1400px] mx-auto pb-12 flex flex-col lg:flex-row h-[calc(100vh-100px)] gap-8">
       
@@ -40,10 +61,10 @@ export default function TrackingPage() {
         <div className="mb-6">
           <div className="flex justify-between items-start mb-2">
             <div>
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">ORDER #OP-28491-X</p>
-              <h1 className="text-3xl font-extrabold text-gray-900 mt-1 leading-tight">Artisan Sourdough<br/>Bundle</h1>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">ORDER #{orderId}</p>
+              <h1 className="text-3xl font-extrabold text-gray-900 mt-1 leading-tight">{orderTitle}</h1>
             </div>
-            <span className="bg-[#eef3e8] text-green-800 text-[10px] font-bold px-3 py-1.5 rounded-full border border-[#d4dec4] whitespace-nowrap">On Delivery</span>
+            <span className="bg-[#eef3e8] text-green-800 text-[10px] font-bold px-3 py-1.5 rounded-full border border-[#d4dec4] whitespace-nowrap">{statusLabel}</span>
           </div>
         </div>
 
@@ -72,6 +93,7 @@ export default function TrackingPage() {
         <div className="mb-8 flex-1">
           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-6">DELIVERY PROGRESS</p>
           <div className="relative border-l-2 border-[#c3d1b0] ml-3 space-y-8">
+            {/* Step 1: Order Confirmed */}
             <div className="relative pl-6">
               <div className="absolute -left-[11px] top-0 bg-green-700 rounded-full w-5 h-5 flex items-center justify-center border-4 border-[#f4f7ed] shadow-sm">
                 <CheckCircle2 className="w-3 h-3 text-white" />
@@ -79,20 +101,34 @@ export default function TrackingPage() {
               <h4 className="font-bold text-gray-900 text-sm">Order Confirmed</h4>
               <p className="text-[10px] text-gray-500 font-medium">Today, 10:30 AM</p>
             </div>
-            <div className="relative pl-6">
+            
+            {/* Step 2: Preparing */}
+            <div className={`relative pl-6 ${!isPreparing && !isTransitOrReady ? 'opacity-40' : ''}`}>
               <div className="absolute -left-[11px] top-0 bg-green-700 rounded-full w-5 h-5 flex items-center justify-center border-4 border-[#f4f7ed] shadow-sm">
-                <CheckCircle2 className="w-3 h-3 text-white" />
+                {isTransitOrReady ? (
+                  <CheckCircle2 className="w-3 h-3 text-white" />
+                ) : (
+                  <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                )}
               </div>
-              <h4 className="font-bold text-gray-900 text-sm">Preparing</h4>
+              <h4 className={`font-bold text-sm ${isPreparing ? 'text-green-700' : 'text-gray-900'}`}>Preparing</h4>
               <p className="text-[10px] text-gray-500 font-medium">Today, 10:45 AM</p>
             </div>
-            <div className="relative pl-6">
+            
+            {/* Step 3: Transit / Ready */}
+            <div className={`relative pl-6 ${!isTransitOrReady ? 'opacity-40' : ''}`}>
               <div className="absolute -left-[11px] top-0 bg-white border-2 border-green-700 rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                <div className="w-1.5 h-1.5 bg-green-700 rounded-full"></div>
+                {isTransitOrReady ? (
+                  <div className="w-1.5 h-1.5 bg-green-700 rounded-full animate-ping"></div>
+                ) : (
+                  <Circle className="w-2 h-2 text-transparent" />
+                )}
               </div>
-              <h4 className="font-bold text-green-700 text-sm">{method === 'delivery' ? 'On Delivery' : 'Ready for Pickup'}</h4>
+              <h4 className={`font-bold text-sm ${isTransitOrReady ? 'text-green-700' : 'text-gray-900'}`}>{method === 'delivery' ? 'On Delivery' : 'Ready for Pickup'}</h4>
               <p className="text-[10px] text-gray-500 font-medium">{method === 'delivery' ? 'In transit since 11:12 AM' : 'Available at EcoEat Hub'}</p>
             </div>
+            
+            {/* Step 4: Delivered / Picked Up */}
             <div className="relative pl-6 opacity-40">
               <div className="absolute -left-[11px] top-0 bg-[#d4dec4] rounded-full w-5 h-5 flex items-center justify-center border-4 border-[#f4f7ed]">
                 <Circle className="w-2 h-2 text-transparent" />

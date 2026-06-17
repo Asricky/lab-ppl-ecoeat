@@ -26,8 +26,7 @@ import {
 } from '@/lib/donationLocations';
 import { distanceKm, formatDistanceKm } from '@/lib/geo';
 import { type LksPartner } from '@/lib/lksPartners';
-import { useProductStore } from '@/store/productStore';
-import { useLksInboxStore } from '@/store/lksInboxStore';
+import { useGlobalStore } from '@/store/globalStore';
 
 type DonationRow = {
   id: string;
@@ -91,8 +90,7 @@ type CatalogProduct = {
 
 function DonationsPageInner() {
   const searchParams = useSearchParams();
-  const { donations, addDonation, products, updateProduct } = useProductStore();
-  const addDonationAlert = useLksInboxStore((s) => s.addDonationAlert);
+  const { donations, products } = useGlobalStore();
 
   const [activeTab, setActiveTab] = useState<DonationTab>('add-donation');
 
@@ -267,39 +265,56 @@ function DonationsPageInner() {
       (donationManualImage ||
       'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80');
 
-    addDonation({
-      id,
-      productName: productName.trim(),
-      category: donationCategory.trim(),
-      expiry: donationExpiry.trim(),
-      weight: weightLabel,
-      recipient: selected.name,
-      recipientImage: selected.image,
-      date: new Date().toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      }),
-      status: 'Scheduled',
-      image: donationProductImage,
-    });
-
-    if (catalogP && catalogP.type === 'Donate') {
-      const nextStock = Math.max(0, catalogP.stock - qtyNum);
-      updateProduct(catalogP.id, {
-        stock: nextStock,
-        status: nextStock === 0 ? 'Sold Out' : catalogP.status,
+    import('@/store/globalStore').then(({ useGlobalStore }) => {
+      // 1. Sync Donation (Shared by Seller & LKS Panti)
+      useGlobalStore.getState().addDonation({
+        id,
+        productName: productName.trim(),
+        product: productName.trim(), // for LKS compatibility
+        category: donationCategory.trim(),
+        expiry: donationExpiry.trim(),
+        weight: weightLabel,
+        amountKg: Math.max(1, qtyNum * 0.3), // for LKS compatibility
+        recipient: selected.name,
+        recipientImage: selected.image,
+        donor: 'Toko Penyelamat Makanan',
+        date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+        dateReceived: new Date().toLocaleDateString('id-ID'),
+        status: 'Scheduled',
+        eta: '15-30 min',
+        image: donationProductImage,
+        courierName: 'Menunggu Kurir'
       });
-    }
 
-    addDonationAlert({
-      lksId: selected.id,
-      lksName: selected.name,
-      productName: productName.trim(),
-      quantity: qtyNum,
-      unit: 'portion',
-      weightLabel,
-      donationId: id,
+      // 2. Sync to Courier Tasks
+      useGlobalStore.getState().addTask({
+        id: `TASK-${Math.floor(1000 + Math.random() * 9000)}`,
+        type: 'donation',
+        status: 'assigned',
+        pickup: 'Toko Penyelamat Makanan',
+        destination: selected.name,
+        reward: 12000,
+        distance: selectedDistanceKm ? `${selectedDistanceKm.toFixed(1)} km` : '1.5 km',
+        eta: '15-30 min',
+        proofUploaded: false
+      });
+
+      // 3. Sync Notification to LKS Panti
+      useGlobalStore.getState().addNotification({
+        lksId: selected.id,
+        lksName: selected.name,
+        productName: productName.trim(),
+        quantity: qtyNum,
+        unit: 'portion',
+        weightLabel,
+        donationId: id,
+        timestamp: Date.now()
+      });
+
+      // Reduce product stock if catalog
+      if (catalogP && catalogP.type === 'Donate') {
+        useGlobalStore.getState().reduceProductStock(catalogP.id, qtyNum);
+      }
     });
 
     setSubmitting(false);

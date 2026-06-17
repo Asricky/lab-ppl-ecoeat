@@ -55,17 +55,27 @@ export default function ReviewPublishPage() {
       /* Stitch endpoint optional offline */
     }
 
-    addProduct({
+    const globalProduct = {
       id: `PRD-${Math.floor(Math.random() * 1000) + 100}`,
       name,
       image: payload.image,
       type: 'Sell',
       stock: draftProduct.stock || 1,
       price: draftProduct.price || 'Rp 0',
+      originalPrice: draftProduct.originalPrice || 'Rp 0',
+      discountPercent,
       expiry: draftProduct.expiry || '—',
       status: 'Active',
       description: draftProduct.description || 'No description provided.',
       category: draftProduct.category || '',
+      seller: 'Toko Penyelamat Makanan' // Mock logged in seller
+    };
+
+    addProduct(globalProduct);
+    
+    // Sync to Global Store
+    import('@/store/globalStore').then(({ useGlobalStore }) => {
+      useGlobalStore.getState().addProduct(globalProduct);
     });
 
     setPublishedName(name);

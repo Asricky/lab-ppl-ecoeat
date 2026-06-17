@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { useAuthStore } from "./authStore";
 
 export type BuyerSavedAddress = {
   id: string;
@@ -19,21 +20,43 @@ interface BuyerAddressesState {
   setPrimary: (id: string) => void;
 }
 
+const INITIAL_ADDRESSES = [
+  {
+    id: "addr-seed",
+    label: "Rumah",
+    fullName: "Default User",
+    phone: "08123456789",
+    province: "Jawa Barat",
+    city: "Bandung",
+    district: "Coblong",
+    postalCode: "40131",
+    streetDetail: "Jl. Ekologi No. 245, Gedung Emerald Suite 10",
+    isPrimary: true,
+  },
+];
+
+const getInitialAddresses = (): BuyerSavedAddress[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = localStorage.getItem('auth-storage');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      const user = parsed.state?.user;
+      if (user) {
+        const isDemo = ['buyer@ecoeat.com', 'seller@ecoeat.com', 'courier@ecoeat.com', 'lks@ecoeat.com', 'admin@ecoeat.com'].includes(user.email);
+        if (!isDemo) {
+          return [];
+        }
+      }
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return INITIAL_ADDRESSES;
+};
+
 export const useBuyerAddressesStore = create<BuyerAddressesState>((set) => ({
-  addresses: [
-    {
-      id: "addr-seed",
-      label: "Rumah",
-      fullName: "Default User",
-      phone: "08123456789",
-      province: "Jawa Barat",
-      city: "Bandung",
-      district: "Coblong",
-      postalCode: "40131",
-      streetDetail: "Jl. Ekologi No. 245, Gedung Emerald Suite 10",
-      isPrimary: true,
-    },
-  ],
+  addresses: getInitialAddresses(),
   addAddress: (input) => {
     const id = `addr-${Date.now()}`;
     set((s) => {
@@ -50,3 +73,17 @@ export const useBuyerAddressesStore = create<BuyerAddressesState>((set) => ({
     }));
   },
 }));
+
+if (typeof window !== "undefined") {
+  useAuthStore.subscribe((state) => {
+    const user = state.user;
+    if (!user) {
+      useBuyerAddressesStore.setState({ addresses: [] });
+    } else {
+      const isDemo = ['buyer@ecoeat.com', 'seller@ecoeat.com', 'courier@ecoeat.com', 'lks@ecoeat.com', 'admin@ecoeat.com'].includes(user.email);
+      if (!isDemo) {
+        useBuyerAddressesStore.setState({ addresses: [] });
+      }
+    }
+  });
+}

@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import Sidebar from "@/components/buyer/Sidebar";
 import Header from "@/components/buyer/Header";
+import AuthGuard from "@/components/layout/AuthGuard";
 
 export default function BuyerLayout({ children }: { children: React.ReactNode }) {
   const [desktopCollapsed, setDesktopCollapsed] = useState(false);
@@ -21,16 +22,18 @@ export default function BuyerLayout({ children }: { children: React.ReactNode })
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f4f7ed] text-gray-900 flex">
-      <Sidebar
-        desktopCollapsed={desktopCollapsed}
-        mobileOpen={mobileSidebarOpen}
-        onCloseMobile={() => setMobileSidebarOpen(false)}
-      />
-      <div className="flex-1 flex flex-col min-w-0 max-w-[100vw]">
-        <Header onMenuClick={toggleSidebar} />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-8">{children}</main>
+    <AuthGuard expectedRole="buyer">
+      <div className="min-h-screen bg-[#f4f7ed] text-gray-900 flex">
+        <Sidebar
+          desktopCollapsed={desktopCollapsed}
+          mobileOpen={mobileSidebarOpen}
+          onCloseMobile={() => setMobileSidebarOpen(false)}
+        />
+        <div className="flex-1 flex flex-col min-w-0 max-w-[100vw]">
+          <Header onMenuClick={toggleSidebar} />
+          <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-8">{children}</main>
+        </div>
       </div>
-    </div>
+    </AuthGuard>
   );
 }

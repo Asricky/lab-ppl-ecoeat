@@ -5,14 +5,47 @@ import { Filter, X } from "lucide-react";
 import FilterBar, { ExploreFilters } from "@/components/buyer/FilterBar";
 import ProductCard from "@/components/buyer/ProductCard";
 
-const allProducts = [
-  { id: "2", name: "Artisan Sourdough Bundle", price: 9.0, discountPrice: 4.5, discountPercentage: 50, vendor: "Hearth & Grain", distance: 1.2, expiresIn: "3 HOURS", image: "https://images.unsplash.com/photo-1585478259715-876acc5be8eb?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3", category: "Bakery" },
-  { id: "5", name: "Roasted Veggie Bowl", price: 12.0, discountPrice: 7.2, discountPercentage: 40, vendor: "Green Garden Deli", distance: 0.8, expiresIn: "4 HOURS", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3", category: "Meals" },
-  { id: "3", name: "Evening Pastry Box", price: 12.5, discountPrice: 5.0, discountPercentage: 60, vendor: "Sweet Haven", distance: 2.1, expiresIn: "1 HOUR", image: "https://images.unsplash.com/photo-1495147466023-ff5a443385f5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3", category: "Bakery" },
-  { id: "6", name: "Salmon Poke Salad", price: 17.0, discountPrice: 8.5, discountPercentage: 50, vendor: "Ocean Fresh", distance: 1.5, expiresIn: "2 HOURS", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3", category: "Meals" },
-  { id: "4", name: "Cold-Pressed Detox Duo", price: 13.0, discountPrice: 9.0, discountPercentage: 30, vendor: "Pure Press", distance: 2.5, expiresIn: "5 HOURS", image: "https://images.unsplash.com/photo-1622597467836-f38240662c8c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3", category: "Drinks" },
-  { id: "7", name: "Dark Cocoa Brownie Box", price: 12.0, discountPrice: 6.0, discountPercentage: 50, vendor: "Sweet Haven", distance: 0.8, expiresIn: "2 HOURS", image: "https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3", category: "Bakery" },
-];
+function getDynamicImage(name: string): string {
+  const lowerName = name.toLowerCase();
+  if (lowerName.includes('nasi') || lowerName.includes('ayam')) {
+    return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60';
+  }
+  if (lowerName.includes('roti') || lowerName.includes('kue')) {
+    return 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=60';
+  }
+  if (lowerName.includes('martabak') || lowerName.includes('snack')) {
+    return 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=500&auto=format&fit=crop&q=60';
+  }
+  return 'https://images.unsplash.com/photo-1495147466023-ff5a443385f5?w=500&auto=format&fit=crop&q=60';
+}
+
+import { useGlobalStore } from "@/store/globalStore";
+
+function mapToProductTile(p: any) {
+  const parseRp = (str: string) => {
+    if (!str) return 0;
+    const num = parseInt(str.replace(/[^0-9]/g, ''), 10);
+    return isNaN(num) ? 0 : num / 1000;
+  };
+
+  let cat = "Meals";
+  if (p.category?.includes("Bakery")) cat = "Bakery";
+  else if (p.category?.includes("Snack")) cat = "Snacks";
+  else if (p.category?.includes("Drink") || p.category?.includes("Produce")) cat = "Drinks";
+
+  return {
+    id: p.id,
+    name: p.name,
+    price: parseRp(p.originalPrice) || 15,
+    discountPrice: parseRp(p.price) || 10,
+    discountPercentage: p.discountPercent || 20,
+    vendor: p.seller || "EcoEat Vendor",
+    distance: 1.2,
+    expiresIn: p.expiry || "1 HOUR",
+    image: p.image,
+    category: cat as any,
+  };
+}
 
 const INITIAL_FILTERS: ExploreFilters = {
   category: "Bakery",
@@ -22,11 +55,14 @@ const INITIAL_FILTERS: ExploreFilters = {
   condition: "Near expiry",
 };
 
-function productPriceIdr(p: (typeof allProducts)[0]) {
+function productPriceIdr(p: any) {
   return Math.round(p.discountPrice * 10_000);
 }
 
 export default function ExplorePage() {
+  const { products: globalProducts } = useGlobalStore();
+  const allProducts = useMemo(() => globalProducts.filter(p => p.type === 'Sell' && p.stock > 0).map(mapToProductTile), [globalProducts]);
+
   const [draftFilters, setDraftFilters] = useState<ExploreFilters>(INITIAL_FILTERS);
   const [appliedFilters, setAppliedFilters] = useState<ExploreFilters>(INITIAL_FILTERS);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -61,13 +97,13 @@ export default function ExplorePage() {
     const high = Math.max(appliedFilters.minPriceIdr, appliedFilters.maxPriceIdr);
 
     return allProducts.filter((p) => {
-      if (appliedFilters.category && p.category !== appliedFilters.category) return false;
+      if (appliedFilters.category && p.category !== appliedFilters.category && appliedFilters.category !== "All Surplus" as any) return false;
       const pidr = productPriceIdr(p);
       if (pidr < low || pidr > high) return false;
       if (p.distance > appliedFilters.maxDistance) return false;
       return true;
     });
-  }, [appliedFilters]);
+  }, [appliedFilters, allProducts]);
 
   return (
     <div className="max-w-[1400px] mx-auto pb-12 relative">
@@ -133,7 +169,7 @@ export default function ExplorePage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.id} product={{ ...product, image: getDynamicImage(product.name) }} />
           ))}
           <div className="sm:col-span-2 bg-[#1b5e20] rounded-3xl p-8 text-white flex flex-col justify-between shadow-lg relative overflow-hidden border border-[#144517]">
             <div className="relative z-10">

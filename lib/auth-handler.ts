@@ -1,59 +1,90 @@
 import { Role, User } from '../store/authStore';
 
+const MOCK_USERS = [
+  {
+    email: "lukas.buyer@ecoeat.com",
+    password: "password",
+    full_name: "Lukas Ricky Krisjatmiko",
+    role: "buyer",
+    balance: 500000
+  },
+  {
+    email: "lukas.seller@ecoeat.com",
+    password: "password",
+    full_name: "Toko Penyelamat Makanan",
+    role: "seller",
+    balance: 0
+  },
+  {
+    email: "lukas.kurir@ecoeat.com",
+    password: "password",
+    full_name: "Lukas Rider Express",
+    role: "courier",
+    balance: 0
+  },
+  {
+    email: "lukas.lks@ecoeat.com",
+    password: "password",
+    full_name: "Panti Asuhan Mulia",
+    role: "lks",
+    balance: 0
+  }
+];
+
+// Helper to map backend roles to frontend roles
+export const mapBackendRoleToFrontend = (role: string): Role => {
+  if (role === 'courier') return 'kurir';
+  if (role === 'lks') return 'lks-panti';
+  return role as Role;
+};
+
+// Helper to map frontend roles to backend roles
+export const mapFrontendRoleToBackend = (role: Role): string => {
+  if (role === 'kurir') return 'courier';
+  if (role === 'lks-panti') return 'lks';
+  return role || 'buyer';
+};
+
 export const authHandler = {
-  login: async (email: string, password: string):Promise<{user: User, token: string}> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
+  login: async (email: string, password: string): Promise<{ user: User, token: string }> => {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 600));
 
-    let role: Role = 'buyer';
-    if (email.includes('admin')) role = 'admin';
-    else if (email.includes('seller') || email.includes('business')) role = 'seller';
-    else if (email.includes('kurir') || email.includes('courier')) role = 'kurir';
-    else if (email.includes('lks') || email.includes('panti')) role = 'lks-panti';
+    const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
 
-    const user: any = {
-      id: Math.random().toString(36).substring(2, 9),
-      name: email.split('@')[0],
-      email,
-      role,
-      ecoPayBalance: Math.floor(Math.random() * 500000), // Random balance for simulation
-    };
-
-    // Populate mock fields for specific roles
-    if (role === 'lks-panti') {
-      user.name = "Yayasan Berbagi Nusantara";
-      user.lksType = "Yayasan Sosial";
-      user.legalPermit = "LKS-DINSOS/3174/2024";
-      user.capacity = 135;
-      user.foodStorage = "Chiller Active";
-    } else if (role === 'seller') {
-      user.name = "Alex Rivers";
-      user.businessName = "Green Valley Farms";
-      user.storeDescription = "Local organic farm dedicated to sustainable agriculture. We provide fresh produce directly to the community.";
+    if (!foundUser) {
+      throw new Error("Email atau password salah!");
     }
 
-    return {
-      user,
-      token: `mock_token_${Date.now()}`,
-    };
-  },
-
-  register: async (data: any, role: Role):Promise<{user: User, token: string}> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    const token = "mock-jwt-token-" + Date.now();
 
     const user: User = {
-      id: Math.random().toString(36).substring(2, 9),
-      name: data.name || data.email.split('@')[0],
-      email: data.email,
-      role,
-      ecoPayBalance: 0,
-      ...data, // Spread registration details to persist additional fields
+      id: "mock-uuid-" + Date.now(),
+      name: foundUser.full_name,
+      email: foundUser.email,
+      role: mapBackendRoleToFrontend(foundUser.role),
+      ecoPayBalance: foundUser.balance,
+      avatar: undefined,
     };
 
-    return {
-      user,
-      token: `mock_token_${Date.now()}`,
+    return { user, token };
+  },
+
+  register: async (data: any, role: Role): Promise<{ user: User, token: string }> => {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    const token = "mock-jwt-token-" + Date.now();
+
+    const user: User = {
+      id: "mock-uuid-" + Date.now(),
+      name: data.name || data.businessName || "New User",
+      email: data.email,
+      role: role,
+      ecoPayBalance: 0,
+      avatar: undefined,
     };
+
+    return { user, token };
   }
-}
+};

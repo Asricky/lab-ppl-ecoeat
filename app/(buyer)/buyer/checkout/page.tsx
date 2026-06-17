@@ -4,12 +4,17 @@ import { useRouter } from 'next/navigation';
 import { Truck, Store, MapPin, Wallet, Leaf, Info, CheckCircle, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useEcoPayStore } from '@/store/ecoPayStore';
+import { useBuyerOrdersStore, BuyerOrder } from '@/store/buyerOrdersStore';
+import { useSellerOrdersStore } from '@/store/sellerOrdersStore';
+import { useTaskStore } from '@/store/taskStore';
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, clearCart } = useCartStore();
   const { balance, deductBalance } = useEcoPayStore();
+  const { addOrder } = useBuyerOrdersStore();
   const [isSuccess, setIsSuccess] = useState(false);
+  const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'pickup'>('delivery');
   const total = items.reduce((acc, item) => acc + (item.discountPrice * item.quantity), 0);
 
   const [notification, setNotification] = useState<{
@@ -39,7 +44,95 @@ export default function CheckoutPage() {
       showToast("Saldo EcoPay tidak mencukupi!", "error");
       return;
     }
-    deductBalance(total * 10000, "Checkout Order");
+    if (items.length === 0) {
+      showToast("Keranjang belanja kosong!", "error");
+      return;
+    }
+
+    const orderId = `OP-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newOrder: BuyerOrder = {
+      id: orderId,
+      tab: 'Active Orders',
+      statusLabel: deliveryMethod === 'delivery' ? 'Preparing' : 'Ready for Pickup',
+      shipmentStatus: deliveryMethod === 'delivery'
+        ? 'Your order is being prepared by the vendor.'
+        : 'Your order is ready at EcoEat Downtown Hub.',
+      vendorName: items[0]?.vendor || 'EcoEat Vendor',
+      lines: items.map(item => ({
+        productId: item.id,
+        name: item.name,
+        image: item.image,
+        quantity: item.quantity,
+        unitPriceDisplay: item.discountPrice,
+      })),
+      shippingAddress: '245 Eco Lane, Suite 10',
+      shippingCity: 'Greenwood, 90210',
+      orderedAtLabel: 'Today',
+      deliveryFeeDisplay: 0,
+      platformFeeDisplay: 0.5,
+      estimatedArrivalLabel: deliveryMethod === 'delivery'
+        ? 'Hari ini, dalam 15-30 menit'
+        : 'Hari ini, buka s/d 20:00 WIB',
+      deliveryMethod: deliveryMethod,
+    };
+
+    // Store order
+    addOrder(newOrder);
+
+    // Sync to Seller
+    useSellerOrdersStore.getState().addOrder({
+      id: orderId,
+      productName: items[0]?.name || 'Multiple items',
+      quantity: items.reduce((acc, i) => acc + i.quantity, 0),
+      price: formatRp(total),
+      status: 'Active',
+      refundStatus: '-'
+    });
+
+    // Sync to Courier
+    useTaskStore.getState().addTask({
+      id: `TASK-${Math.floor(1000 + Math.random() * 9000)}`,
+      type: 'purchase',
+      status: 'assigned',
+      pickup: items[0]?.vendor || 'EcoEat Vendor',
+      destination: '245 Eco Lane, Suite 10',
+      reward: 15000,
+      distance: '2.5 km',
+      eta: '15-30 min',
+      proofUploaded: false
+    });
+
+    // Sync to Global Store for End-to-End integration
+    import('@/store/globalStore').then(({ useGlobalStore }) => {
+      useGlobalStore.getState().addOrder({
+        id: orderId,
+        productName: items[0]?.name || 'Multiple items',
+        quantity: items.reduce((acc, i) => acc + i.quantity, 0),
+        price: formatRp(total),
+        status: 'Active',
+        refundStatus: '-',
+        date: new Date().toLocaleDateString('id-ID'),
+        buyer: 'Lukas Ricky Krisjatmiko'
+      });
+      items.forEach(item => {
+        useGlobalStore.getState().reduceProductStock(item.id, item.quantity);
+      });
+      useGlobalStore.getState().addTask({
+        id: `TASK-${Math.floor(1000 + Math.random() * 9000)}`,
+        type: 'purchase',
+        status: 'assigned',
+        pickup: items[0]?.vendor || 'EcoEat Vendor',
+        destination: '245 Eco Lane, Suite 10',
+        reward: 15000,
+        distance: '2.5 km',
+        eta: '15-30 min',
+        proofUploaded: false
+      });
+    });
+
+    // Deduct wallet balance
+    deductBalance(total * 10000, `Checkout Order ${orderId}`);
+
     setIsSuccess(true);
     if (clearCart) clearCart();
     setTimeout(() => {
@@ -68,7 +161,7 @@ export default function CheckoutPage() {
 
       <div className="flex flex-col lg:flex-row gap-12">
         <div className="flex-1 space-y-10">
-          
+
           {/* 1. Delivery Method */}
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
@@ -76,23 +169,35 @@ export default function CheckoutPage() {
               Delivery Method
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="border-2 border-green-700 bg-white rounded-3xl p-6 cursor-pointer relative shadow-sm">
+              <div
+                onClick={() => setDeliveryMethod('delivery')}
+                className={`border-2 rounded-3xl p-6 cursor-pointer relative shadow-sm transition-all ${deliveryMethod === 'delivery'
+                    ? 'border-green-700 bg-white'
+                    : 'border-transparent bg-[#eef3e8] hover:bg-[#e6ebd9] border-[#d4dec4]'
+                  }`}
+              >
                 <div className="flex items-start">
-                  <Truck className="w-6 h-6 text-green-700 mr-4 mt-1" />
+                  <Truck className={`w-6 h-6 mr-4 mt-1 ${deliveryMethod === 'delivery' ? 'text-green-700' : 'text-gray-600'}`} />
                   <div>
                     <h3 className="font-bold text-gray-900 text-lg">Home Delivery</h3>
                     <p className="text-sm text-gray-500 font-medium mb-2 mt-1">Eco-friendly bike courier</p>
-                    <p className="text-xs font-bold text-green-700">Free sustainable delivery</p>
+                    <p className={`text-xs font-bold ${deliveryMethod === 'delivery' ? 'text-green-700' : 'text-gray-500'}`}>Free sustainable delivery</p>
                   </div>
                 </div>
               </div>
-              <div className="border-2 border-transparent bg-[#eef3e8] hover:bg-[#e6ebd9] rounded-3xl p-6 cursor-pointer transition-colors border-[#d4dec4]">
+              <div
+                onClick={() => setDeliveryMethod('pickup')}
+                className={`border-2 rounded-3xl p-6 cursor-pointer transition-all ${deliveryMethod === 'pickup'
+                    ? 'border-green-700 bg-white'
+                    : 'border-transparent bg-[#eef3e8] hover:bg-[#e6ebd9] border-[#d4dec4]'
+                  }`}
+              >
                 <div className="flex items-start">
-                  <Store className="w-6 h-6 text-gray-600 mr-4 mt-1" />
+                  <Store className={`w-6 h-6 mr-4 mt-1 ${deliveryMethod === 'pickup' ? 'text-green-700' : 'text-gray-600'}`} />
                   <div>
                     <h3 className="font-bold text-gray-900 text-lg">Store Pickup</h3>
                     <p className="text-sm text-gray-500 font-medium mb-2 mt-1">Collect from our hub</p>
-                    <p className="text-xs font-medium text-gray-500">Available today</p>
+                    <p className={`text-xs font-medium ${deliveryMethod === 'pickup' ? 'text-green-700' : 'text-gray-500'}`}>Available today</p>
                   </div>
                 </div>
               </div>
@@ -110,7 +215,7 @@ export default function CheckoutPage() {
                 <MapPin className="w-4 h-4 mr-1" /> Use saved address
               </button>
             </div>
-            
+
             <div className="bg-[#eef3e8] rounded-t-2xl p-5 border-b-2 border-[#d4dec4]">
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">STREET ADDRESS</p>
               <p className="font-bold text-gray-900 text-lg">245 Eco Lane, Suite 10</p>
@@ -133,7 +238,7 @@ export default function CheckoutPage() {
               <span className="w-8 h-8 rounded-full bg-[#eef3e8] text-green-700 flex items-center justify-center text-sm mr-3">3</span>
               Payment Method
             </h2>
-            
+
             <div className="bg-[#388e3c] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg border border-[#2e7d32]">
               <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-green-500 rounded-full opacity-30 blur-3xl"></div>
               <div className="relative z-10 flex flex-col h-full">
@@ -142,7 +247,7 @@ export default function CheckoutPage() {
                   <Wallet className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-3xl font-extrabold mb-10">Rp{(balance).toLocaleString('id-ID')}</h3>
-                
+
                 <div className="flex justify-between items-end mt-auto">
                   <div className="bg-white/20 backdrop-blur rounded-2xl p-3 px-4 flex items-center space-x-3 border border-white/30">
                     <div className="bg-white p-1.5 rounded-full text-green-800">
@@ -167,7 +272,7 @@ export default function CheckoutPage() {
         <div className="w-full lg:w-[400px]">
           <div className="bg-[#eef3e8] rounded-3xl p-8 sticky top-24 border border-[#d4dec4]">
             <h2 className="text-2xl font-extrabold text-gray-900 mb-8">Order Summary</h2>
-            
+
             <div className="space-y-6 mb-8">
               {items.map(item => (
                 <div key={item.id} className="flex items-center space-x-4">
@@ -207,7 +312,7 @@ export default function CheckoutPage() {
               <span className="text-2xl font-extrabold text-green-700">{formatRp(total)}</span>
             </div>
 
-            <button 
+            <button
               onClick={handlePayNow}
               disabled={items.length === 0}
               className="w-full bg-[#388e3c] hover:bg-[#2e7d32] text-white font-bold py-4 rounded-xl transition-colors shadow-md flex items-center justify-center disabled:opacity-50"
@@ -229,10 +334,10 @@ export default function CheckoutPage() {
       {notification && (
         <div className="fixed bottom-5 right-5 z-[9999] animate-in fade-in slide-in-from-bottom-5 duration-300">
           <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl border backdrop-blur-md ${notification.type === 'success'
-              ? 'bg-[#EAF3E1]/95 border-[#1A5632]/20 text-[#1A5632]'
-              : notification.type === 'error'
-                ? 'bg-red-50/95 border-red-200 text-red-950'
-                : 'bg-blue-50/95 border-blue-200 text-blue-950'
+            ? 'bg-[#EAF3E1]/95 border-[#1A5632]/20 text-[#1A5632]'
+            : notification.type === 'error'
+              ? 'bg-red-50/95 border-red-200 text-red-950'
+              : 'bg-blue-50/95 border-blue-200 text-blue-950'
             }`}>
             {notification.type === 'success' && <CheckCircle2 className="w-5 h-5 text-green-700 shrink-0" />}
             {notification.type === 'error' && <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />}

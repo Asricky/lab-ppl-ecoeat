@@ -393,9 +393,7 @@ export default function MitraMapSection() {
                         className="transition-all duration-300"
                       />
                       {/* Tooltip on hover */}
-                      <title>
-                        {region.name} ({region.partners} Mitra)
-                      </title>
+                      <title>{`${region.name} (${region.partners} Mitra)`}</title>
                     </g>
                   );
                 })}

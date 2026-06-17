@@ -1,13 +1,18 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, Bell, Menu } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/authStore';
 
 interface ReceiverNavbarProps {
   onMenuClick: () => void;
 }
 
 export default function ReceiverNavbar({ onMenuClick }: ReceiverNavbarProps) {
+  const router = useRouter();
+  const { user, logout } = useAuthStore();
+  const [profileOpen, setProfileOpen] = useState(false);
   return (
     <header className="sticky top-0 z-20 bg-white border-b border-ecoeat-border h-16 flex items-center justify-between px-4 md:px-6 shadow-sm">
       <div className="flex items-center gap-4">
@@ -38,8 +43,30 @@ export default function ReceiverNavbar({ onMenuClick }: ReceiverNavbarProps) {
             <p className="text-sm font-bold text-ecoeat-text">Yayasan Berbagi</p>
             <p className="text-[10px] text-gray-500 font-medium">LKS / Panti Asuhan</p>
           </div>
-          <div className="w-8 h-8 bg-ecoeat-primary text-white rounded-full flex items-center justify-center font-bold">
-            YB
+          <div className="relative">
+            <div 
+              className="w-8 h-8 bg-ecoeat-primary text-white rounded-full flex items-center justify-center font-bold cursor-pointer hover:bg-green-700 transition-colors"
+              onClick={() => setProfileOpen(!profileOpen)}
+            >
+              {user?.name ? user.name.charAt(0).toUpperCase() : 'YB'}
+            </div>
+            {profileOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-50">
+                <div className="px-4 py-2 border-b border-gray-100">
+                  <p className="text-sm font-bold text-gray-900 truncate">{user?.name || 'Yayasan Berbagi'}</p>
+                  <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    logout();
+                    router.push('/login');
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

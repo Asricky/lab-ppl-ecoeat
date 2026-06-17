@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import { incomingDonations } from '@/lib/dashboardData';
+import { useGlobalStore } from '@/store/globalStore';
 
 export default function LksIncomingPage() {
   const router = useRouter();
+  const incomingDonations = useGlobalStore(s => s.donations);
 
   return (
     <div className="space-y-6">
