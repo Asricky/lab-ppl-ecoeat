@@ -20,6 +20,7 @@ interface BuyerAddressesState {
   updateAddress: (id: string, input: Partial<Omit<BuyerSavedAddress, "id">>) => void;
   deleteAddress: (id: string) => void;
   setPrimary: (id: string) => void;
+  setAddresses: (addresses: BuyerSavedAddress[]) => void;
 }
 
 const INITIAL_ADDRESSES = [
@@ -89,6 +90,7 @@ export const useBuyerAddressesStore = create<BuyerAddressesState>((set) => ({
       addresses: s.addresses.map((a) => ({ ...a, isPrimary: a.id === id })),
     }));
   },
+  setAddresses: (addresses) => set({ addresses }),
 }));
 
 if (typeof window !== "undefined") {

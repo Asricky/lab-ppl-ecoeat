@@ -32,7 +32,7 @@ export default function OrderDetailDynamicPage() {
       style: "currency",
       currency: "IDR",
       maximumFractionDigits: 0,
-    }).format(displayAmount * 1000);
+    }).format(displayAmount);
   };
 
   const formatRpIdr = (idr: number) => {

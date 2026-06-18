@@ -54,6 +54,7 @@ export const useEcoPayStore = create((set) => ({
       ...state.transactions,
     ],
   })),
+  setBalance: (balance) => set({ balance }),
 }));
 
 // Subscribe to authStore changes to keep ecoPayStore synced with real database balance

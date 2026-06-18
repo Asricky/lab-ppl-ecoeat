@@ -31,7 +31,7 @@ export default function ProductCard({ product }: { product: any }) {
   };
 
   const formatRp = (amount: number) => {
-    return 'Rp' + (amount * 1000).toLocaleString('id-ID');
+    return 'Rp' + amount.toLocaleString('id-ID');
   };
 
   const handleAddToCart = (e: React.MouseEvent) => {

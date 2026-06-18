@@ -29,13 +29,14 @@ export default function RegisterBuyerPage() {
   };
 
   useEffect(() => {
-    if (notification) {
-      const timer = setTimeout(() => {
-        setNotification(null);
-      }, 4000);
-      return () => clearTimeout(timer);
+    const storedUser = localStorage.getItem('user');
+    // ATAU mengecek dari Zustand store: const user = useAuthStore((s) => s.user);
+
+    if (!storedUser) {
+      // Jika ini pemicunya, pastikan key nama di localStorage.setItem pada Langkah 1 tadi sudah SAMA PERSIS dengan yang dicek di sini
+      router.push('/login');
     }
-  }, [notification]);
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -196,10 +197,10 @@ export default function RegisterBuyerPage() {
       {notification && (
         <div className="fixed bottom-5 right-5 z-[9999] animate-in fade-in slide-in-from-bottom-5 duration-300">
           <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl border backdrop-blur-md ${notification.type === 'success'
-              ? 'bg-[#EAF3E1]/95 border-[#1A5632]/20 text-[#1A5632]'
-              : notification.type === 'error'
-                ? 'bg-red-50/95 border-red-200 text-red-950'
-                : 'bg-blue-50/95 border-blue-200 text-blue-950'
+            ? 'bg-[#EAF3E1]/95 border-[#1A5632]/20 text-[#1A5632]'
+            : notification.type === 'error'
+              ? 'bg-red-50/95 border-red-200 text-red-950'
+              : 'bg-blue-50/95 border-blue-200 text-blue-950'
             }`}>
             {notification.type === 'success' && <CheckCircle2 className="w-5 h-5 text-green-700 shrink-0" />}
             {notification.type === 'error' && <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />}

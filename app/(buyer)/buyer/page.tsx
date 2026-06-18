@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import ProductCard from "@/components/buyer/ProductCard";
@@ -33,7 +33,7 @@ function mapToProductTile(p: any): ProductTile {
   const parseRp = (str: string) => {
     if (!str) return 0;
     const num = parseInt(str.replace(/[^0-9]/g, ''), 10);
-    return isNaN(num) ? 0 : num / 1000;
+    return isNaN(num) ? 0 : num;
   };
 
   let cat = "Meals";
@@ -44,8 +44,8 @@ function mapToProductTile(p: any): ProductTile {
   return {
     id: p.id,
     name: p.name,
-    price: parseRp(p.originalPrice) || 15,
-    discountPrice: parseRp(p.price) || 10,
+    price: parseRp(p.originalPrice) || 15000,
+    discountPrice: parseRp(p.price) || 10000,
     discountPercentage: p.discountPercent || 20,
     vendor: p.seller || "EcoEat Vendor",
     distance: 1.2,
@@ -61,11 +61,36 @@ function BuyerDashboardContent() {
   const products = useMemo(() => globalProducts.filter(p => p.type === 'Sell' && p.stock > 0).map(mapToProductTile), [globalProducts]);
   
   const balance = useEcoPayStore((s) => s.balance);
+  const setBalance = useEcoPayStore((s) => s.setBalance);
   const orders = useBuyerOrdersStore((s) => s.orders);
   const activeOrders = useMemo(() => orders.filter(o => o.tab === 'Active Orders'), [orders]);
   const latestOrder = activeOrders[0];
   
   const [activeCategory, setActiveCategory] = useState<CategoryTab>("All Surplus");
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        const stored = localStorage.getItem('user');
+        const userObj = stored ? JSON.parse(stored) : null;
+        const currentUserId = userObj?.id || 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d';
+
+        const response = await fetch('/api/buyer/checkout', {
+          method: 'GET',
+          headers: {
+            'x-user-id': currentUserId
+          }
+        });
+        const result = await response.json();
+        if (result.success && typeof result.balance === 'number') {
+          setBalance(result.balance);
+        }
+      } catch (error) {
+        console.error("Gagal menarik saldo asli:", error);
+      }
+    };
+    fetchBalance();
+  }, [setBalance]);
 
   const searchParams = useSearchParams();
   const query = (searchParams.get("q") || "").trim().toLowerCase();

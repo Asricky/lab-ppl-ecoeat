@@ -57,7 +57,7 @@ export default function EditAddressPage({ params }: { params: Promise<{ id: stri
     }
   }, [notification]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const labelFinal = label.trim() || "Alamat";
     if (
@@ -76,21 +76,57 @@ export default function EditAddressPage({ params }: { params: Promise<{ id: stri
       showToast("Kode pos wajib 5 digit.", "error");
       return;
     }
-    updateAddress(id, {
-      label: labelFinal,
-      fullName: fullName.trim(),
-      phone: phone.trim(),
-      province: province.trim(),
-      city: city.trim(),
-      district: district.trim(),
-      postalCode: pos,
-      streetDetail: streetDetail.trim(),
-      isPrimary,
-    });
-    showToast("Alamat berhasil diperbarui!", "success");
-    setTimeout(() => {
-      router.push("/buyer/profile?tab=address");
-    }, 800);
+
+    try {
+      const stored = localStorage.getItem('user');
+      const userObj = stored ? JSON.parse(stored) : null;
+      const currentUserId = userObj?.id || 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d';
+
+      const response = await fetch('/api/buyer/addresses', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUserId
+        },
+        body: JSON.stringify({
+          id,
+          label: labelFinal,
+          recipient_name: fullName.trim(),
+          phone_number: phone.trim(),
+          address: streetDetail.trim(),
+          district: district.trim(),
+          city: city.trim(),
+          province: province.trim(),
+          postal_code: pos,
+          is_default: isPrimary
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        updateAddress(id, {
+          label: labelFinal,
+          fullName: fullName.trim(),
+          phone: phone.trim(),
+          province: province.trim(),
+          city: city.trim(),
+          district: district.trim(),
+          postalCode: pos,
+          streetDetail: streetDetail.trim(),
+          isPrimary,
+        });
+        showToast("Alamat berhasil diperbarui!", "success");
+        setTimeout(() => {
+          router.push("/buyer/profile?tab=address");
+        }, 800);
+      } else {
+        showToast(result.error || "Gagal memperbarui alamat di database.", "error");
+      }
+    } catch (err: any) {
+      console.error(err);
+      showToast("Terjadi kesalahan koneksi saat memperbarui alamat.", "error");
+    }
   };
 
   const fieldClass =

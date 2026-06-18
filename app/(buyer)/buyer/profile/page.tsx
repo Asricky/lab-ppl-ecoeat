@@ -21,6 +21,7 @@ function ProfileContent() {
 
   const addresses = useBuyerAddressesStore((s) => s.addresses);
   const setPrimaryAddress = useBuyerAddressesStore((s) => s.setPrimary);
+  const setAddresses = useBuyerAddressesStore((s) => s.setAddresses);
 
   const sortedAddresses = useMemo(() => [...addresses].sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary)), [addresses]);
 
@@ -58,19 +59,82 @@ function ProfileContent() {
     router.push('/login');
   };
 
-  const handleTopup = (e: React.FormEvent) => {
+  const handleTopup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!topupAmount || !topupBank) return showToast("Pilih bank dan masukkan nominal!", "error");
-    addBalance(Number(topupAmount), `Top-up via ${topupBank}`);
-    showToast("Top-up berhasil!", "success");
-    setTopupAmount('');
-    setActiveTab('ecopay');
+
+    try {
+      const stored = localStorage.getItem('user');
+      const userObj = stored ? JSON.parse(stored) : null;
+      const currentUserId = userObj?.id || 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d';
+
+      const response = await fetch('/api/buyer/checkout', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUserId
+        },
+        body: JSON.stringify({
+          amount: Number(topupAmount)
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        addBalance(Number(topupAmount), `Top-up via ${topupBank}`);
+        useEcoPayStore.setState({ balance: result.balance });
+        showToast("Top-up berhasil!", "success");
+        setTopupAmount('');
+        setActiveTab('ecopay');
+      } else {
+        showToast(result.error || "Gagal melakukan top-up ke database.", "error");
+      }
+    } catch (err: any) {
+      console.error(err);
+      showToast("Terjadi kesalahan koneksi saat top-up.", "error");
+    }
   };
 
   useEffect(() => {
     const tab = searchParams.get('tab');
     if (tab) setActiveTab(tab);
   }, [searchParams]);
+
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const stored = localStorage.getItem('user');
+        const userObj = stored ? JSON.parse(stored) : null;
+        const currentUserId = userObj?.id || 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d';
+
+        const response = await fetch('/api/buyer/addresses', {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': currentUserId
+          }
+        });
+        const result = await response.json();
+        if (result.success && result.data) {
+          const mapped = result.data.map((addr: any) => ({
+            id: addr.id,
+            label: addr.label,
+            fullName: addr.recipient_name || addr.fullName || '',
+            phone: addr.phone_number || addr.phone || '',
+            province: addr.province || '',
+            city: addr.city || '',
+            district: addr.district || '',
+            postalCode: addr.postal_code || addr.postalCode || '',
+            streetDetail: addr.address || addr.streetDetail || '',
+            isPrimary: addr.is_default || addr.isPrimary || false,
+          }));
+          setAddresses(mapped);
+        }
+      } catch (error) {
+        console.error("Gagal mensinkronisasi data alamat:", error);
+      }
+    };
+    fetchAddresses();
+  }, [setAddresses]);
 
   const transactionDisplay = (t: { type: string; amount: number }) => {
     const isCredit = t.type === "topup" || t.type === "refund";
@@ -87,6 +151,75 @@ function ProfileContent() {
     setWithdrawAmount('');
     setWithdrawAccount('');
     setActiveTab('ecopay');
+  };
+
+  const handleSetPrimary = async (addrId: string) => {
+    try {
+      const stored = localStorage.getItem('user');
+      const userObj = stored ? JSON.parse(stored) : null;
+      const currentUserId = userObj?.id || 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d';
+
+      const target = addresses.find((a) => a.id === addrId);
+      if (!target) return;
+
+      const response = await fetch('/api/buyer/addresses', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUserId
+        },
+        body: JSON.stringify({
+          id: addrId,
+          label: target.label,
+          recipient_name: target.fullName,
+          phone_number: target.phone,
+          address: target.streetDetail,
+          district: target.district,
+          city: target.city,
+          province: target.province,
+          postal_code: target.postalCode,
+          is_default: true
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setPrimaryAddress(addrId);
+        showToast("Alamat utama berhasil diubah!", "success");
+      } else {
+        showToast(result.error || "Gagal memperbarui alamat utama di database.", "error");
+      }
+    } catch (err: any) {
+      console.error(err);
+      showToast("Terjadi kesalahan koneksi saat memperbarui alamat utama.", "error");
+    }
+  };
+
+  const handleDeleteAddress = async (addrId: string) => {
+    try {
+      const stored = localStorage.getItem('user');
+      const userObj = stored ? JSON.parse(stored) : null;
+      const currentUserId = userObj?.id || 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d';
+
+      const response = await fetch(`/api/buyer/addresses?id=${addrId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUserId
+        }
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        useBuyerAddressesStore.getState().deleteAddress(addrId);
+        showToast("Alamat berhasil dihapus", "success");
+      } else {
+        showToast(result.error || "Gagal menghapus alamat dari database.", "error");
+      }
+    } catch (err: any) {
+      console.error(err);
+      showToast("Terjadi kesalahan koneksi saat menghapus alamat.", "error");
+    }
   };
 
   return (
@@ -290,7 +423,7 @@ function ProfileContent() {
                       {!a.isPrimary && (
                         <button
                           type="button"
-                          onClick={() => setPrimaryAddress(a.id)}
+                          onClick={() => handleSetPrimary(a.id)}
                           className="text-sm font-bold text-green-800 hover:text-green-900 underline-offset-4 hover:underline"
                         >
                           Jadikan alamat utama
@@ -351,8 +484,7 @@ function ProfileContent() {
               <button
                 type="button"
                 onClick={() => {
-                  useBuyerAddressesStore.getState().deleteAddress(addressToDelete);
-                  showToast("Alamat berhasil dihapus", "success");
+                  handleDeleteAddress(addressToDelete);
                   setAddressToDelete(null);
                 }}
                 className="flex-1 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 shadow-md transition-colors"

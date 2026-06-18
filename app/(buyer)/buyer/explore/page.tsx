@@ -13,7 +13,7 @@ function mapToProductTile(p: any) {
   const parseRp = (str: string) => {
     if (!str) return 0;
     const num = parseInt(str.replace(/[^0-9]/g, ''), 10);
-    return isNaN(num) ? 0 : num / 1000;
+    return isNaN(num) ? 0 : num;
   };
 
   let cat = "Meals";
@@ -24,8 +24,8 @@ function mapToProductTile(p: any) {
   return {
     id: p.id,
     name: p.name,
-    price: parseRp(p.originalPrice) || 15,
-    discountPrice: parseRp(p.price) || 10,
+    price: parseRp(p.originalPrice) || 15000,
+    discountPrice: parseRp(p.price) || 10000,
     discountPercentage: p.discountPercent || 20,
     vendor: p.seller || "EcoEat Vendor",
     distance: 1.2,
@@ -44,7 +44,7 @@ const INITIAL_FILTERS: ExploreFilters = {
 };
 
 function productPriceIdr(p: any) {
-  return Math.round(p.discountPrice * 10_000);
+  return p.discountPrice;
 }
 
 export default function ExplorePage() {

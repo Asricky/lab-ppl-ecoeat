@@ -1,13 +1,7 @@
 import { Role, User } from '../store/authStore';
 
 const MOCK_USERS = [
-  {
-    email: "lukas.buyer@ecoeat.com",
-    password: "password",
-    full_name: "Lukas Ricky Krisjatmiko",
-    role: "buyer",
-    balance: 500000
-  },
+
   {
     email: "lukas.seller@ecoeat.com",
     password: "password",

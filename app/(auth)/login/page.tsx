@@ -33,28 +33,48 @@ export default function LoginPage() {
     }
   }, [notification]);
 
-  const handleLogin = async (e: FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
-      const { user, token } = await authHandler.login(email, password);
-      setUser(user, token);
-      showToast("Login berhasil!", "success");
-      // Add a tiny delay to let the toast show up
-      setTimeout(() => {
-        const backendRole = (user?.role || 'buyer').toLowerCase();
-        if (backendRole === 'buyer') router.push('/buyer');
-        else if (backendRole === 'seller') router.push('/seller');
-        else if (backendRole === 'courier' || backendRole === 'kurir') router.push('/kurir');
-        else if (backendRole === 'lks' || backendRole === 'lks-panti') router.push('/lks-panti');
-        else if (backendRole === 'admin') router.push('/admin');
-        else router.push(`/${user.role}`);
-      }, 800);
-    } catch (error) {
-      console.error("Login failed", error);
-      const msg = error instanceof Error ? error.message : "Email atau password salah!";
-      showToast(msg, "error");
-    } finally {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast("Login Berhasil!", "success");
+
+        // 1. Simpan session user asli dari Supabase ke localStorage
+        localStorage.setItem('user', JSON.stringify(result.user));
+        localStorage.setItem('isLoggedIn', 'true');
+
+        // 2. Update Zustand Auth Store
+        if (result.user) {
+          setUser({
+            id: result.user.id,
+            name: result.user.full_name || result.user.name || "User",
+            email: result.user.email,
+            role: result.user.role,
+            ecoPayBalance: result.user.ecoPayBalance || 0,
+          }, result.token || "mock-token-from-supabase");
+        }
+
+        // 3. Pindah ke dashboard buyer
+        setTimeout(() => {
+          router.push('/buyer');
+        }, 800);
+      } else {
+        showToast(result.error || result.message || "Email atau password salah!", "error");
+        setIsLoading(false);
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      showToast("Terjadi kesalahan pada sistem login.", "error");
       setIsLoading(false);
     }
   };
@@ -79,7 +99,7 @@ export default function LoginPage() {
           <p className="text-white/90 text-lg max-w-md mb-8">
             Join a community of thousands preserving the harvest and nourishing the planet through sustainable redistribution.
           </p>
-          
+
           <div className="bg-white/20 backdrop-blur-md rounded-2xl p-4 flex items-center space-x-4 max-w-sm border border-white/30">
             <div className="bg-green-500 rounded-full p-2 flex items-center justify-center">
               <TrendingUp className="text-white w-6 h-6" />
@@ -153,7 +173,7 @@ export default function LoginPage() {
               >
                 {isLoading ? "Logging in..." : "Login"}
               </button>
-              
+
               <Link
                 href="/register"
                 className="w-full bg-transparent border-2 border-[#e0e5df] hover:border-green-600 text-green-700 font-semibold py-3.5 rounded-lg transition-colors flex justify-center items-center"
@@ -180,10 +200,10 @@ export default function LoginPage() {
       {notification && (
         <div className="fixed bottom-5 right-5 z-[9999] animate-in fade-in slide-in-from-bottom-5 duration-300">
           <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl border backdrop-blur-md ${notification.type === 'success'
-              ? 'bg-[#EAF3E1]/95 border-[#1A5632]/20 text-[#1A5632]'
-              : notification.type === 'error'
-                ? 'bg-red-50/95 border-red-200 text-red-950'
-                : 'bg-blue-50/95 border-blue-200 text-blue-950'
+            ? 'bg-[#EAF3E1]/95 border-[#1A5632]/20 text-[#1A5632]'
+            : notification.type === 'error'
+              ? 'bg-red-50/95 border-red-200 text-red-950'
+              : 'bg-blue-50/95 border-blue-200 text-blue-950'
             }`}>
             {notification.type === 'success' && <CheckCircle2 className="w-5 h-5 text-green-700 shrink-0" />}
             {notification.type === 'error' && <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />}

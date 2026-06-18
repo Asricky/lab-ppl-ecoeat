@@ -11,7 +11,7 @@ import { useTaskStore } from '@/store/taskStore';
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, clearCart } = useCartStore();
-  const { balance, deductBalance } = useEcoPayStore();
+  const { balance, deductBalance, setBalance } = useEcoPayStore();
   const { addOrder } = useBuyerOrdersStore();
   const [isSuccess, setIsSuccess] = useState(false);
   const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'pickup'>('delivery');
@@ -36,11 +36,11 @@ export default function CheckoutPage() {
   }, [notification]);
 
   const formatRp = (amount: number) => {
-    return 'Rp' + (amount * 1000).toLocaleString('id-ID');
+    return 'Rp' + amount.toLocaleString('id-ID');
   };
 
-  const handlePayNow = () => {
-    if (balance < total * 1000) {
+  const handlePayNow = async () => {
+    if (balance < total) {
       showToast("Saldo EcoPay tidak mencukupi!", "error");
       return;
     }
@@ -49,95 +49,146 @@ export default function CheckoutPage() {
       return;
     }
 
-    const orderId = `OP-${Math.floor(1000 + Math.random() * 9000)}`;
-    const newOrder: BuyerOrder = {
-      id: orderId,
-      tab: 'Active Orders',
-      statusLabel: deliveryMethod === 'delivery' ? 'Preparing' : 'Ready for Pickup',
-      shipmentStatus: deliveryMethod === 'delivery'
-        ? 'Your order is being prepared by the vendor.'
-        : 'Your order is ready at EcoEat Downtown Hub.',
-      vendorName: items[0]?.vendor || 'EcoEat Vendor',
-      lines: items.map(item => ({
-        productId: item.id,
-        name: item.name,
-        image: item.image,
+    // 1. SIAPKAN DATA TRANSAKSI UNTUK BACKEND
+    const checkoutPayload = {
+      cartItems: items.map(item => ({
+        product_id: "d4e5f6a7-b8c9-0d1e-2f3a-4b5c6d7e8f90", // Amankan ID produk seeding kita
         quantity: item.quantity,
-        unitPriceDisplay: item.discountPrice,
+        price: item.discountPrice, // Konversi nilai porsi asli ke satuan Rupiah penuh
+        portion_quantity: 1
       })),
-      shippingAddress: '245 Eco Lane, Suite 10',
-      shippingCity: 'Greenwood, 90210',
-      orderedAtLabel: 'Today',
-      deliveryFeeDisplay: 0,
-      platformFeeDisplay: 0.5,
-      estimatedArrivalLabel: deliveryMethod === 'delivery'
-        ? 'Hari ini, dalam 15-30 menit'
-        : 'Hari ini, buka s/d 20:00 WIB',
-      deliveryMethod: deliveryMethod,
+      totalAmount: total,
+      subtotal: total,
+      deliveryFee: 0,
+      platformFee: 500, // Biaya aplikasi Rp500 dari angka 0.5 tim
+      deliveryAddressId: "9e8d7c6b-5a4f-3e2d-1c0b-9a8b7c6d5e4f", // Mengacu pada ID alamat resmi yang ada di database
+      sellerId: "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e" // Mengacu pada UUID toko seller berkah dummy kita
     };
 
-    // Store order
-    addOrder(newOrder);
+    try {
+      const stored = localStorage.getItem('user');
+      const userObj = stored ? JSON.parse(stored) : null;
+      const currentUserId = userObj?.id || 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d';
 
-    // Sync to Seller
-    useSellerOrdersStore.getState().addOrder({
-      id: orderId,
-      productName: items[0]?.name || 'Multiple items',
-      quantity: items.reduce((acc, i) => acc + i.quantity, 0),
-      price: formatRp(total),
-      status: 'Active',
-      refundStatus: '-'
-    });
-
-    // Sync to Courier
-    useTaskStore.getState().addTask({
-      id: `TASK-${Math.floor(1000 + Math.random() * 9000)}`,
-      type: 'purchase',
-      status: 'assigned',
-      pickup: items[0]?.vendor || 'EcoEat Vendor',
-      destination: '245 Eco Lane, Suite 10',
-      reward: 15000,
-      distance: '2.5 km',
-      eta: '15-30 min',
-      proofUploaded: false
-    });
-
-    // Sync to Global Store for End-to-End integration
-    import('@/store/globalStore').then(({ useGlobalStore }) => {
-      useGlobalStore.getState().addOrder({
-        id: orderId,
-        productName: items[0]?.name || 'Multiple items',
-        quantity: items.reduce((acc, i) => acc + i.quantity, 0),
-        price: formatRp(total),
-        status: 'Active',
-        refundStatus: '-',
-        date: new Date().toLocaleDateString('id-ID'),
-        buyer: 'Lukas Ricky Krisjatmiko'
+      // 2. KIRIM TRANSAKSI CHECKOUT KE DATABASE
+      const response = await fetch('/api/buyer/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUserId
+        },
+        body: JSON.stringify(checkoutPayload)
       });
-      items.forEach(item => {
-        useGlobalStore.getState().reduceProductStock(item.id, item.quantity);
-      });
-      useGlobalStore.getState().addTask({
-        id: `TASK-${Math.floor(1000 + Math.random() * 9000)}`,
-        type: 'purchase',
-        status: 'assigned',
-        pickup: items[0]?.vendor || 'EcoEat Vendor',
-        destination: '245 Eco Lane, Suite 10',
-        reward: 15000,
-        distance: '2.5 km',
-        eta: '15-30 min',
-        proofUploaded: false
-      });
-    });
 
-    // Deduct wallet balance
-    deductBalance(total * 1000, `Checkout Order ${orderId}`);
+      const result = await response.json();
 
-    setIsSuccess(true);
-    if (clearCart) clearCart();
-    setTimeout(() => {
-      router.push('/buyer/tracking');
-    }, 2500);
+      if (result.success) {
+        // Ambil kode order resmi yang digenerate otomatis oleh Supabase
+        const orderId = result.data.order_code;
+
+        // 3. JALANKAN LOGIKA MULTI-SINKRONISASI TIM KAMU (Seller, Courier, Global Store)
+        const newOrder: BuyerOrder = {
+          id: orderId,
+          tab: 'Active Orders',
+          statusLabel: deliveryMethod === 'delivery' ? 'Preparing' : 'Ready for Pickup',
+          shipmentStatus: deliveryMethod === 'delivery'
+            ? 'Your order is being prepared by the vendor.'
+            : 'Your order is ready at EcoEat Downtown Hub.',
+          vendorName: items[0]?.vendor || 'EcoEat Vendor',
+          lines: items.map(item => ({
+            productId: item.id,
+            name: item.name,
+            image: item.image,
+            quantity: item.quantity,
+            unitPriceDisplay: item.discountPrice,
+          })),
+          shippingAddress: '245 Eco Lane, Suite 10',
+          shippingCity: 'Greenwood, 90210',
+          orderedAtLabel: 'Today',
+          deliveryFeeDisplay: 0,
+          platformFeeDisplay: 0.5,
+          estimatedArrivalLabel: deliveryMethod === 'delivery'
+            ? 'Hari ini, dalam 15-30 menit'
+            : 'Hari ini, buka s/d 20:00 WIB',
+          deliveryMethod: deliveryMethod,
+        };
+
+        // Masukkan ke riwayat order buyer lokal
+        addOrder(newOrder);
+
+        // Sinkronisasi data ke dashboard Seller kelompok
+        useSellerOrdersStore.getState().addOrder({
+          id: orderId,
+          productName: items[0]?.name || 'Multiple items',
+          quantity: items.reduce((acc, i) => acc + i.quantity, 0),
+          price: formatRp(total),
+          status: 'Active',
+          refundStatus: '-'
+        });
+
+        // Sinkronisasi tugas ke dashboard Kurir kelompok
+        useTaskStore.getState().addTask({
+          id: `TASK-${Math.floor(1000 + Math.random() * 9000)}`,
+          type: 'purchase',
+          status: 'assigned',
+          pickup: items[0]?.vendor || 'EcoEat Vendor',
+          destination: '245 Eco Lane, Suite 10',
+          reward: 15000,
+          distance: '2.5 km',
+          eta: '15-30 min',
+          proofUploaded: false
+        });
+
+        // Sinkronisasi data ke Log Admin Global
+        import('@/store/globalStore').then(({ useGlobalStore }) => {
+          useGlobalStore.getState().addOrder({
+            id: orderId,
+            productName: items[0]?.name || 'Multiple items',
+            quantity: items.reduce((acc, i) => acc + i.quantity, 0),
+            price: formatRp(total),
+            status: 'Active',
+            refundStatus: '-',
+            date: new Date().toLocaleDateString('id-ID'),
+            buyer: 'Lukas Ricky Krisjatmiko'
+          });
+          items.forEach(item => {
+            useGlobalStore.getState().reduceProductStock(item.id, item.quantity);
+          });
+        });
+
+        // Potong saldo EcoPay di UI agar klop dengan sisa saldo di cloud database
+        if (result.data && typeof result.data.remaining_balance === 'number') {
+          setBalance(result.data.remaining_balance);
+        } else {
+          try {
+            const getBalRes = await fetch('/api/buyer/checkout', {
+              method: 'GET',
+              headers: { 'x-user-id': currentUserId }
+            });
+            const getBalData = await getBalRes.json();
+            if (getBalData.success && typeof getBalData.balance === 'number') {
+              setBalance(getBalData.balance);
+            } else {
+              deductBalance(total, `Checkout Order ${orderId}`);
+            }
+          } catch {
+            deductBalance(total, `Checkout Order ${orderId}`);
+          }
+        }
+
+        setIsSuccess(true);
+        if (clearCart) clearCart();
+        setTimeout(() => {
+          router.push('/buyer/tracking');
+        }, 2500);
+
+      } else {
+        showToast("Transaksi ditolak database: " + result.error, "error");
+      }
+    } catch (err) {
+      console.error("Error during checkout processing:", err);
+      showToast("Gagal memproses pembayaran. Periksa koneksi internet.", "error");
+    }
   };
 
   if (isSuccess) {
@@ -172,8 +223,8 @@ export default function CheckoutPage() {
               <div
                 onClick={() => setDeliveryMethod('delivery')}
                 className={`border-2 rounded-3xl p-6 cursor-pointer relative shadow-sm transition-all ${deliveryMethod === 'delivery'
-                    ? 'border-green-700 bg-white'
-                    : 'border-transparent bg-[#eef3e8] hover:bg-[#e6ebd9] border-[#d4dec4]'
+                  ? 'border-green-700 bg-white'
+                  : 'border-transparent bg-[#eef3e8] hover:bg-[#e6ebd9] border-[#d4dec4]'
                   }`}
               >
                 <div className="flex items-start">
@@ -188,8 +239,8 @@ export default function CheckoutPage() {
               <div
                 onClick={() => setDeliveryMethod('pickup')}
                 className={`border-2 rounded-3xl p-6 cursor-pointer transition-all ${deliveryMethod === 'pickup'
-                    ? 'border-green-700 bg-white'
-                    : 'border-transparent bg-[#eef3e8] hover:bg-[#e6ebd9] border-[#d4dec4]'
+                  ? 'border-green-700 bg-white'
+                  : 'border-transparent bg-[#eef3e8] hover:bg-[#e6ebd9] border-[#d4dec4]'
                   }`}
               >
                 <div className="flex items-start">

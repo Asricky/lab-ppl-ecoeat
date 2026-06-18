@@ -2,9 +2,9 @@ import { create } from 'zustand';
 import { useEcoPayStore } from './ecoPayStore';
 import { useAuthStore } from './authStore';
 
-/** Display unit scales to IDR via × 1000 (same as formatRp elsewhere) */
+/** Display unit scales to IDR (same as formatRp elsewhere) */
 export function displayToIdr(display: number) {
-  return Math.round(display * 1000);
+  return display;
 }
 
 export interface OrderLine {
@@ -27,7 +27,7 @@ export interface BuyerOrder {
   shippingCity: string;
   shippingPhone?: string;
   orderedAtLabel: string;
-  /** Biaya kirim (display units × 1000 = IDR) */
+  /** Biaya kirim (display units = IDR) */
   deliveryFeeDisplay?: number;
   /** Biaya layanan platform (display units) */
   platformFeeDisplay?: number;
@@ -43,7 +43,7 @@ export function formatDisplayLineTotal(order: BuyerOrder): number {
   return order.lines.reduce((acc, l) => acc + l.quantity * l.unitPriceDisplay, 0);
 }
 
-/** Subtotal barang, biaya kirim & layanan, total pembayaran (satuan display × 1000 = IDR) */
+/** Subtotal barang, biaya kirim & layanan, total pembayaran (satuan display = IDR) */
 export function orderPaymentBreakdown(order: BuyerOrder) {
   const subtotalItems = formatDisplayLineTotal(order);
   const delivery = order.deliveryFeeDisplay ?? 0;
@@ -69,15 +69,15 @@ const INITIAL: BuyerOrder[] = [
         name: 'Local Organic Veggie Box',
         image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500',
         quantity: 1,
-        unitPriceDisplay: 24,
+        unitPriceDisplay: 24000,
       },
     ],
     shippingAddress: 'Jl. Melati Dalam No. 12A',
     shippingCity: 'Bandung, Jawa Barat 40115',
     shippingPhone: '+62 812-3456-7890',
     orderedAtLabel: 'Today',
-    deliveryFeeDisplay: 3,
-    platformFeeDisplay: 0.5,
+    deliveryFeeDisplay: 3000,
+    platformFeeDisplay: 500,
     estimatedArrivalLabel: 'Hari ini, 15:30 – 18:00 WIB',
   },
   {
@@ -92,17 +92,17 @@ const INITIAL: BuyerOrder[] = [
         name: 'Heirloom Harvest Box',
         image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=500',
         quantity: 1,
-        unitPriceDisplay: 45,
+        unitPriceDisplay: 45000,
       },
     ],
     shippingAddress: 'Perumahan Cendana Blok C2 No. 8',
     shippingCity: 'Jakarta Selatan, DKI Jakarta 12310',
     shippingPhone: '+62 821-9988-7766',
     orderedAtLabel: 'Oct 14, 2023',
-    deliveryFeeDisplay: 5,
-    platformFeeDisplay: 0.5,
+    deliveryFeeDisplay: 5000,
+    platformFeeDisplay: 500,
     refundEligible: true,
-    refundAmountDisplay: 45,
+    refundAmountDisplay: 45000,
   },
   {
     id: 'OP-8834',
@@ -116,16 +116,16 @@ const INITIAL: BuyerOrder[] = [
         name: 'Organic Berry Medley',
         image: 'https://images.unsplash.com/photo-1596199050105-6d5d32222916?w=500',
         quantity: 1,
-        unitPriceDisplay: 32.5,
+        unitPriceDisplay: 32500,
       },
     ],
     shippingAddress: 'Jl. Bamboo Raya No. 20',
     shippingCity: 'Surabaya, Jawa Timur 60256',
     orderedAtLabel: 'Oct 10, 2023',
     refundEligible: false,
-    refundAmountDisplay: 32.5,
-    deliveryFeeDisplay: 4,
-    platformFeeDisplay: 0.5,
+    refundAmountDisplay: 32500,
+    deliveryFeeDisplay: 4000,
+    platformFeeDisplay: 500,
   },
   {
     id: 'CK-2201',
@@ -138,16 +138,16 @@ const INITIAL: BuyerOrder[] = [
         name: 'Community Kitchen Meal Kit',
         image: 'https://images.unsplash.com/photo-1622597467836-f38240662c8c?w=500',
         quantity: 1,
-        unitPriceDisplay: 18,
+        unitPriceDisplay: 18000,
       },
     ],
     shippingAddress: 'Jl. Veteran III No. 5',
     shippingCity: 'Yogyakarta, DIY 55161',
     orderedAtLabel: 'Oct 20, 2024',
     refundEligible: true,
-    refundAmountDisplay: 18,
-    deliveryFeeDisplay: 2,
-    platformFeeDisplay: 0.5,
+    refundAmountDisplay: 18000,
+    deliveryFeeDisplay: 2000,
+    platformFeeDisplay: 500,
   },
   {
     id: 'OP-7710',
@@ -160,15 +160,15 @@ const INITIAL: BuyerOrder[] = [
         name: 'Organic Heirloom Tomatoes',
         image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=200',
         quantity: 2,
-        unitPriceDisplay: 3.5,
+        unitPriceDisplay: 3500,
       },
     ],
     shippingAddress: 'Apartemen Lavender Tower B / 904',
     shippingCity: 'Tangerang, Banten 15143',
     shippingPhone: '+62 817-8899-0011',
     orderedAtLabel: 'Sep 28, 2024',
-    deliveryFeeDisplay: 2.5,
-    platformFeeDisplay: 0.5,
+    deliveryFeeDisplay: 2500,
+    platformFeeDisplay: 500,
   },
   {
     id: 'OP-7711',
@@ -181,15 +181,15 @@ const INITIAL: BuyerOrder[] = [
         name: 'Leafy Green Bundle',
         image: 'https://images.unsplash.com/photo-1582284540020-8acbe03f4924?w=200',
         quantity: 1,
-        unitPriceDisplay: 12,
+        unitPriceDisplay: 12000,
       },
     ],
     shippingAddress: 'Jl. Anggrek Lestari No. 44',
     shippingCity: 'Depok, Jawa Barat 16451',
     shippingPhone: '+62 831-7654-2233',
     orderedAtLabel: 'Sep 30, 2024',
-    deliveryFeeDisplay: 2.5,
-    platformFeeDisplay: 0.5,
+    deliveryFeeDisplay: 2500,
+    platformFeeDisplay: 500,
   },
 ];
 

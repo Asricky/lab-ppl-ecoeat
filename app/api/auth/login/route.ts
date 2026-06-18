@@ -1,99 +1,66 @@
-import { scrypt as scryptCallback } from "crypto";
-import { promisify } from "util";
-import { createClient } from "@supabase/supabase-js";
-import { NextResponse } from "next/server";
+export const dynamic = 'force-dynamic';
 
-export const runtime = "nodejs";
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
-const scrypt = promisify(scryptCallback);
-
-function getSupabaseAdminClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.NEXT_SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_SECRET_KEY;
-
-  if (!supabaseUrl) {
-    throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured");
-  }
-
-  if (!serviceRoleKey) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY is required to retrieve users");
-  }
-
-  return createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
-}
-
-async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  const parts = hash.split(":");
-  if (parts.length !== 3 || parts[0] !== "scrypt") {
-    return false; // unsupported/invalid format
-  }
-  const [, salt, storedKey] = parts;
-  const derivedKey = (await scrypt(password, salt, 64)) as Buffer;
-  return derivedKey.toString("hex") === storedKey;
-}
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
 
-    if (!email || !password) {
-      return NextResponse.json({ message: "Email and password are required" }, { status: 400 });
+    // 🕵️‍♂️ LOG 1: Cetak data yang dikirim dari tombol login frontend
+    console.log("============ 🔍 SINKRONISASI AUTH DEBUG ============");
+    console.log("1. Email dari Frontend   :", `"${email}"`);
+    console.log("2. Password dari Frontend:", `"${password}"`);
+
+    // Ambil data user dari Supabase dengan toleransi .trim()
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email.trim())
+      .single();
+
+    // Jika data tidak ketemu di Supabase
+    if (error || !user) {
+      console.log("❌ Hasil: Email TIDAK ditemukan di tabel users Supabase!");
+      console.log("====================================================");
+      return NextResponse.json({
+        success: false,
+        error: `Email ${email} tidak terdaftar di Supabase!`
+      }, { status: 401 });
     }
 
-    const supabase = getSupabaseAdminClient();
+    // 🕵️‍♂️ LOG 2: Cetak data asli yang disimpan di dalam database Supabase
+    console.log("✅ Hasil: Email DITEMUKAN di Supabase!");
+    console.log("3. Password asli di DB   :", `"${user.password_hash}"`);
+    console.log("4. Role User di DB       :", user.role);
+    console.log("====================================================");
 
-    // Query user by email
-    const { data: user, error: userError } = await supabase
-      .from("users")
-      .select("id, email, full_name, role, password_hash")
-      .eq("email", email.trim())
-      .maybeSingle();
-
-    if (userError) {
-      return NextResponse.json({ message: userError.message }, { status: 500 });
+    // Validasi kecocokan string password
+    if (user.password_hash !== password) {
+      return NextResponse.json({
+        success: false,
+        error: "Password di database tidak cocok dengan input frontend!"
+      }, { status: 401 });
     }
 
-    if (!user) {
-      return NextResponse.json({ message: "Email atau password salah!" }, { status: 401 });
-    }
-
-    // Verify Password
-    const isPasswordValid = await verifyPassword(password, user.password_hash);
-    if (!isPasswordValid) {
-      return NextResponse.json({ message: "Email atau password salah!" }, { status: 401 });
-    }
-
-    // Fetch Wallet balance
-    const { data: wallet, error: walletError } = await supabase
-      .from("wallets")
-      .select("balance")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    const balance = wallet ? wallet.balance : 0;
-
-    const token = "mock-jwt-token-" + Date.now();
-
+    // Jika lolos semua
     return NextResponse.json({
+      success: true,
+      message: "Login Berhasil!",
       user: {
         id: user.id,
-        name: user.full_name,
+        full_name: user.full_name,
         email: user.email,
-        role: user.role,
-        ecoPayBalance: balance,
-      },
-      token,
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Login failed. Please try again.";
-    return NextResponse.json({ message }, { status: 500 });
+        role: user.role
+      }
+    }, { status: 200 });
+
+  } catch (error: any) {
+    console.error("🚨 Crash pada API Login:", error.message);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
