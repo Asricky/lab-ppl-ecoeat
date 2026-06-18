@@ -17,6 +17,8 @@ export type BuyerSavedAddress = {
 interface BuyerAddressesState {
   addresses: BuyerSavedAddress[];
   addAddress: (input: Omit<BuyerSavedAddress, "id">) => void;
+  updateAddress: (id: string, input: Partial<Omit<BuyerSavedAddress, "id">>) => void;
+  deleteAddress: (id: string) => void;
   setPrimary: (id: string) => void;
 }
 
@@ -66,6 +68,21 @@ export const useBuyerAddressesStore = create<BuyerAddressesState>((set) => ({
       next = [...next, { ...input, id }];
       return { addresses: next };
     });
+  },
+  updateAddress: (id, input) => {
+    set((s) => {
+      let next = s.addresses;
+      if (input.isPrimary) {
+        next = next.map((a) => ({ ...a, isPrimary: false }));
+      }
+      next = next.map((a) => (a.id === id ? { ...a, ...input } : a));
+      return { addresses: next };
+    });
+  },
+  deleteAddress: (id) => {
+    set((s) => ({
+      addresses: s.addresses.filter((a) => a.id !== id),
+    }));
   },
   setPrimary: (id) => {
     set((s) => ({

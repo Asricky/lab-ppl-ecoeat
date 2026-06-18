@@ -2,9 +2,9 @@ import { create } from 'zustand';
 import { useEcoPayStore } from './ecoPayStore';
 import { useAuthStore } from './authStore';
 
-/** Display unit scales to IDR via × 10_000 (same as formatRp elsewhere) */
+/** Display unit scales to IDR via × 1000 (same as formatRp elsewhere) */
 export function displayToIdr(display: number) {
-  return Math.round(display * 10000);
+  return Math.round(display * 1000);
 }
 
 export interface OrderLine {
@@ -27,7 +27,7 @@ export interface BuyerOrder {
   shippingCity: string;
   shippingPhone?: string;
   orderedAtLabel: string;
-  /** Biaya kirim (display units × 10.000 = IDR) */
+  /** Biaya kirim (display units × 1000 = IDR) */
   deliveryFeeDisplay?: number;
   /** Biaya layanan platform (display units) */
   platformFeeDisplay?: number;
@@ -43,7 +43,7 @@ export function formatDisplayLineTotal(order: BuyerOrder): number {
   return order.lines.reduce((acc, l) => acc + l.quantity * l.unitPriceDisplay, 0);
 }
 
-/** Subtotal barang, biaya kirim & layanan, total pembayaran (satuan display × 10.000 = IDR) */
+/** Subtotal barang, biaya kirim & layanan, total pembayaran (satuan display × 1000 = IDR) */
 export function orderPaymentBreakdown(order: BuyerOrder) {
   const subtotalItems = formatDisplayLineTotal(order);
   const delivery = order.deliveryFeeDisplay ?? 0;
@@ -199,6 +199,7 @@ interface BuyerOrdersState {
   completeRefund: (orderId: string, amountIdr: number) => void;
   getOrder: (orderId: string) => BuyerOrder | undefined;
   addOrder: (order: BuyerOrder) => void;
+  completeOrder: (orderId: string) => void;
 }
 
 const getInitialOrders = (): BuyerOrder[] => {
@@ -226,6 +227,18 @@ export const useBuyerOrdersStore = create<BuyerOrdersState>((set, get) => ({
   refundCompletedIds: [],
   getOrder: (orderId) => get().orders.find((o) => o.id === orderId),
   addOrder: (order) => set((s) => ({ orders: [order, ...s.orders] })),
+  completeOrder: (orderId) => set((s) => ({
+    orders: s.orders.map((o) =>
+      o.id === orderId
+        ? {
+            ...o,
+            tab: 'Completed',
+            statusLabel: 'Delivered',
+            shipmentStatus: 'Delivered successfully.',
+          }
+        : o
+    ),
+  })),
   completeRefund: (orderId, amountIdr) => {
     const s = get();
     if (s.refundCompletedIds.includes(orderId)) return;

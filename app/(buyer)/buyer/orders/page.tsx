@@ -70,7 +70,7 @@ export default function OrderHistoryPage() {
       style: "currency",
       currency: "IDR",
       maximumFractionDigits: 0,
-    }).format(amount * 10000);
+    }).format(amount * 1000);
   };
 
   const filtered = orders.filter((o) => o.tab === activeTab);

@@ -36,11 +36,11 @@ export default function CheckoutPage() {
   }, [notification]);
 
   const formatRp = (amount: number) => {
-    return 'Rp' + (amount * 10000).toLocaleString('id-ID');
+    return 'Rp' + (amount * 1000).toLocaleString('id-ID');
   };
 
   const handlePayNow = () => {
-    if (balance < total * 10000) {
+    if (balance < total * 1000) {
       showToast("Saldo EcoPay tidak mencukupi!", "error");
       return;
     }
@@ -131,7 +131,7 @@ export default function CheckoutPage() {
     });
 
     // Deduct wallet balance
-    deductBalance(total * 10000, `Checkout Order ${orderId}`);
+    deductBalance(total * 1000, `Checkout Order ${orderId}`);
 
     setIsSuccess(true);
     if (clearCart) clearCart();

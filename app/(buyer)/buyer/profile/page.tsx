@@ -29,6 +29,7 @@ function ProfileContent() {
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [withdrawBank, setWithdrawBank] = useState('');
   const [withdrawAccount, setWithdrawAccount] = useState('');
+  const [addressToDelete, setAddressToDelete] = useState<string | null>(null);
 
   const [notification, setNotification] = useState<{
     message: string;
@@ -285,15 +286,30 @@ function ProfileContent() {
                       <br />
                       Kec. {a.district}, {a.city}, {a.province} {a.postalCode}
                     </p>
-                    {!a.isPrimary && (
+                    <div className="flex gap-4 items-center mt-2">
+                      {!a.isPrimary && (
+                        <button
+                          type="button"
+                          onClick={() => setPrimaryAddress(a.id)}
+                          className="text-sm font-bold text-green-800 hover:text-green-900 underline-offset-4 hover:underline"
+                        >
+                          Jadikan alamat utama
+                        </button>
+                      )}
+                      <Link
+                        href={`/buyer/profile/addresses/edit/${a.id}`}
+                        className="text-sm font-bold text-blue-600 hover:text-blue-700 underline-offset-4 hover:underline"
+                      >
+                        Edit
+                      </Link>
                       <button
                         type="button"
-                        onClick={() => setPrimaryAddress(a.id)}
-                        className="text-sm font-bold text-green-800 hover:text-green-900 underline-offset-4 hover:underline"
+                        onClick={() => setAddressToDelete(a.id)}
+                        className="text-sm font-bold text-red-600 hover:text-red-700 underline-offset-4 hover:underline"
                       >
-                        Jadikan alamat utama
+                        Hapus
                       </button>
-                    )}
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -315,6 +331,38 @@ function ProfileContent() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {addressToDelete && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl relative">
+            <h3 className="text-xl font-extrabold text-gray-900 mb-2">Hapus Alamat?</h3>
+            <p className="text-sm text-gray-500 font-medium mb-8">
+              Apakah Anda yakin ingin menghapus alamat ini? Tindakan ini tidak dapat dibatalkan.
+            </p>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => setAddressToDelete(null)}
+                className="flex-1 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3.5 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  useBuyerAddressesStore.getState().deleteAddress(addressToDelete);
+                  showToast("Alamat berhasil dihapus", "success");
+                  setAddressToDelete(null);
+                }}
+                className="flex-1 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 shadow-md transition-colors"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Premium Toast Notification */}
       {notification && (
