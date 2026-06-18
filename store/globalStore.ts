@@ -151,16 +151,65 @@ export const INITIAL_DONATIONS = [
     productName: 'Organic Heirloom Tomatoes',
     product: 'Organic Heirloom Tomatoes',
     amountKg: 7.2,
-    donor: 'Toko Penyelamat Makanan',
+    donor: 'Green Valley Kitchen',
     status: 'Completed',
     eta: 'Delivered',
     dateReceived: '12/05/2026',
-    recipient: 'Green Valley Kitchen',
+    recipient: 'Yayasan Berbagi',
     recipientImage: 'https://images.unsplash.com/photo-1574314050516-e56593a1fa06?w=400&q=80',
     weight: '24 porsi',
     date: '12 Mei 2026',
-    image: 'https://images.unsplash.com/photo-1593113565694-c6f8716c0296?w=400&q=80'
-  }
+    image: 'https://images.unsplash.com/photo-1593113565694-c6f8716c0296?w=600&auto=format&fit=crop&q=80',
+    courierName: 'Alex Green',
+  },
+  {
+    id: 'DON-9022',
+    productName: 'Nasi Box Sisa Acara',
+    product: 'Nasi Box Sisa Acara',
+    amountKg: 12.5,
+    donor: 'Catering Berkah Jaya',
+    status: 'In Progress',
+    eta: '30 menit',
+    dateReceived: '-',
+    recipient: 'Yayasan Berbagi',
+    recipientImage: 'https://images.unsplash.com/photo-1574314050516-e56593a1fa06?w=400&q=80',
+    weight: '50 porsi',
+    date: '18 Jun 2026',
+    image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&auto=format&fit=crop&q=80',
+    courierName: 'Budi Santoso',
+  },
+  {
+    id: 'DON-9023',
+    productName: 'Roti & Pastry Sisa Kemarin',
+    product: 'Roti & Pastry Sisa Kemarin',
+    amountKg: 5.0,
+    donor: 'Bakehouse 19',
+    status: 'Assigned',
+    eta: '1 jam',
+    dateReceived: '-',
+    recipient: 'Yayasan Berbagi',
+    recipientImage: 'https://images.unsplash.com/photo-1574314050516-e56593a1fa06?w=400&q=80',
+    weight: '20 porsi',
+    date: '18 Jun 2026',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80',
+    courierName: 'Reza Fajar',
+  },
+  {
+    id: 'DON-9024',
+    productName: 'Buah Segar Mix (Imperfect)',
+    product: 'Buah Segar Mix (Imperfect)',
+    amountKg: 20.0,
+    donor: 'Superindo Blok M',
+    status: 'Assigned',
+    eta: '2 jam',
+    dateReceived: '-',
+    recipient: 'Yayasan Berbagi',
+    recipientImage: 'https://images.unsplash.com/photo-1574314050516-e56593a1fa06?w=400&q=80',
+    weight: '80 porsi',
+    date: '18 Jun 2026',
+    image: 'https://images.unsplash.com/photo-1519996529931-28324d5a630e?w=600&auto=format&fit=crop&q=80',
+    courierName: 'Dian Pratama',
+  },
 ];
 
 export const INITIAL_TASKS = [
@@ -291,8 +340,15 @@ export const useGlobalStore = create<GlobalState>()(
     }),
     {
       name: 'ecoeat-global-store', // key in localStorage
-      version: 2,
+      version: 3,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       migrate: (persistedState: any, version: number) => {
+        if (version < 3) {
+          return {
+            ...persistedState,
+            donations: INITIAL_DONATIONS,
+          };
+        }
         return persistedState;
       }
     }
